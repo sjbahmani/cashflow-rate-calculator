@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محاسبه‌گر سود واقعی وام و اقساط</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0c29;
+    --card: rgba(255,255,255,0.07);
+    --card-solid: #1e1a45;
+    --primary: #7c6cf0;
+    --primary-dark: #5b4de0;
+    --primary-light: rgba(124,108,240,0.15);
+    --text: #f0eeff;
+    --muted: #9b93cc;
+    --border: rgba(255,255,255,0.12);
+    --warn: #f0a0ff;
+    --good: #6ee7b7;
+    --radius: 14px;
+  }
+
+  body {
+    font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background: layered radial blobs + subtle grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(94,71,230,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 85% 75%, rgba(160,100,255,0.28) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 55% 50%, rgba(60,130,255,0.18) 0%, transparent 60%),
+      linear-gradient(160deg, #0f0c29 0%, #1a1040 50%, #0d1a3a 100%);
+    z-index: -2;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -1;
+  }
+
+  .container { max-width: 640px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 32px; }
+  header h1 {
+    font-size: 1.7rem; font-weight: 700; margin-bottom: 8px;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  header p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 8px; margin-bottom: 24px;
+    background: rgba(255,255,255,0.05); backdrop-filter: blur(12px);
+    border-radius: var(--radius); padding: 6px; border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1; padding: 10px 4px; border: none; background: transparent;
+    border-radius: 8px; font-family: inherit; font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; color: var(--muted); transition: all .2s;
+  }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--primary), #5b8def);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(124,108,240,0.4);
+  }
+
+  /* Card */
+  .card {
+    background: rgba(255,255,255,0.06); backdrop-filter: blur(16px);
+    border-radius: var(--radius); padding: 24px;
+    border: 1px solid var(--border); margin-bottom: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Form */
+  .field { margin-bottom: 18px; }
+  label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: #d4ceff; }
+  label span.hint { font-weight: 400; color: var(--muted); font-size: 0.82rem; }
+
+  input[type="text"], input[type="number"], select {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-family: inherit; font-size: 1rem;
+    background: rgba(255,255,255,0.06); color: var(--text);
+    transition: border-color .2s, background .2s; direction: ltr; text-align: right;
+  }
+  input[type="text"]::placeholder, input[type="number"]::placeholder { color: var(--muted); }
+  select option { background: #1e1a45; color: var(--text); }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    outline: none; border-color: var(--primary);
+    background: rgba(124,108,240,0.1);
+    box-shadow: 0 0 0 3px rgba(124,108,240,0.2);
+  }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--primary) 0%, #5b8def 100%);
+    color: #fff; border: none; border-radius: 8px; font-family: inherit;
+    font-size: 1.05rem; font-weight: 700; cursor: pointer;
+    transition: transform .15s, box-shadow .15s; margin-top: 4px;
+    box-shadow: 0 4px 16px rgba(124,108,240,0.45);
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(124,108,240,0.6); }
+  .btn:active { transform: translateY(0); }
+
+  /* Results */
+  .result-card {
+    display: none;
+    background: linear-gradient(135deg, rgba(124,108,240,0.18), rgba(91,141,239,0.12));
+    border: 1.5px solid rgba(124,108,240,0.4);
+    border-radius: var(--radius); padding: 22px; margin-top: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(91,78,224,0.2);
+  }
+  .result-card.show { display: block; }
+
+  .result-card h3 {
+    font-size: 1rem; font-weight: 700; margin-bottom: 16px; text-align: center;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .label { color: var(--muted); font-size: 0.9rem; }
+  .result-row .value { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+  .result-row .value.big { font-size: 1.15rem; color: #f0a0ff; }
+  .result-row .value.apr { color: #c4b5fd; }
+
+  /* Verdict bar */
+  .verdict {
+    margin-top: 16px; background: rgba(255,255,255,0.06);
+    border-radius: 8px; padding: 14px 16px; font-size: 0.88rem; line-height: 1.7;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .verdict strong { color: #f0a0ff; }
+
+  /* Explainer box */
+  .explainer {
+    background: rgba(124,108,240,0.08);
+    border-right: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0; padding: 14px 16px; margin-top: 20px;
+    font-size: 0.87rem; line-height: 1.75; color: var(--muted);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .explainer strong { color: #a78bfa; }
+
+  /* Variable installments textarea */
+  textarea {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-family: 'Vazirmatn', Tahoma, monospace; font-size: 0.95rem;
+    background: rgba(255,255,255,0.06); color: var(--text);
+    resize: vertical; direction: ltr; text-align: right;
+    transition: border-color .2s, background .2s; line-height: 1.8;
+  }
+  textarea::placeholder { color: var(--muted); }
+  textarea:focus {
+    outline: none; border-color: var(--primary);
+    background: rgba(124,108,240,0.1);
+    box-shadow: 0 0 0 3px rgba(124,108,240,0.2);
+  }
+  .var-counter {
+    font-size: 0.8rem; color: var(--muted); margin-top: 5px; text-align: left;
+  }
+  .var-counter.has-entries { color: #a78bfa; }
+
+  /* Grace period toggle */
+  .grace-toggle {
+    display: inline-block; margin-bottom: 16px; font-size: 0.85rem;
+    color: #a78bfa; cursor: pointer; user-select: none;
+    padding: 6px 12px; border: 1px dashed rgba(167,139,250,0.4);
+    border-radius: 8px; transition: background .2s;
+  }
+  .grace-toggle:hover { background: rgba(167,139,250,0.1); }
+  .grace-panel { display: none; margin-bottom: 4px; }
+  .grace-panel.open { display: block; }
+
+  /* Validation errors */
+  .field-error { font-size: 0.82rem; color: #f87171; margin-top: 5px; display: none; }
+  .field-error.show { display: block; }
+  input.invalid { border-color: #f87171 !important; box-shadow: 0 0 0 3px rgba(248,113,113,0.2) !important; }
+  .form-error {
+    background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.4);
+    border-radius: 8px; padding: 11px 14px; font-size: 0.88rem; color: #fca5a5;
+    margin-bottom: 14px; display: none;
+  }
+  .form-error.show { display: block; }
+
+  /* Tooltip helper */
+  .tooltip-wrap { position: relative; display: inline-block; margin-right: 4px; }
+  .tooltip-icon { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; background: var(--muted); color: #fff; border-radius: 50%; font-size: 11px; cursor: default; }
+
+  /* Reference box */
+  .ref-box {
+    background: rgba(255,255,255,0.05); backdrop-filter: blur(12px);
+    border: 1px solid rgba(167,139,250,0.3); border-radius: var(--radius);
+    margin-bottom: 20px; overflow: hidden;
+  }
+  .ref-box summary {
+    padding: 13px 18px; font-size: 0.88rem; font-weight: 600; color: #c4b5fd;
+    cursor: pointer; list-style: none; user-select: none;
+  }
+  .ref-box summary::-webkit-details-marker { display: none; }
+  .ref-box[open] summary { border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .ref-body { padding: 16px 18px; }
+  .ref-baseline {
+    font-size: 0.88rem; color: var(--muted); margin-bottom: 14px;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline;
+  }
+  .ref-baseline strong { color: #a78bfa; }
+  .ref-bands { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+  .band { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #d4ceff; }
+  .bdot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .b-good .bdot { background: #6ee7b7; }
+  .b-ok   .bdot { background: #fde68a; }
+  .b-warn .bdot { background: #fb923c; }
+  .b-high .bdot { background: #f87171; }
+  .b-bad  .bdot { background: #e879f9; }
+  .ref-note { font-size: 0.78rem; color: var(--muted); border-top: 1px solid rgba(255,255,255,0.07); padding-top: 12px; line-height: 1.6; }
+
+  @media(max-width: 420px) {
+    .row-2 { grid-template-columns: 1fr; }
+    .tab-btn { font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>🧮 سود واقعی وام من چقدر است؟</h1>
+    <p>قبل از خرید قسطی یا دریافت وام، میزان اضافه پرداخت و نرخ بهره واقعی را به درستی محاسبه کنید.</p>
+  </header>
+
+  <!-- Reference box -->
+  <details class="ref-box" id="ref-box">
+    <summary>📌 راهنمای تفسیر نرخ مؤثر سالانه (EAR) — بر اساس مصوبه بانک مرکزی</summary>
+    <div class="ref-body">
+      <div class="ref-baseline">
+        نرخ سود مصوب بانک مرکزی (تیر ۱۴۰۴):
+        <span>سپرده کوتاه‌مدت <strong>۲۳٪</strong> — تسهیلات <strong>۲۳٪</strong></span>
+      </div>
+      <div class="ref-bands">
+        <div class="band b-good"><span class="bdot"></span> زیر ۲۵٪ — پایین‌تر از نرخ رسمی بانکی</div>
+        <div class="band b-ok">  <span class="bdot"></span> ۲۵–۴۰٪ — متوسط، بالاتر از نرخ رسمی</div>
+        <div class="band b-warn"><span class="bdot"></span> ۴۰–۶۰٪ — بالا، رایج در بازار اقساط</div>
+        <div class="band b-high"><span class="bdot"></span> ۶۰–۸۵٪ — بسیار بالا</div>
+        <div class="band b-bad"> <span class="bdot"></span> بالای ۸۵٪ — نجومی / غیرمتعارف</div>
+      </div>
+      <p class="ref-note">این ارقام بر اساس آخرین مصوبه شورای پول و اعتبار تنظیم شده‌اند و به‌روزرسانی دستی می‌شوند.</p>
+    </div>
+  </details>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('installment')">اقساط / خرید اعتباری</button>
+    <button class="tab-btn" onclick="switchTab('loan')">وام بانکی</button>
+    <button class="tab-btn" onclick="switchTab('compare')">مقایسه دو گزینه</button>
+  </div>
+
+  <!-- ===== PANEL 1: Installment / Credit ===== -->
+  <div id="panel-installment" class="panel active">
+    <div class="card">
+      <div class="field">
+        <label>قیمت نقدی کالا یا خدمات <span class="hint">(تومان)</span></label>
+        <input type="text" inputmode="numeric" id="inst-cash" data-fmt="money" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰">
+      </div>
+      <!-- Equal installments (default) -->
+      <div id="inst-equal-fields">
+        <div class="row-2">
+          <div class="field">
+            <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
+            <input type="text" inputmode="numeric" id="inst-payment" data-fmt="money" placeholder="مثلاً ۵٬۵۰۰٬۰۰۰">
+          </div>
+          <div class="field">
+            <label>تعداد اقساط <span class="hint">(ماه)</span></label>
+            <input type="text" inputmode="numeric" id="inst-n" data-fmt="count" placeholder="مثلاً ۱۲">
+          </div>
+        </div>
+      </div>
+
+      <!-- Variable installments -->
+      <div id="inst-variable-fields" style="display:none">
+        <div class="field">
+          <label>مبلغ اقساط <span class="hint">— هر ماه در یک خط، به تومان</span></label>
+          <textarea id="inst-payments-var" rows="6" placeholder="مثال:&#10;۵٬۰۰۰٬۰۰۰&#10;۵٬۵۰۰٬۰۰۰&#10;۶٬۰۰۰٬۰۰۰&#10;..."></textarea>
+          <div class="var-counter" id="inst-var-counter">۰ قسط وارد شده</div>
+        </div>
+      </div>
+
+      <div class="grace-toggle" onclick="toggleVariable()" id="inst-var-toggle">
+        ➕ اقساط نامساوی دارم
+      </div>
+
+      <div class="field">
+        <label>پیش‌پرداخت <span class="hint">(تومان — اگر ندارد صفر بگذارید)</span></label>
+        <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="۰" value="۰">
+      </div>
+      <div class="form-error" id="inst-error"></div>
+      <button class="btn" onclick="calcInstallment()">محاسبه کن</button>
+    </div>
+
+    <div class="result-card" id="inst-result">
+      <h3>📊 نتیجه محاسبه</h3>
+      <div class="result-row"><span class="label">قیمت نقدی</span><span class="value" id="inst-r-cash">—</span></div>
+      <div class="result-row"><span class="label">پیش‌پرداخت</span><span class="value" id="inst-r-down">—</span></div>
+      <div class="result-row"><span class="label">مبلغ اعتبار دریافتی</span><span class="value" id="inst-r-principal">—</span></div>
+      <div class="result-row" id="inst-r-n-row"><span class="label">تعداد اقساط</span><span class="value" id="inst-r-n">—</span></div>
+      <div class="result-row"><span class="label">مجموع پرداخت شما</span><span class="value" id="inst-r-total">—</span></div>
+      <div class="result-row"><span class="label">مبلغ اضافه‌پرداخت</span><span class="value big" id="inst-r-extra">—</span></div>
+      <div class="result-row"><span class="label">درصد اضافه از قیمت نقدی</span><span class="value" id="inst-r-pct">—</span></div>
+      <div class="result-row"><span class="label">نرخ بهره ماهانه</span><span class="value apr" id="inst-r-monthly">—</span></div>
+      <div class="result-row"><span class="label">نرخ مؤثر سالانه (EAR) <span style="font-weight:400;font-size:0.8rem;color:var(--muted)">— روی مبلغ اعتبار</span></span><span class="value apr" id="inst-r-apr">—</span></div>
+      <div class="verdict" id="inst-verdict"></div>
+    </div>
+
+    <div class="explainer">
+      <strong>نرخ مؤثر سالانه (EAR) چیست؟</strong><br>
+      فروشنده یا بانک معمولاً یک نرخ «اعلامی» می‌گوید — مثلاً ۲۴٪ سالانه. اما چون سود هر ماه روی ماه قبل هم حساب می‌شود، چیزی که واقعاً از جیب شما می‌رود بیشتر است. EAR همان عدد واقعی است؛ آنچه اگر همه هزینه را با هم جمع کنید، در یک سال پرداخت کرده‌اید. برای مقایسه دو پیشنهاد مختلف، همیشه EAR را مقایسه کنید، نه نرخ اعلامی را.
+    </div>
+  </div>
+
+  <!-- ===== PANEL 2: Bank Loan ===== -->
+  <div id="panel-loan" class="panel">
+    <div class="card">
+      <div class="field">
+        <label>مبلغ وام <span class="hint">(تومان)</span></label>
+        <input type="text" inputmode="numeric" id="loan-amount" data-fmt="money" placeholder="مثلاً ۲۰۰٬۰۰۰٬۰۰۰">
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>نرخ سود اعلام‌شده <span class="hint">(%  سالانه)</span></label>
+          <input type="text" inputmode="decimal" id="loan-rate" data-fmt="rate" placeholder="مثلاً ۲۳">
+        </div>
+        <div class="field">
+          <label>مدت وام <span class="hint">(ماه)</span></label>
+          <input type="text" inputmode="numeric" id="loan-n" data-fmt="count" placeholder="مثلاً ۳۶">
+        </div>
+      </div>
+      <div class="field">
+        <label>نوع محاسبه بانک</label>
+        <select id="loan-type">
+          <option value="flat">سود روی اصل وام (flat rate) — رایج در بانک‌های ایران</option>
+          <option value="reducing">سود روی مانده (reducing balance) — استاندارد جهانی</option>
+        </select>
+      </div>
+      <div class="grace-toggle" onclick="toggleGrace()">
+        <span id="grace-toggle-label">➕ افزودن دوره تنفس (اختیاری)</span>
+      </div>
+      <div class="grace-panel" id="grace-panel">
+        <div class="row-2">
+          <div class="field">
+            <label>طول دوره تنفس <span class="hint">(ماه)</span></label>
+            <input type="text" inputmode="numeric" id="loan-grace" data-fmt="count" placeholder="مثلاً ۶" value="">
+          </div>
+          <div class="field">
+            <label>نوع دوره تنفس</label>
+            <select id="loan-grace-type">
+              <option value="accumulate">بدون پرداخت — سود انباشته می‌شود</option>
+              <option value="interest-only">فقط سود — اصل پرداخت نمی‌شود</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="form-error" id="loan-error"></div>
+      <button class="btn" onclick="calcLoan()">محاسبه کن</button>
+    </div>
+
+    <div class="result-card" id="loan-result">
+      <h3>📊 نتیجه محاسبه</h3>
+      <div class="result-row"><span class="label">مبلغ وام</span><span class="value" id="loan-r-amount">—</span></div>
+      <div class="result-row" id="loan-r-grace-row" style="display:none"><span class="label" id="loan-r-grace-label">دوره تنفس</span><span class="value" id="loan-r-grace">—</span></div>
+      <div class="result-row" id="loan-r-grace-payment-row" style="display:none"><span class="label">پرداخت در دوره تنفس</span><span class="value" id="loan-r-grace-payment">—</span></div>
+      <div class="result-row"><span class="label">مبلغ هر قسط (پس از تنفس)</span><span class="value" id="loan-r-payment">—</span></div>
+      <div class="result-row"><span class="label">مجموع پرداخت</span><span class="value" id="loan-r-total">—</span></div>
+      <div class="result-row"><span class="label">مبلغ اضافه‌پرداخت (سود)</span><span class="value big" id="loan-r-extra">—</span></div>
+      <div class="result-row"><span class="label">نرخ بهره ماهانه</span><span class="value apr" id="loan-r-monthly">—</span></div>
+      <div class="result-row"><span class="label">نرخ سود مؤثر سالانه (EAR)</span><span class="value apr" id="loan-r-apr">—</span></div>
+      <div class="verdict" id="loan-verdict"></div>
+    </div>
+
+    <div class="explainer">
+      <strong>تفاوت flat rate و reducing balance چیست؟</strong><br>
+      در روش <strong>flat rate</strong> (که اکثر بانک‌های ایران استفاده می‌کنند) سود روی کل مبلغ اولیه حساب می‌شود، حتی اگر بخشی از آن را بازپرداخت کرده باشید. نرخ مؤثر سالانه (EAR) این روش تقریباً <strong>دو برابر</strong> نرخ اعلامی است.
+      در روش reducing balance سود فقط روی مانده‌ی بدهی حساب می‌شود.
+    </div>
+  </div>
+
+  <!-- ===== PANEL 3: Compare ===== -->
+  <div id="panel-compare" class="panel">
+    <div class="card">
+      <p style="font-size:0.88rem;color:#9b93cc;margin-bottom:18px;">دو گزینه خرید را وارد کنید تا مقایسه شوند.</p>
+
+      <p style="font-weight:700;margin-bottom:12px;color:#a78bfa">گزینه اول</p>
+      <div class="field">
+        <label>قیمت نقدی <span class="hint">(تومان)</span></label>
+        <input type="text" inputmode="numeric" id="c1-cash" data-fmt="money" placeholder="قیمت نقد">
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
+          <input type="text" inputmode="numeric" id="c1-payment" data-fmt="money" placeholder="قسط">
+        </div>
+        <div class="field">
+          <label>تعداد اقساط <span class="hint">(ماه)</span></label>
+          <input type="text" inputmode="numeric" id="c1-n" data-fmt="count" placeholder="ماه">
+        </div>
+      </div>
+      <div class="field">
+        <label>پیش‌پرداخت <span class="hint">(تومان)</span></label>
+        <input type="text" inputmode="numeric" id="c1-down" data-fmt="money" placeholder="۰" value="۰">
+      </div>
+
+      <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.12);margin:20px 0">
+
+      <p style="font-weight:700;margin-bottom:12px;color:#a78bfa">گزینه دوم</p>
+      <div class="field">
+        <label>قیمت نقدی <span class="hint">(تومان)</span></label>
+        <input type="text" inputmode="numeric" id="c2-cash" data-fmt="money" placeholder="قیمت نقد">
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
+          <input type="text" inputmode="numeric" id="c2-payment" data-fmt="money" placeholder="قسط">
+        </div>
+        <div class="field">
+          <label>تعداد اقساط <span class="hint">(ماه)</span></label>
+          <input type="text" inputmode="numeric" id="c2-n" data-fmt="count" placeholder="ماه">
+        </div>
+      </div>
+      <div class="field">
+        <label>پیش‌پرداخت <span class="hint">(تومان)</span></label>
+        <input type="text" inputmode="numeric" id="c2-down" data-fmt="money" placeholder="۰" value="۰">
+      </div>
+
+      <div class="form-error" id="compare-error"></div>
+      <button class="btn" onclick="calcCompare()">مقایسه کن</button>
+    </div>
+
+    <div class="result-card" id="compare-result">
+      <h3>📊 مقایسه دو گزینه</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+        <thead>
+          <tr>
+            <th style="text-align:right;padding:8px 4px;border-bottom:2px solid #e8d5cc;color:var(--muted);font-weight:600"></th>
+            <th style="text-align:center;padding:8px 4px;border-bottom:2px solid rgba(124,108,240,0.4);color:#a78bfa">گزینه اول</th>
+            <th style="text-align:center;padding:8px 4px;border-bottom:2px solid rgba(124,108,240,0.4);color:#a78bfa">گزینه دوم</th>
+          </tr>
+        </thead>
+        <tbody id="compare-tbody"></tbody>
+      </table>
+      <div class="verdict" id="compare-verdict"></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── Helpers ─────────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n === null || isNaN(n)) return '—';
+  return Math.round(n).toLocaleString('fa-IR') + ' تومان';
+}
+function toPersian(s) {
+  return String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+}
+function fmtPct(n) {
+  if (isNaN(n) || !isFinite(n)) return '—';
+  return toPersian(n.toFixed(1)).replace('.', '٫') + '٪';
+}
+// Convert any mix of Persian/Latin digits to Latin, strip thousand separators
+function toEn(s) {
+  return String(s)
+    .replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776)
+    .replace(/٬/g, '')   // Arabic thousands separator
+    .replace(/,/g, '');  // Latin thousands separator
+}
+function v(id) { return parseFloat(toEn(document.getElementById(id).value)) || 0; }
+
+// ── Input live formatting ────────────────────────────────────────────────────
+function applyMoneyFmt(el) {
+  const raw = toEn(el.value).replace(/[^0-9]/g, '');
+  if (!raw) return;
+  // Use fa-IR locale for Persian digits + ٬ separators
+  el.value = parseInt(raw, 10).toLocaleString('fa-IR');
+}
+function applyCountFmt(el) {
+  const raw = toEn(el.value).replace(/[^0-9]/g, '');
+  el.value = toPersian(raw);
+}
+function applyRateFmt(el) {
+  // Allow one decimal separator (. or ٫)
+  let raw = toEn(el.value).replace(/[^0-9.]/g, '');
+  const parts = raw.split('.');
+  if (parts.length > 2) raw = parts[0] + '.' + parts.slice(1).join('');
+  el.value = toPersian(raw).replace('.', '٫');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('inst-payments-var').addEventListener('input', updateVarCounter);
+
+  document.querySelectorAll('input[data-fmt]').forEach(el => {
+    const fmt = el.dataset.fmt;
+    el.addEventListener('input', () => {
+      const pos = el.selectionStart;
+      const oldLen = el.value.length;
+      if (fmt === 'money') applyMoneyFmt(el);
+      else if (fmt === 'count') applyCountFmt(el);
+      else if (fmt === 'rate') applyRateFmt(el);
+      // Restore cursor position adjusted for added separators
+      const diff = el.value.length - oldLen;
+      el.setSelectionRange(pos + diff, pos + diff);
+    });
+    // Also format initial values
+    if (el.value) {
+      if (fmt === 'money') applyMoneyFmt(el);
+      else if (fmt === 'count') applyCountFmt(el);
+      else if (fmt === 'rate') applyRateFmt(el);
+    }
+  });
+});
+
+// Newton-Raphson to solve for monthly rate given PV, PMT, N
+function solveRate(pv, pmt, n) {
+  if (pmt <= 0 || pv <= 0 || n <= 0) return NaN;
+  // Total paid vs principal — if no interest, return 0
+  if (Math.abs(pmt * n - pv) < 0.01) return 0;
+  let r = 0.01; // initial guess: 1% per month
+  for (let i = 0; i < 200; i++) {
+    const f  = pv * r * Math.pow(1+r, n) / (Math.pow(1+r, n) - 1) - pmt;
+    const df = pv * (Math.pow(1+r,n)*(1 + r*n) - Math.pow(1+r,n+1) + 1) /
+               Math.pow(Math.pow(1+r,n)-1, 2);
+    const r2 = r - f/df;
+    if (Math.abs(r2 - r) < 1e-10) { r = r2; break; }
+    r = r2;
+    if (r <= 0) r = 1e-6;
+  }
+  return r;
+}
+
+function aprFromMonthly(r) {
+  return (Math.pow(1 + r, 12) - 1) * 100;
+}
+function monthlyFromEAR(ear) {
+  // ear is a percentage, returns monthly rate as percentage
+  return (Math.pow(1 + ear / 100, 1 / 12) - 1) * 100;
+}
+
+// Verdict text — thresholds calibrated against CBI approved rate (23% as of Tir 1404)
+function verdictText(apr) {
+  if (isNaN(apr) || !isFinite(apr)) return '';
+  let msg = '';
+  if      (apr < 25) msg = 'پایین‌تر از نرخ رسمی بانک مرکزی — این معامله نسبتاً منصفانه است.';
+  else if (apr < 40) msg = 'بالاتر از نرخ رسمی بانکی — اگر وام بانکی در دسترس دارید، ارزان‌تر است.';
+  else if (apr < 60) msg = 'بالا — رایج در بازار اقساط ایران، اما قدرت خرید شما را کاهش می‌دهد.';
+  else if (apr < 85) msg = 'بسیار بالا — این نرخ سود شما را به‌شدت تحت فشار می‌گذارد. گزینه‌های دیگر را بررسی کنید.';
+  else               msg = 'نجومی — این معامله در عمل قرض با بهره‌ی سنگین است. شدیداً توصیه می‌شود گزینه دیگری بیابید.';
+  return `<strong>نرخ مؤثر سالانه (EAR) شما: ${fmtPct(apr)}</strong><br>${msg}`;
+}
+
+// ── Variable installment toggle ───────────────────────────────────────────
+let instVariableMode = false;
+
+function toggleVariable() {
+  instVariableMode = !instVariableMode;
+  document.getElementById('inst-equal-fields').style.display  = instVariableMode ? 'none' : '';
+  document.getElementById('inst-variable-fields').style.display = instVariableMode ? '' : 'none';
+  document.getElementById('inst-var-toggle').textContent =
+    instVariableMode ? '➖ برگشت به اقساط مساوی' : '➕ اقساط نامساوی دارم';
+  clearFormError('inst-error');
+  document.getElementById('inst-result').classList.remove('show');
+}
+
+function parseVarPayments() {
+  const raw = document.getElementById('inst-payments-var').value;
+  const lines = raw.split(/[\n,،]+/).map(l => l.trim()).filter(l => l.length > 0);
+  return lines.map(l => parseFloat(toEn(l).replace(/[^0-9.]/g, '')) || 0);
+}
+
+function updateVarCounter() {
+  const pmts = parseVarPayments();
+  const valid = pmts.filter(p => p > 0).length;
+  const el = document.getElementById('inst-var-counter');
+  el.textContent = toPersian(valid) + ' قسط وارد شده';
+  el.classList.toggle('has-entries', valid > 0);
+}
+
+// ── Grace period toggle ───────────────────────────────────────────────────
+function toggleGrace() {
+  const panel = document.getElementById('grace-panel');
+  const label = document.getElementById('grace-toggle-label');
+  const open  = panel.classList.toggle('open');
+  label.textContent = open ? '➖ حذف دوره تنفس' : '➕ افزودن دوره تنفس (اختیاری)';
+  if (!open) document.getElementById('loan-grace').value = '';
+}
+
+// ── Tab switcher ──────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const names = ['installment','loan','compare'];
+    b.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── Validation helpers ───────────────────────────────────────────────────
+function showFormError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('show');
+}
+function clearFormError(id) {
+  const el = document.getElementById(id);
+  el.textContent = ''; el.classList.remove('show');
+}
+
+// ── Panel 1: Installment ─────────────────────────────────────────────────
+function calcInstallment() {
+  clearFormError('inst-error');
+  const cash = v('inst-cash');
+  const down = v('inst-down');
+
+  if (!cash) {
+    showFormError('inst-error', 'لطفاً قیمت نقدی را وارد کنید.');
+    return;
+  }
+  if (down >= cash) {
+    showFormError('inst-error', 'پیش‌پرداخت نمی‌تواند بیشتر یا مساوی قیمت نقدی باشد.');
+    return;
+  }
+
+  const principal = cash - down;
+  let payments, n, totalInstallments, ear;
+
+  if (instVariableMode) {
+    // ── Variable mode ──────────────────────────────────────────────────────
+    payments = parseVarPayments().filter(p => p > 0);
+    n = payments.length;
+    if (n < 1) {
+      showFormError('inst-error', 'لطفاً حداقل یک مبلغ قسط وارد کنید.');
+      return;
+    }
+    if (n > 360) {
+      showFormError('inst-error', 'تعداد اقساط نمی‌تواند بیشتر از ۳۶۰ باشد.');
+      return;
+    }
+    totalInstallments = payments.reduce((s, p) => s + p, 0);
+    if (down + totalInstallments <= cash) {
+      showFormError('inst-error', 'مجموع اقساط از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.');
+      return;
+    }
+    ear = solveEARVariable(principal, payments);
+  } else {
+    // ── Equal mode ─────────────────────────────────────────────────────────
+    const payment = v('inst-payment');
+    n = v('inst-n');
+    if (!payment || !n) {
+      showFormError('inst-error', 'لطفاً مبلغ قسط و تعداد اقساط را وارد کنید.');
+      return;
+    }
+    if (n < 1 || n > 360) {
+      showFormError('inst-error', 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.');
+      return;
+    }
+    totalInstallments = payment * n;
+    if (down + totalInstallments <= cash) {
+      showFormError('inst-error', 'مجموع اقساط (پیش‌پرداخت + قسط × تعداد) از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.');
+      return;
+    }
+    payments = null;
+    ear = aprFromMonthly(solveRate(principal, payment, n));
+  }
+
+  const totalPaid = down + totalInstallments;
+  const extra     = totalPaid - cash;
+  const pct       = (extra / cash) * 100;
+
+  document.getElementById('inst-r-cash').textContent      = fmt(cash);
+  document.getElementById('inst-r-down').textContent      = fmt(down);
+  document.getElementById('inst-r-principal').textContent = fmt(principal);
+  document.getElementById('inst-r-n-row').style.display   = instVariableMode ? '' : 'none';
+  document.getElementById('inst-r-n').textContent         = toPersian(n) + ' ماه';
+  document.getElementById('inst-r-total').textContent     = fmt(totalPaid);
+  document.getElementById('inst-r-extra').textContent     = fmt(extra);
+  document.getElementById('inst-r-pct').textContent       = fmtPct(pct);
+  document.getElementById('inst-r-monthly').textContent   = fmtPct(monthlyFromEAR(ear));
+  document.getElementById('inst-r-apr').textContent       = fmtPct(ear);
+
+  let verdict = verdictText(ear);
+  if (down > 0 && principal < cash * 0.3) {
+    verdict += `<br><br><em style="font-size:0.82rem;color:var(--muted)">توجه: چون پیش‌پرداخت بالاست، اعتبار دریافتی فقط ${fmt(principal)} است. EAR روی همین مبلغ کوچک محاسبه می‌شود — به همین دلیل ممکن است عدد بالا به نظر برسد، حتی اگر کل اضافه‌پرداخت کم باشد.</em>`;
+  }
+  document.getElementById('inst-verdict').innerHTML = verdict;
+  document.getElementById('inst-result').classList.add('show');
+}
+
+// NPV-based EAR solver for variable payments
+function solveEARVariable(pv, payments) {
+  let r = 0.01;
+  for (let i = 0; i < 300; i++) {
+    let npv = 0, dnpv = 0;
+    payments.forEach((pmt, idx) => {
+      const t    = idx + 1;
+      const disc = Math.pow(1 + r, t);
+      npv  += pmt / disc;
+      dnpv -= t * pmt / (disc * (1 + r));
+    });
+    npv -= pv;
+    const r2 = r - npv / dnpv;
+    if (Math.abs(r2 - r) < 1e-10) { r = r2; break; }
+    r = Math.max(r2, 1e-6);
+  }
+  return aprFromMonthly(r);
+}
+
+// ── Panel 2: Bank Loan ───────────────────────────────────────────────────
+function calcLoan() {
+  clearFormError('loan-error');
+  const amount     = v('loan-amount');
+  const rateAnn    = v('loan-rate');
+  const n          = v('loan-n');
+  const loanType   = document.getElementById('loan-type').value;
+  const graceOpen  = document.getElementById('grace-panel').classList.contains('open');
+  const grace      = graceOpen ? (v('loan-grace') || 0) : 0;
+  const graceType  = document.getElementById('loan-grace-type').value;
+
+  if (!amount || !rateAnn || !n) {
+    showFormError('loan-error', 'لطفاً مبلغ وام، نرخ سود، و مدت وام را وارد کنید.');
+    return;
+  }
+  if (rateAnn <= 0 || rateAnn > 300) {
+    showFormError('loan-error', 'نرخ سود باید عددی مثبت و منطقی باشد (مثلاً ۲۳).');
+    return;
+  }
+  if (n < 1 || n > 360) {
+    showFormError('loan-error', 'مدت وام باید بین ۱ تا ۳۶۰ ماه باشد.');
+    return;
+  }
+  if (grace < 0 || grace >= n) {
+    showFormError('loan-error', 'دوره تنفس باید کمتر از مدت کل وام باشد.');
+    return;
+  }
+
+  const rMonthly = (rateAnn / 100) / 12;
+  let payment, totalPaid, extra, ear;
+  let gracePmt = 0;       // what's paid each month during grace
+  let graceTotalPaid = 0; // total outflow during grace period
+  let effectivePrincipal = amount; // principal used for repayment phase
+
+  // ── Flat rate ────────────────────────────────────────────────────────────
+  if (loanType === 'flat') {
+    if (grace > 0) {
+      if (graceType === 'accumulate') {
+        // Interest accumulates, added to principal
+        const graceInterest   = amount * rMonthly * grace;
+        effectivePrincipal    = amount + graceInterest;
+        gracePmt              = 0;
+        graceTotalPaid        = 0;
+      } else {
+        // Interest-only payments during grace
+        gracePmt              = amount * rMonthly;
+        graceTotalPaid        = gracePmt * grace;
+        effectivePrincipal    = amount; // principal unchanged
+      }
+    }
+    const repayMonths  = n - grace;
+    const repayYears   = repayMonths / 12;
+    const repayInterest= effectivePrincipal * (rateAnn / 100) * repayYears;
+    const repayTotal   = effectivePrincipal + repayInterest;
+    payment    = repayTotal / repayMonths;
+    totalPaid  = graceTotalPaid + payment * repayMonths;
+    extra      = totalPaid - amount;
+    // EAR: solve for rate on full cash flow stream
+    ear = solveEARWithGrace(amount, gracePmt, grace, payment, n - grace);
+
+  // ── Reducing balance ─────────────────────────────────────────────────────
+  } else {
+    if (rMonthly === 0) {
+      payment   = amount / n;
+      totalPaid = amount;
+      extra     = 0;
+      ear       = 0;
+    } else {
+      if (grace > 0) {
+        if (graceType === 'accumulate') {
+          effectivePrincipal = amount * Math.pow(1 + rMonthly, grace);
+          gracePmt           = 0;
+          graceTotalPaid     = 0;
+        } else {
+          gracePmt           = amount * rMonthly;
+          graceTotalPaid     = gracePmt * grace;
+          effectivePrincipal = amount;
+        }
+      }
+      const repayMonths = n - grace;
+      payment    = effectivePrincipal * rMonthly * Math.pow(1+rMonthly, repayMonths)
+                   / (Math.pow(1+rMonthly, repayMonths) - 1);
+      totalPaid  = graceTotalPaid + payment * repayMonths;
+      extra      = totalPaid - amount;
+      ear        = solveEARWithGrace(amount, gracePmt, grace, payment, repayMonths);
+    }
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────
+  const graceRow        = document.getElementById('loan-r-grace-row');
+  const gracePmtRow     = document.getElementById('loan-r-grace-payment-row');
+
+  if (grace > 0) {
+    graceRow.style.display     = '';
+    document.getElementById('loan-r-grace-label').textContent =
+      graceType === 'accumulate' ? 'دوره تنفس (سود انباشته)' : 'دوره تنفس (فقط سود)';
+    document.getElementById('loan-r-grace').textContent =
+      toPersian(grace) + ' ماه';
+    gracePmtRow.style.display  = graceType === 'interest-only' ? '' : 'none';
+    document.getElementById('loan-r-grace-payment').textContent =
+      graceType === 'interest-only' ? fmt(gracePmt) + ' / ماه' : '—';
+  } else {
+    graceRow.style.display     = 'none';
+    gracePmtRow.style.display  = 'none';
+  }
+
+  const pmtLabel = document.querySelector('#loan-r-payment').previousElementSibling;
+  pmtLabel.textContent = grace > 0 ? 'مبلغ هر قسط (پس از تنفس)' : 'مبلغ هر قسط';
+
+  document.getElementById('loan-r-amount').textContent  = fmt(amount);
+  document.getElementById('loan-r-payment').textContent = fmt(payment);
+  document.getElementById('loan-r-total').textContent   = fmt(totalPaid);
+  document.getElementById('loan-r-extra').textContent   = fmt(extra);
+  document.getElementById('loan-r-monthly').textContent = fmtPct(monthlyFromEAR(ear));
+  document.getElementById('loan-r-apr').textContent     = fmtPct(ear);
+  document.getElementById('loan-verdict').innerHTML     = verdictText(ear);
+  document.getElementById('loan-result').classList.add('show');
+}
+
+// Solve EAR from full cash flow: grace months of gracePmt, then repayN months of payment
+function solveEARWithGrace(pv, gracePmt, graceN, payment, repayN) {
+  if (graceN === 0) {
+    const r = solveRate(pv, payment, repayN);
+    return aprFromMonthly(r);
+  }
+  // Newton-Raphson on NPV of all cash flows = PV
+  // NPV(r) = sum(gracePmt/(1+r)^t, t=1..graceN) + sum(payment/(1+r)^t, t=graceN+1..graceN+repayN) - pv = 0
+  let r = 0.01;
+  for (let i = 0; i < 300; i++) {
+    let npv = 0, dnpv = 0;
+    for (let t = 1; t <= graceN; t++) {
+      const disc = Math.pow(1+r, t);
+      npv  += gracePmt / disc;
+      dnpv -= t * gracePmt / (disc * (1+r));
+    }
+    for (let t = graceN+1; t <= graceN+repayN; t++) {
+      const disc = Math.pow(1+r, t);
+      npv  += payment / disc;
+      dnpv -= t * payment / (disc * (1+r));
+    }
+    npv -= pv;
+    const r2 = r - npv / dnpv;
+    if (Math.abs(r2 - r) < 1e-10) { r = r2; break; }
+    r = Math.max(r2, 1e-6);
+  }
+  return aprFromMonthly(r);
+}
+
+// ── Panel 3: Compare ─────────────────────────────────────────────────────
+function calcCompare() {
+  clearFormError('compare-error');
+
+  function getOption(prefix) {
+    const cash    = v(prefix+'-cash');
+    const payment = v(prefix+'-payment');
+    const n       = v(prefix+'-n');
+    const down    = v(prefix+'-down');
+    return { cash, payment, n, down };
+  }
+
+  function validateOption(o, label) {
+    if (!o.cash || !o.payment || !o.n)
+      return `${label}: قیمت نقدی، مبلغ قسط، و تعداد اقساط را وارد کنید.`;
+    if (o.down >= o.cash)
+      return `${label}: پیش‌پرداخت نمی‌تواند بیشتر یا مساوی قیمت نقدی باشد.`;
+    if (o.down + o.payment * o.n <= o.cash)
+      return `${label}: مجموع اقساط از قیمت نقدی کمتر یا مساوی است.`;
+    if (o.n < 1 || o.n > 360)
+      return `${label}: تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.`;
+    return null;
+  }
+
+  const r1 = getOption('c1'), r2 = getOption('c2');
+  const e1 = validateOption(r1, 'گزینه اول');
+  const e2 = validateOption(r2, 'گزینه دوم');
+  if (e1 || e2) { showFormError('compare-error', e1 || e2); return; }
+
+  function buildOption(o) {
+    const totalPaid = o.down + o.payment * o.n;
+    const extra     = totalPaid - o.cash;
+    const pct       = (extra / o.cash) * 100;
+    const principal = o.cash - o.down;
+    const r         = solveRate(principal, o.payment, o.n);
+    const ear       = aprFromMonthly(r);
+    return { ...o, totalPaid, extra, pct, ear };
+  }
+
+  const o1 = buildOption(r1);
+  const o2 = buildOption(r2);
+
+  const rows = [
+    ['قیمت نقدی',              fmt(o1.cash),        fmt(o2.cash)],
+    ['پیش‌پرداخت',              fmt(o1.down),        fmt(o2.down)],
+    ['مبلغ هر قسط × تعداد',    `${fmt(o1.payment)} × ${toPersian(Math.round(o1.n))}`, `${fmt(o2.payment)} × ${toPersian(Math.round(o2.n))}`],
+    ['مجموع پرداخت',           fmt(o1.totalPaid),   fmt(o2.totalPaid)],
+    ['اضافه‌پرداخت',            fmt(o1.extra),       fmt(o2.extra)],
+    ['درصد اضافه از قیمت نقد', fmtPct(o1.pct),      fmtPct(o2.pct)],
+    ['نرخ مؤثر سالانه (EAR)', fmtPct(o1.ear),      fmtPct(o2.ear)],
+  ];
+
+  const tbody = document.getElementById('compare-tbody');
+  tbody.innerHTML = rows.map(([label, v1, v2]) => {
+    return `<tr>
+      <td style="padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.08);color:var(--muted)">${label}</td>
+      <td style="padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center;font-weight:600;color:#f0eeff">${v1}</td>
+      <td style="padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center;font-weight:600;color:#f0eeff">${v2}</td>
+    </tr>`;
+  }).join('');
+
+  let verdict = '';
+  if (!isNaN(o1.ear) && !isNaN(o2.ear)) {
+    if (Math.abs(o1.ear - o2.ear) < 0.5) {
+      verdict = 'هر دو گزینه از نظر نرخ مؤثر سالانه تقریباً یکسان هستند.';
+    } else if (o1.ear < o2.ear) {
+      verdict = `<strong>گزینه اول ارزان‌تر است.</strong> نرخ مؤثر سالانه آن ${fmtPct(o1.ear)} در مقابل ${fmtPct(o2.ear)} گزینه دوم است.`;
+    } else {
+      verdict = `<strong>گزینه دوم ارزان‌تر است.</strong> نرخ مؤثر سالانه آن ${fmtPct(o2.ear)} در مقابل ${fmtPct(o1.ear)} گزینه اول است.`;
+    }
+  }
+  document.getElementById('compare-verdict').innerHTML = verdict;
+  document.getElementById('compare-result').classList.add('show');
+}
+</script>
+</body>
+</html>
