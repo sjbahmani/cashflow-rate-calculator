@@ -3,7 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محاسبه‌گر سود واقعی وام و اقساط</title>
+<title>محاسبه‌گر سود واقعی وام و اقساط | نرخ بهره مؤثر سالانه</title>
+<meta name="description" content="محاسبه‌گر رایگان سود واقعی وام، خرید قسطی و نرخ بهره مؤثر سالانه (EAR). مبلغ قسط، اضافه‌پرداخت، سود ماهانه و مقایسه دو گزینه را دقیق محاسبه کنید.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0f0c29">
+<meta name="application-name" content="محاسبه‌گر سود واقعی وام">
+<link rel="canonical" href="https://sbahmani.github.io/cashflow-rate-calculator/loan-calculator.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fa_IR">
+<meta property="og:site_name" content="محاسبه‌گر سود واقعی وام">
+<meta property="og:title" content="محاسبه‌گر سود واقعی وام و اقساط">
+<meta property="og:description" content="سود واقعی وام، خرید قسطی، اضافه‌پرداخت و نرخ مؤثر سالانه را با چند عدد محاسبه و مقایسه کنید.">
+<meta property="og:url" content="https://sbahmani.github.io/cashflow-rate-calculator/loan-calculator.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="محاسبه‌گر سود واقعی وام و اقساط">
+<meta name="twitter:description" content="محاسبه رایگان نرخ بهره واقعی، مبلغ اضافه‌پرداخت و EAR برای وام و خرید قسطی.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "محاسبه‌گر سود واقعی وام و اقساط",
+  "alternateName": "Cashflow Rate Calculator",
+  "url": "https://sbahmani.github.io/cashflow-rate-calculator/loan-calculator.html",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "fa-IR",
+  "isAccessibleForFree": true,
+  "description": "ابزار رایگان محاسبه سود واقعی وام، خرید قسطی، اضافه‌پرداخت و نرخ بهره مؤثر سالانه.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "IRR"
+  },
+  "featureList": [
+    "محاسبه سود واقعی خرید قسطی",
+    "محاسبه نرخ بهره مؤثر سالانه",
+    "محاسبه اقساط وام بانکی",
+    "مقایسه دو گزینه خرید اقساطی"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "fa-IR",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "نرخ مؤثر سالانه یا EAR چیست؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "نرخ مؤثر سالانه نشان می‌دهد هزینه واقعی وام یا خرید قسطی در مقیاس یک سال چقدر است. این نرخ اثر زمان‌بندی پرداخت‌ها و ترکیب سود را بهتر از نرخ اعلامی نشان می‌دهد."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "چرا سود واقعی خرید قسطی با نرخ اعلامی فرق دارد؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "در خرید قسطی، زمان پرداخت، مبلغ پیش‌پرداخت، تعداد اقساط و قیمت نقدی روی هزینه واقعی اثر می‌گذارند. به همین دلیل ممکن است نرخ واقعی از نرخ تبلیغ‌شده یا ذهنی فروشنده بیشتر باشد."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "برای مقایسه دو پیشنهاد وام یا قسط کدام عدد مهم‌تر است؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "برای مقایسه، نرخ مؤثر سالانه و مجموع اضافه‌پرداخت را کنار هم ببینید. EAR برای مقایسه نرخ واقعی مناسب است و اضافه‌پرداخت نشان می‌دهد در مجموع چه مبلغی بیشتر از قیمت نقدی یا اصل وام پرداخت می‌کنید."
+      }
+    }
+  ]
+}
+</script>
 <script>
   window.GA_MEASUREMENT_ID = 'G-GB3STFFW12';
 
@@ -260,8 +334,63 @@
   .b-bad  .bdot { background: #e879f9; }
   .ref-note { font-size: 0.78rem; color: var(--muted); border-top: 1px solid rgba(255,255,255,0.07); padding-top: 12px; line-height: 1.6; }
 
+  .seo-content {
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .seo-content h2 {
+    font-size: 1.15rem;
+    color: #f0eeff;
+    margin-bottom: 10px;
+  }
+  .seo-content h3 {
+    font-size: 0.98rem;
+    color: #c4b5fd;
+    margin-bottom: 8px;
+  }
+  .seo-content p {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.85;
+    margin-bottom: 14px;
+  }
+  .seo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 18px 0 20px;
+  }
+  .seo-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .faq-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .faq-list details {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .faq-list summary {
+    color: #d4ceff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .faq-list p {
+    margin: 10px 0 0;
+  }
+
   @media(max-width: 420px) {
     .row-2 { grid-template-columns: 1fr; }
+    .seo-grid { grid-template-columns: 1fr; }
     .tab-btn { font-size: 0.78rem; }
   }
 </style>
@@ -493,6 +622,73 @@
       <div class="verdict" id="compare-verdict"></div>
     </div>
   </div>
+
+  <section class="seo-content" aria-labelledby="seo-title">
+    <h2 id="seo-title">محاسبه سود واقعی وام و خرید قسطی</h2>
+    <p>
+      این محاسبه‌گر کمک می‌کند قبل از گرفتن وام، خرید اعتباری یا انتخاب یک طرح اقساطی، هزینه واقعی تصمیم خود را ببینید.
+      با وارد کردن قیمت نقدی، مبلغ قسط، تعداد اقساط و پیش‌پرداخت، می‌توانید اضافه‌پرداخت، نرخ بهره ماهانه و نرخ مؤثر سالانه را محاسبه کنید.
+    </p>
+    <p>
+      نرخ مؤثر سالانه یا EAR برای مقایسه پیشنهادهای مختلف کاربردی است، چون فقط به نرخ اعلام‌شده نگاه نمی‌کند و زمان‌بندی پرداخت‌ها را هم در نظر می‌گیرد.
+      به همین دلیل برای مقایسه وام بانکی، خرید قسطی کالا، اعتبار خرید و پیشنهادهای فروش اقساطی، عدد دقیق‌تری از هزینه واقعی به شما می‌دهد.
+    </p>
+
+    <div class="seo-grid">
+      <article class="seo-item">
+        <h3>سود واقعی وام چیست؟</h3>
+        <p>
+          سود واقعی وام یعنی مبلغی که در عمل بیشتر از اصل وام یا قیمت نقدی پرداخت می‌کنید. این عدد با مجموع اقساط، دوره بازپرداخت، دوره تنفس و روش محاسبه بانک تغییر می‌کند.
+        </p>
+      </article>
+      <article class="seo-item">
+        <h3>چرا EAR مهم است؟</h3>
+        <p>
+          نرخ اعلامی همیشه تصویر کامل نمی‌دهد. EAR هزینه وام را در مقیاس سالانه نشان می‌دهد و کمک می‌کند دو پیشنهاد با مدت، قسط یا پیش‌پرداخت متفاوت را منصفانه‌تر مقایسه کنید.
+        </p>
+      </article>
+      <article class="seo-item">
+        <h3>خرید قسطی بهتر است یا وام؟</h3>
+        <p>
+          پاسخ به قیمت نقدی، مبلغ پیش‌پرداخت، تعداد اقساط و نرخ مؤثر بستگی دارد. اگر EAR خرید قسطی از وام بانکی خیلی بیشتر باشد، معمولاً وام گزینه ارزان‌تری است.
+        </p>
+      </article>
+      <article class="seo-item">
+        <h3>اضافه‌پرداخت را چطور بخوانیم؟</h3>
+        <p>
+          اضافه‌پرداخت نشان می‌دهد در مجموع چند تومان بیشتر از قیمت نقدی یا اصل وام پرداخت می‌کنید. برای تصمیم‌گیری بهتر، این عدد را کنار EAR بررسی کنید.
+        </p>
+      </article>
+    </div>
+
+    <h2>سوالات متداول</h2>
+    <div class="faq-list">
+      <details>
+        <summary>نرخ مؤثر سالانه یا EAR چیست؟</summary>
+        <p>
+          EAR هزینه واقعی وام یا خرید قسطی را در مقیاس یک سال نشان می‌دهد. این نرخ اثر زمان‌بندی پرداخت‌ها و ترکیب سود را بهتر از نرخ اعلامی نشان می‌دهد.
+        </p>
+      </details>
+      <details>
+        <summary>چرا سود واقعی خرید قسطی با نرخ اعلامی فرق دارد؟</summary>
+        <p>
+          در خرید قسطی، قیمت نقدی، پیش‌پرداخت، تعداد اقساط و مبلغ هر قسط روی نرخ واقعی اثر می‌گذارند. به همین دلیل ممکن است هزینه واقعی از تصور اولیه بیشتر باشد.
+        </p>
+      </details>
+      <details>
+        <summary>برای مقایسه دو پیشنهاد، EAR مهم‌تر است یا اضافه‌پرداخت؟</summary>
+        <p>
+          هر دو مهم هستند. EAR نرخ واقعی را برای مقایسه نشان می‌دهد و اضافه‌پرداخت مشخص می‌کند در مجموع چند تومان بیشتر پرداخت می‌کنید.
+        </p>
+      </details>
+      <details>
+        <summary>آیا نرخ flat rate با نرخ بهره واقعی یکی است؟</summary>
+        <p>
+          نه همیشه. در روش flat rate سود معمولاً روی کل اصل وام حساب می‌شود، حتی وقتی بخشی از بدهی بازپرداخت شده است. به همین دلیل نرخ مؤثر می‌تواند از نرخ اعلامی بالاتر باشد.
+        </p>
+      </details>
+    </div>
+  </section>
 
 </div><!-- /container -->
 
