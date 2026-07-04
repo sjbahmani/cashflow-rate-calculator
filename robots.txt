@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sbahmani.github.io/cashflow-rate-calculator/sitemap.xml
