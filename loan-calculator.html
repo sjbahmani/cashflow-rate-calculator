@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>محاسبه‌گر سود واقعی وام و اقساط</title>
+<script>
+  window.GA_MEASUREMENT_ID = 'G-GB3STFFW12';
+
+  (function loadGoogleAnalytics() {
+    const id = window.GA_MEASUREMENT_ID;
+    if (!id || id === 'G-XXXXXXXXXX') return;
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function gtag(){ dataLayer.push(arguments); };
+    gtag('js', new Date());
+    gtag('config', id);
+  })();
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
 
@@ -479,6 +497,11 @@
 </div><!-- /container -->
 
 <script>
+function trackEvent(eventName, params = {}) {
+  if (typeof window.gtag !== 'function') return;
+  window.gtag('event', eventName, params);
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function fmt(n) {
   if (n === null || isNaN(n)) return '—';
@@ -625,6 +648,7 @@ function switchTab(name) {
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
+  trackEvent('calculator_tab_change', { tab_name: name });
 }
 
 // ── Validation helpers ───────────────────────────────────────────────────
@@ -715,6 +739,11 @@ function calcInstallment() {
   }
   document.getElementById('inst-verdict').innerHTML = verdict;
   document.getElementById('inst-result').classList.add('show');
+  trackEvent('calculator_result', {
+    calculator_type: instVariableMode ? 'installment_variable' : 'installment_equal',
+    installment_count: Math.round(n),
+    has_down_payment: down > 0
+  });
 }
 
 // NPV-based EAR solver for variable payments
@@ -853,6 +882,12 @@ function calcLoan() {
   document.getElementById('loan-r-apr').textContent     = fmtPct(ear);
   document.getElementById('loan-verdict').innerHTML     = verdictText(ear);
   document.getElementById('loan-result').classList.add('show');
+  trackEvent('calculator_result', {
+    calculator_type: 'loan',
+    loan_type: loanType,
+    term_months: Math.round(n),
+    has_grace_period: grace > 0
+  });
 }
 
 // Solve EAR from full cash flow: grace months of gracePmt, then repayN months of payment
@@ -957,6 +992,7 @@ function calcCompare() {
   }
   document.getElementById('compare-verdict').innerHTML = verdict;
   document.getElementById('compare-result').classList.add('show');
+  trackEvent('calculator_result', { calculator_type: 'compare' });
 }
 </script>
 </body>
