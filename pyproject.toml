@@ -1,0 +1,10 @@
+[project]
+name = "finance"
+version = "0.1.0"
+description = "Internal Rate of Return"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy-financial>=1.0.0",
+    "numpy>=2.4.0",
+]
