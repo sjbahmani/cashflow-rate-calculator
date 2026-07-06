@@ -302,3 +302,9 @@ Install with:
 ```bash
 uv sync
 ```
+
+---
+
+## Credits
+
+This project has been iterated with AI assistance from Claude and OpenAI Codex.
