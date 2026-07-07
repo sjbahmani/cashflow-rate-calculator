@@ -4,7 +4,7 @@
 This repository contains a Persian static website for calculating the real cost of loans, installment purchases, and credit offers.
 
 ## Main Files
-- `loan-calculator.html` is the primary user-facing page.
+- `index.html` is the primary user-facing page.
 - `favicon.svg` is the site favicon.
 - `robots.txt` and `sitemap.xml` support search indexing.
 - Python files in the repo are earlier calculation/reference utilities.
@@ -17,6 +17,6 @@ This repository contains a Persian static website for calculating the real cost 
 - Keep accessibility in mind, especially text contrast and control boundaries.
 
 ## Verification
-- After JavaScript edits, run an inline syntax check for scripts inside `loan-calculator.html`.
-- For visual changes, serve locally with `python3 -m http.server 8000` and open `loan-calculator.html`.
+- After JavaScript edits, run an inline syntax check for scripts inside `index.html`.
+- For visual changes, serve locally with `python3 -m http.server 8000` and open `index.html`.
 - Check the three calculator tabs: installment purchase, bank loan, and comparison.
