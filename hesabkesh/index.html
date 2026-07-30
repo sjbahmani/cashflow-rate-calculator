@@ -41,8 +41,7 @@
   "featureList": [
     "محاسبه سود واقعی خرید قسطی",
     "محاسبه نرخ بهره مؤثر سالانه",
-    "محاسبه اقساط وام بانکی",
-    "مقایسه دو گزینه خرید اقساطی"
+    "محاسبه اقساط وام بانکی"
   ]
 }
 </script>
@@ -158,7 +157,7 @@
   .trust-pill {
     display: inline-flex; align-items: center;
     border: 1px solid rgba(45,212,191,0.52); color: #99f6e4;
-    background: rgba(45,212,191,0.08); border-radius: 999px;
+    background: rgba(45,212,191,0.08); border-radius: var(--radius);
     padding: 6px 10px; white-space: nowrap; text-decoration: none;
     transition: background .2s, border-color .2s;
   }
@@ -231,6 +230,35 @@
 
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
+  .input-choice { margin-bottom: 18px; }
+  .choice-group {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    padding: 5px; border: 1px solid var(--border); border-radius: 8px;
+    background: rgba(0,0,0,0.16);
+  }
+  .choice-btn {
+    border: 0; border-radius: 6px; padding: 10px 8px;
+    background: transparent; color: var(--muted); font-family: inherit;
+    font-size: 0.86rem; font-weight: 600; cursor: pointer;
+    transition: background .2s, color .2s, box-shadow .2s;
+  }
+  .choice-btn.active {
+    background: rgba(45,212,191,0.18); color: #b7fff2;
+    box-shadow: inset 0 0 0 1px rgba(45,212,191,0.48);
+  }
+  .choice-help {
+    color: var(--muted); font-size: 0.8rem; line-height: 1.7;
+    margin-top: 7px;
+  }
+  .derived-note {
+    display: none; margin: -2px 0 18px; padding: 11px 13px;
+    border: 1px solid rgba(45,212,191,0.28); border-radius: 8px;
+    background: rgba(45,212,191,0.07); color: var(--muted);
+    font-size: 0.82rem; line-height: 1.75;
+  }
+  .derived-note.show { display: block; }
+  .derived-note strong { color: #99f6e4; }
+
   .btn {
     width: 100%; padding: 14px;
     background: var(--primary);
@@ -241,6 +269,15 @@
   }
   .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(45,212,191,0.36); }
   .btn:active { transform: translateY(0); }
+  .reset-btn {
+    display: block; margin: 11px auto 0; padding: 5px 8px;
+    border: 0; background: transparent; color: var(--muted);
+    font-family: inherit; font-size: 0.82rem; cursor: pointer;
+    text-decoration: underline; text-decoration-color: rgba(169,177,173,0.45);
+    text-underline-offset: 4px; transition: color .2s;
+  }
+  .reset-btn:hover,
+  .reset-btn:focus-visible { color: #99f6e4; outline: none; }
 
   /* Results */
   .result-card {
@@ -252,10 +289,27 @@
     box-shadow: 0 4px 24px rgba(0,0,0,0.26);
   }
   .result-card.show { display: block; }
+  .result-card.result-nudge {
+    animation: resultNudge 1.25s ease;
+  }
 
   .result-card h3 {
     font-size: 1rem; font-weight: 700; margin-bottom: 16px; text-align: center;
     color: #99f6e4;
+  }
+  @keyframes resultNudge {
+    0% {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.26), 0 0 0 0 rgba(45,212,191,0.0);
+      border-color: rgba(45,212,191,0.52);
+    }
+    35% {
+      box-shadow: 0 10px 34px rgba(0,0,0,0.34), 0 0 0 8px rgba(45,212,191,0.10);
+      border-color: rgba(110,231,183,0.9);
+    }
+    100% {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.26), 0 0 0 0 rgba(45,212,191,0.0);
+      border-color: rgba(45,212,191,0.52);
+    }
   }
 
   .result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -332,6 +386,19 @@
   .preset-btn:hover { border-color: rgba(45,212,191,0.45); background: rgba(45,212,191,0.08); }
   .preset-btn strong { display: block; font-size: 0.9rem; margin-bottom: 3px; }
   .preset-btn span { display: block; color: var(--muted); font-size: 0.78rem; line-height: 1.5; }
+  .preset-label {
+    color: #99f6e4;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .preset-separator {
+    height: 0;
+    border: 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    background: linear-gradient(90deg, rgba(45,212,191,0), rgba(45,212,191,0.3), rgba(45,212,191,0));
+    margin: 2px 0 18px;
+  }
 
   /* Variable installments textarea */
   textarea {
@@ -360,6 +427,7 @@
     border-radius: 8px; transition: background .2s;
   }
   .grace-toggle:hover { background: rgba(45,212,191,0.1); }
+  .optional-toggle { background: transparent; font-family: inherit; }
   .grace-panel { display: none; margin-bottom: 4px; }
   .grace-panel.open { display: block; }
 
@@ -469,6 +537,10 @@
     line-height: 1.8;
     text-align: center;
   }
+  .footer-free {
+    color: #99f6e4;
+    font-weight: 700;
+  }
 
   @media(max-width: 420px) {
     .row-2 { grid-template-columns: 1fr; }
@@ -494,63 +566,112 @@
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('installment')">اقساط / خرید اعتباری</button>
     <button class="tab-btn" onclick="switchTab('loan')">وام بانکی</button>
-    <button class="tab-btn" onclick="switchTab('compare')">مقایسه دو گزینه</button>
   </div>
 
   <!-- ===== PANEL 1: Installment / Credit ===== -->
   <div id="panel-installment" class="panel active">
     <div class="card">
+      <div class="preset-label">مثال‌ها</div>
       <div class="presets" aria-label="نمونه‌های آماده خرید قسطی">
-        <button class="preset-btn" type="button" onclick="loadInstallmentPreset(60000000, 10000000, 7000000, 12)">
-          <strong>گوشی قسطی</strong>
-          <span>۶۰ نقدی، ۱۰ پیش، ۱۲ قسط ۷</span>
+        <button class="preset-btn" type="button" onclick="loadStorePreset(18000000, 0, 3600000, 4, 'extra', true)">
+          <strong>تبلت</strong>
+          <span>۱۸ نقدی، ۳٫۶ اضافه، قسط اول امروز</span>
         </button>
-        <button class="preset-btn" type="button" onclick="loadInstallmentPreset(80000000, 20000000, 8200000, 12)">
+        <button class="preset-btn" type="button" onclick="loadInstallmentPreset(80000000, 20000000, 5800000, 12)">
           <strong>لوازم خانگی</strong>
-          <span>۸۰ نقدی، ۲۰ پیش، ۱۲ قسط ۸٫۲</span>
+          <span>۸۰ نقدی، ۲۰ پیش، ۱۲ قسط ۵٫۸</span>
         </button>
-        <button class="preset-btn" type="button" onclick="loadInstallmentPreset(30000000, 0, 3800000, 10)">
-          <strong>اعتبار خرید</strong>
-          <span>۳۰ نقدی، بدون پیش، ۱۰ قسط ۳٫۸</span>
+        <button class="preset-btn" type="button" onclick="loadStorePreset(30000000, 0, 38000000, 10, 'total', false)">
+          <strong>گوشی میان‌رده</strong>
+          <span>۳۰ نقدی، مجموع کل ۳۸، ۱۰ قسط</span>
         </button>
       </div>
+      <hr class="preset-separator">
       <div class="field">
         <label>قیمت نقدی کالا یا خدمات <span class="hint">(تومان)</span></label>
         <input type="text" inputmode="numeric" id="inst-cash" data-fmt="money" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰">
       </div>
-      <!-- Equal installments (default) -->
-      <div id="inst-equal-fields">
+
+      <div class="input-choice">
+        <label>فروشگاه چه اطلاعاتی بهت داده؟</label>
+        <div class="choice-group" role="group" aria-label="نوع اطلاعات خرید قسطی">
+          <button class="choice-btn active" type="button" id="inst-entry-payment" aria-pressed="true" onclick="setInstallmentEntryMode('payment')">مبلغ هر قسط</button>
+          <button class="choice-btn" type="button" id="inst-entry-store" aria-pressed="false" onclick="setInstallmentEntryMode('store')">اضافه‌پرداخت یا مجموع</button>
+        </div>
+        <p class="choice-help" id="inst-entry-help">اگر مبلغ هر قسط را می‌دانی، همان را مستقیم وارد کن.</p>
+      </div>
+
+      <div id="inst-payment-source-fields">
+        <!-- Equal installments (default) -->
+        <div id="inst-equal-fields">
+          <div class="row-2">
+            <div class="field">
+              <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
+              <input type="text" inputmode="numeric" id="inst-payment" data-fmt="money" placeholder="مثلاً ۵٬۵۰۰٬۰۰۰">
+            </div>
+            <div class="field">
+              <label>تعداد اقساط <span class="hint">(ماه)</span></label>
+              <input type="text" inputmode="numeric" id="inst-n" data-fmt="count" placeholder="مثلاً ۱۲">
+            </div>
+          </div>
+        </div>
+
+        <!-- Variable installments -->
+        <div id="inst-variable-fields" style="display:none">
+          <div class="field">
+            <label>مبلغ اقساط <span class="hint">— هر ماه در یک خط، به تومان</span></label>
+            <textarea id="inst-payments-var" rows="6" placeholder="مثال:&#10;۵٬۰۰۰٬۰۰۰&#10;۵٬۵۰۰٬۰۰۰&#10;۶٬۰۰۰٬۰۰۰&#10;..."></textarea>
+            <div class="var-counter" id="inst-var-counter">۰ قسط وارد شده</div>
+          </div>
+        </div>
+
+        <div class="grace-toggle" onclick="toggleVariable()" id="inst-var-toggle">
+          حالت پیشرفته: اقساط نامساوی دارم
+        </div>
+      </div>
+
+      <div id="inst-store-source-fields" style="display:none">
         <div class="row-2">
           <div class="field">
-            <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
-            <input type="text" inputmode="numeric" id="inst-payment" data-fmt="money" placeholder="مثلاً ۵٬۵۰۰٬۰۰۰">
+            <label>کدام عدد را در فروشگاه می‌بینی؟</label>
+            <select id="inst-store-kind" onchange="updateStoreDerived()">
+              <option value="extra">مجموع اضافه‌پرداخت</option>
+              <option value="total">مجموع کل پرداخت</option>
+            </select>
           </div>
           <div class="field">
-            <label>تعداد اقساط <span class="hint">(ماه)</span></label>
-            <input type="text" inputmode="numeric" id="inst-n" data-fmt="count" placeholder="مثلاً ۱۲">
+            <label>مبلغ همان عدد <span class="hint">(تومان)</span></label>
+            <input type="text" inputmode="numeric" id="inst-store-value" data-fmt="money" placeholder="مثلاً ۳٬۶۰۰٬۰۰۰">
           </div>
         </div>
-      </div>
-
-      <!-- Variable installments -->
-      <div id="inst-variable-fields" style="display:none">
         <div class="field">
-          <label>مبلغ اقساط <span class="hint">— هر ماه در یک خط، به تومان</span></label>
-          <textarea id="inst-payments-var" rows="6" placeholder="مثال:&#10;۵٬۰۰۰٬۰۰۰&#10;۵٬۵۰۰٬۰۰۰&#10;۶٬۰۰۰٬۰۰۰&#10;..."></textarea>
-          <div class="var-counter" id="inst-var-counter">۰ قسط وارد شده</div>
+          <label>تعداد اقساط <span class="hint">(ماه)</span></label>
+          <input type="text" inputmode="numeric" id="inst-store-n" data-fmt="count" placeholder="مثلاً ۴">
         </div>
+        <div class="derived-note" id="inst-store-derived" aria-live="polite"></div>
       </div>
 
-      <div class="grace-toggle" onclick="toggleVariable()" id="inst-var-toggle">
-        حالت پیشرفته: اقساط نامساوی دارم
+      <div class="input-choice">
+        <label>قسط اول چه زمانی پرداخت می‌شود؟</label>
+        <div class="choice-group" role="group" aria-label="زمان پرداخت قسط اول">
+          <button class="choice-btn" type="button" id="inst-first-now" aria-pressed="false" onclick="setFirstPaymentTiming(true)">همین امروز</button>
+          <button class="choice-btn active" type="button" id="inst-first-next" aria-pressed="true" onclick="setFirstPaymentTiming(false)">یک ماه بعد</button>
+        </div>
+        <p class="choice-help">اگر اولین قسط موقع ثبت سفارش کم می‌شود، «همین امروز» را بزن.</p>
       </div>
 
-      <div class="field">
-        <label>پیش‌پرداخت <span class="hint">(تومان — اگر ندارد صفر بگذارید)</span></label>
-        <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="۰" value="۰">
+      <button class="grace-toggle optional-toggle" type="button" id="inst-down-toggle"
+              aria-expanded="false" aria-controls="inst-down-panel"
+              onclick="toggleInstallmentDown()">پیش‌پرداخت جداگانه دارم</button>
+      <div class="grace-panel" id="inst-down-panel">
+        <div class="field">
+          <label>مبلغ پیش‌پرداخت جدا از اقساط <span class="hint">(تومان)</span></label>
+          <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰" value="۰">
+        </div>
       </div>
       <div class="form-error" id="inst-error"></div>
       <button class="btn" onclick="calcInstallment()">واقعی حساب کن</button>
+      <button class="reset-btn" type="button" onclick="resetInstallmentForm()">پاک کردن فرم و شروع از اول</button>
     </div>
 
     <div class="result-placeholder" id="inst-placeholder">
@@ -567,8 +688,10 @@
       <h3>جزئیات عددی</h3>
       <div class="result-row"><span class="label">قیمت نقدی</span><span class="value" id="inst-r-cash">—</span></div>
       <div class="result-row"><span class="label">پیش‌پرداخت</span><span class="value" id="inst-r-down">—</span></div>
-      <div class="result-row"><span class="label">مبلغ اعتبار دریافتی</span><span class="value" id="inst-r-principal">—</span></div>
-      <div class="result-row" id="inst-r-n-row"><span class="label">تعداد اقساط</span><span class="value" id="inst-r-n">—</span></div>
+      <div class="result-row"><span class="label">مبلغی که عملاً تأمین مالی می‌شود</span><span class="value" id="inst-r-principal">—</span></div>
+      <div class="result-row" id="inst-r-payment-row"><span class="label">مبلغ هر قسط</span><span class="value" id="inst-r-payment">—</span></div>
+      <div class="result-row"><span class="label">تعداد اقساط</span><span class="value" id="inst-r-n">—</span></div>
+      <div class="result-row"><span class="label">زمان قسط اول</span><span class="value" id="inst-r-first-payment">—</span></div>
       <div class="result-row"><span class="label">مجموع پرداخت شما</span><span class="value" id="inst-r-total">—</span></div>
       <div class="result-row"><span class="label">مبلغ اضافه‌پرداخت</span><span class="value big" id="inst-r-extra">—</span></div>
       <div class="result-row"><span class="label">درصد اضافه از قیمت نقدی</span><span class="value" id="inst-r-pct">—</span></div>
@@ -586,20 +709,22 @@
   <!-- ===== PANEL 2: Bank Loan ===== -->
   <div id="panel-loan" class="panel">
     <div class="card">
+      <div class="preset-label">مثال‌ها</div>
       <div class="presets" aria-label="نمونه‌های آماده وام">
-        <button class="preset-btn" type="button" onclick="loadLoanPreset(200000000, 23, 36, 'on-principal')">
-          <strong>وام ۲۰۰ میلیونی</strong>
-          <span>۲۳٪، ۳۶ ماه، روش رایج بانکی</span>
+        <button class="preset-btn" type="button" onclick="loadLoanPreset(150000000, 18, 24, 'on-principal')">
+          <strong>وام یک</strong>
+          <span>۱۵۰ میلیون، ۱۸٪، ۲۴ ماه، سود روی اصل</span>
         </button>
         <button class="preset-btn" type="button" onclick="loadLoanPreset(500000000, 23, 60, 'on-principal')">
-          <strong>وام سنگین‌تر</strong>
-          <span>۵۰۰ میلیون، ۶۰ ماه، سود روی اصل</span>
+          <strong>وام دو</strong>
+          <span>۵۰۰ میلیون، ۲۳٪، ۶۰ ماه، سود روی اصل</span>
         </button>
         <button class="preset-btn" type="button" onclick="loadLoanPreset(120000000, 18, 24, 'on-balance')">
-          <strong>روش مانده بدهی</strong>
-          <span>۱۲۰ میلیون، ۱۸٪، ۲۴ ماه</span>
+          <strong>وام سه</strong>
+          <span>۱۲۰ میلیون، ۱۸٪، ۲۴ ماه، سود روی مانده</span>
         </button>
       </div>
+      <hr class="preset-separator">
       <div class="field">
         <label>مبلغ وام <span class="hint">(تومان)</span></label>
         <input type="text" inputmode="numeric" id="loan-amount" data-fmt="money" placeholder="مثلاً ۲۰۰٬۰۰۰٬۰۰۰">
@@ -641,6 +766,7 @@
       </div>
       <div class="form-error" id="loan-error"></div>
       <button class="btn" onclick="calcLoan()">واقعی حساب کن</button>
+      <button class="reset-btn" type="button" onclick="resetLoanForm()">پاک کردن فرم و شروع از اول</button>
     </div>
 
     <div class="result-placeholder" id="loan-placeholder">
@@ -673,104 +799,13 @@
     </div>
   </div>
 
-  <!-- ===== PANEL 3: Compare ===== -->
-  <div id="panel-compare" class="panel">
-    <div class="card">
-      <p style="font-size:0.88rem;color:var(--muted);margin-bottom:18px;">دو پیشنهاد را کنار هم بگذار؛ حساب‌کش می‌گوید کدام یکی کمتر به جیبت فشار می‌آورد.</p>
-      <div class="presets" aria-label="نمونه‌های آماده مقایسه">
-        <button class="preset-btn" type="button" onclick="loadComparePreset('phone')">
-          <strong>دو فروشنده گوشی</strong>
-          <span>قیمت نقد نزدیک، قسط‌های متفاوت</span>
-        </button>
-        <button class="preset-btn" type="button" onclick="loadComparePreset('loanVsInstallment')">
-          <strong>وام یا خرید قسطی</strong>
-          <span>یک خرید، دو مسیر پرداخت</span>
-        </button>
-        <button class="preset-btn" type="button" onclick="loadComparePreset('shortLong')">
-          <strong>کوتاه یا بلند</strong>
-          <span>قسط کمتر همیشه ارزان‌تر نیست</span>
-        </button>
-      </div>
-
-      <p style="font-weight:700;margin-bottom:12px;color:#99f6e4">گزینه اول</p>
-      <div class="field">
-        <label>قیمت نقدی <span class="hint">(تومان)</span></label>
-        <input type="text" inputmode="numeric" id="c1-cash" data-fmt="money" placeholder="قیمت نقد">
-      </div>
-      <div class="row-2">
-        <div class="field">
-          <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
-          <input type="text" inputmode="numeric" id="c1-payment" data-fmt="money" placeholder="قسط">
-        </div>
-        <div class="field">
-          <label>تعداد اقساط <span class="hint">(ماه)</span></label>
-          <input type="text" inputmode="numeric" id="c1-n" data-fmt="count" placeholder="ماه">
-        </div>
-      </div>
-      <div class="field">
-        <label>پیش‌پرداخت <span class="hint">(تومان)</span></label>
-        <input type="text" inputmode="numeric" id="c1-down" data-fmt="money" placeholder="۰" value="۰">
-      </div>
-
-      <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.12);margin:20px 0">
-
-      <p style="font-weight:700;margin-bottom:12px;color:#99f6e4">گزینه دوم</p>
-      <div class="field">
-        <label>قیمت نقدی <span class="hint">(تومان)</span></label>
-        <input type="text" inputmode="numeric" id="c2-cash" data-fmt="money" placeholder="قیمت نقد">
-      </div>
-      <div class="row-2">
-        <div class="field">
-          <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
-          <input type="text" inputmode="numeric" id="c2-payment" data-fmt="money" placeholder="قسط">
-        </div>
-        <div class="field">
-          <label>تعداد اقساط <span class="hint">(ماه)</span></label>
-          <input type="text" inputmode="numeric" id="c2-n" data-fmt="count" placeholder="ماه">
-        </div>
-      </div>
-      <div class="field">
-        <label>پیش‌پرداخت <span class="hint">(تومان)</span></label>
-        <input type="text" inputmode="numeric" id="c2-down" data-fmt="money" placeholder="۰" value="۰">
-      </div>
-
-      <div class="form-error" id="compare-error"></div>
-      <button class="btn" onclick="calcCompare()">مقایسه کن</button>
-    </div>
-
-    <div class="result-placeholder" id="compare-placeholder">
-      <strong>مقایسه اینجا نمایش داده می‌شود.</strong><br>
-      خروجی اول برنده را می‌گوید، بعد جدول عددی را نشان می‌دهد.
-    </div>
-
-    <div class="result-card" id="compare-result">
-      <div class="result-summary">
-        <div class="verdict-kicker">حساب‌کش می‌گه</div>
-        <div class="verdict-title" id="compare-verdict-title">—</div>
-        <div class="verdict-lead" id="compare-verdict-lead">—</div>
-      </div>
-      <h3>جدول مقایسه</h3>
-      <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
-        <thead>
-          <tr>
-            <th style="text-align:right;padding:8px 4px;border-bottom:2px solid rgba(255,255,255,0.18);color:var(--muted);font-weight:600"></th>
-            <th style="text-align:center;padding:8px 4px;border-bottom:2px solid rgba(45,212,191,0.4);color:#99f6e4">گزینه اول</th>
-            <th style="text-align:center;padding:8px 4px;border-bottom:2px solid rgba(45,212,191,0.4);color:#99f6e4">گزینه دوم</th>
-          </tr>
-        </thead>
-        <tbody id="compare-tbody"></tbody>
-      </table>
-      <div class="verdict" id="compare-verdict"></div>
-    </div>
-  </div>
-
   <!-- Reference box -->
   <details class="ref-box" id="ref-box">
     <summary>راهنمای تفسیر نرخ مؤثر سالانه و منبع نرخ مرجع</summary>
     <div class="ref-body">
       <div class="ref-baseline">
         آخرین به‌روزرسانی نرخ مرجع در این ابزار:
-        <span><strong>تیر ۱۴۰۴</strong> — مبنای مقایسه فعلی <strong>۲۳٪</strong></span>
+        <span><strong>مرداد ۱۴۰۵</strong> — مبنای مقایسه فعلی <strong>تسهیلات متعارف ۲۳٪</strong></span>
       </div>
       <div class="ref-bands">
         <div class="band b-good"><span class="bdot"></span> زیر ۲۶٪ — نزدیک به نرخ مؤثر بانکی / خیلی خوب</div>
@@ -854,7 +889,7 @@
   </section>
 
   <footer class="site-footer">
-    حساب‌کش، ۱۴۰۵ — یک ابزار کوچک برای تصمیم‌های مالی شفاف‌تر.
+    حساب‌کش، ۱۴۰۵ — یک ابزار کوچک <span class="footer-free">رایگان</span> برای تصمیم‌های مالی شفاف‌تر.
   </footer>
 
 </div><!-- /container -->
@@ -934,6 +969,10 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (fmt === 'rate') applyRateFmt(el);
     }
   });
+
+  ['inst-cash', 'inst-down', 'inst-store-value', 'inst-store-n'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateStoreDerived);
+  });
 });
 
 // Newton-Raphson to solve for monthly rate given PV, PMT, N
@@ -1004,26 +1043,111 @@ function renderSummary(prefix, apr, lead) {
   if (placeholder) placeholder.style.display = 'none';
 }
 
-function renderCompareSummary(titleText, tone, lead) {
-  const title = document.getElementById('compare-verdict-title');
-  title.textContent = titleText;
-  title.className = 'verdict-title ' + tone;
-  document.getElementById('compare-verdict-lead').innerHTML = lead;
-  document.getElementById('compare-placeholder').style.display = 'none';
+// ── Installment input modes ───────────────────────────────────────────────
+let instEntryMode = 'payment';
+let instFirstPaymentNow = false;
+let instVariableMode = false;
+
+function resetInstallmentResult() {
+  clearFormError('inst-error');
+  document.getElementById('inst-result').classList.remove('show');
+  document.getElementById('inst-placeholder').style.display = '';
+}
+
+function resetInstallmentForm() {
+  if (instVariableMode) toggleVariable();
+
+  ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-store-n']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('inst-payments-var').value = '';
+  document.getElementById('inst-store-kind').value = 'extra';
+  updateVarCounter();
+  setInstallmentEntryMode('payment');
+  setFirstPaymentTiming(false);
+  setInstallmentDownVisibility(false);
+  resetInstallmentResult();
+  trackEvent('calculator_reset', { calculator_type: 'installment' });
+}
+
+function setInstallmentEntryMode(mode) {
+  instEntryMode = mode;
+  if (mode === 'store' && instVariableMode) toggleVariable();
+
+  document.getElementById('inst-payment-source-fields').style.display = mode === 'payment' ? '' : 'none';
+  document.getElementById('inst-store-source-fields').style.display = mode === 'store' ? '' : 'none';
+  document.getElementById('inst-entry-payment').classList.toggle('active', mode === 'payment');
+  document.getElementById('inst-entry-store').classList.toggle('active', mode === 'store');
+  document.getElementById('inst-entry-payment').setAttribute('aria-pressed', mode === 'payment');
+  document.getElementById('inst-entry-store').setAttribute('aria-pressed', mode === 'store');
+  document.getElementById('inst-entry-help').textContent = mode === 'payment'
+    ? 'اگر مبلغ هر قسط را می‌دانی، همان را مستقیم وارد کن.'
+    : 'مثل صفحه پرداخت فروشگاه: مجموع اضافه‌پرداخت یا مجموع کل پرداخت را وارد کن؛ مبلغ هر قسط خودکار حساب می‌شود.';
+
+  updateStoreDerived();
+  resetInstallmentResult();
+}
+
+function setFirstPaymentTiming(firstPaymentNow) {
+  instFirstPaymentNow = firstPaymentNow;
+  document.getElementById('inst-first-now').classList.toggle('active', firstPaymentNow);
+  document.getElementById('inst-first-next').classList.toggle('active', !firstPaymentNow);
+  document.getElementById('inst-first-now').setAttribute('aria-pressed', firstPaymentNow);
+  document.getElementById('inst-first-next').setAttribute('aria-pressed', !firstPaymentNow);
+  resetInstallmentResult();
+}
+
+function setInstallmentDownVisibility(open) {
+  const panel = document.getElementById('inst-down-panel');
+  const toggle = document.getElementById('inst-down-toggle');
+  panel.classList.toggle('open', open);
+  toggle.setAttribute('aria-expanded', open);
+  toggle.textContent = open ? 'حذف پیش‌پرداخت جداگانه' : 'پیش‌پرداخت جداگانه دارم';
+
+  if (!open) setFmtValue('inst-down', 0, 'money');
+  updateStoreDerived();
+  resetInstallmentResult();
+}
+
+function toggleInstallmentDown() {
+  const panel = document.getElementById('inst-down-panel');
+  setInstallmentDownVisibility(!panel.classList.contains('open'));
+}
+
+function updateStoreDerived() {
+  const note = document.getElementById('inst-store-derived');
+  const kind = document.getElementById('inst-store-kind').value;
+  const valueInput = document.getElementById('inst-store-value');
+  valueInput.placeholder = kind === 'extra' ? 'مثلاً ۳٬۶۰۰٬۰۰۰' : 'مثلاً ۲۱٬۶۰۰٬۰۰۰';
+
+  const cash = v('inst-cash');
+  const down = v('inst-down');
+  const storeValue = v('inst-store-value');
+  const n = v('inst-store-n');
+  const totalPaid = kind === 'extra' ? cash + storeValue : storeValue;
+  const installmentTotal = totalPaid - down;
+
+  if (instEntryMode !== 'store' || !cash || !storeValue || !n || installmentTotal <= 0) {
+    note.classList.remove('show');
+    note.textContent = '';
+    return;
+  }
+
+  const payment = installmentTotal / n;
+  const sourceText = kind === 'extra'
+    ? `با افزودن اضافه‌پرداخت، مجموع کل پرداخت ${fmt(totalPaid)} می‌شود.`
+    : `مجموع کل پرداخت اعلام‌شده ${fmt(totalPaid)} است.`;
+  note.innerHTML = `${sourceText} حساب‌کش مبلغ هر قسط را حدود <strong>${fmt(payment)}</strong> در نظر می‌گیرد.`;
+  note.classList.add('show');
 }
 
 // ── Variable installment toggle ───────────────────────────────────────────
-let instVariableMode = false;
-
 function toggleVariable() {
   instVariableMode = !instVariableMode;
   document.getElementById('inst-equal-fields').style.display  = instVariableMode ? 'none' : '';
   document.getElementById('inst-variable-fields').style.display = instVariableMode ? '' : 'none';
   document.getElementById('inst-var-toggle').textContent =
     instVariableMode ? 'برگشت به اقساط مساوی' : 'حالت پیشرفته: اقساط نامساوی دارم';
-  clearFormError('inst-error');
-  document.getElementById('inst-result').classList.remove('show');
-  document.getElementById('inst-placeholder').style.display = '';
+  resetInstallmentResult();
 }
 
 function parseVarPayments() {
@@ -1049,10 +1173,23 @@ function toggleGrace() {
   if (!open) document.getElementById('loan-grace').value = '';
 }
 
+function resetLoanForm() {
+  ['loan-amount', 'loan-rate', 'loan-n', 'loan-grace']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('loan-type').value = 'on-principal';
+  document.getElementById('loan-grace-type').value = 'accumulate';
+  const panel = document.getElementById('grace-panel');
+  if (panel.classList.contains('open')) toggleGrace();
+  clearFormError('loan-error');
+  document.getElementById('loan-result').classList.remove('show');
+  document.getElementById('loan-placeholder').style.display = '';
+  trackEvent('calculator_reset', { calculator_type: 'loan' });
+}
+
 // ── Tab switcher ──────────────────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    const names = ['installment','loan','compare'];
+    const names = ['installment','loan'];
     b.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1060,13 +1197,49 @@ function switchTab(name) {
   trackEvent('calculator_tab_change', { tab_name: name });
 }
 
+function announcePresetResult(prefix) {
+  const result = document.getElementById(prefix + '-result');
+  if (!result) return;
+
+  result.classList.remove('result-nudge');
+  void result.offsetWidth;
+  result.classList.add('result-nudge');
+  window.setTimeout(() => result.classList.remove('result-nudge'), 1400);
+
+  const rect = result.getBoundingClientRect();
+  const isBelowFold = rect.top > window.innerHeight * 0.72;
+  const isMobile = window.innerWidth <= 768;
+  if (!isBelowFold && !isMobile) return;
+
+  const targetY = window.scrollY + rect.top - 24;
+  window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+}
+
 function loadInstallmentPreset(cash, down, payment, n) {
+  setInstallmentEntryMode('payment');
+  setFirstPaymentTiming(false);
   if (instVariableMode) toggleVariable();
+  setInstallmentDownVisibility(down > 0);
   setFmtValue('inst-cash', cash, 'money');
   setFmtValue('inst-down', down, 'money');
   setFmtValue('inst-payment', payment, 'money');
   setFmtValue('inst-n', n, 'count');
   calcInstallment();
+  announcePresetResult('inst');
+}
+
+function loadStorePreset(cash, down, storeValue, n, storeKind, firstPaymentNow) {
+  setInstallmentEntryMode('store');
+  setFirstPaymentTiming(firstPaymentNow);
+  setInstallmentDownVisibility(down > 0);
+  document.getElementById('inst-store-kind').value = storeKind;
+  setFmtValue('inst-cash', cash, 'money');
+  setFmtValue('inst-down', down, 'money');
+  setFmtValue('inst-store-value', storeValue, 'money');
+  setFmtValue('inst-store-n', n, 'count');
+  updateStoreDerived();
+  calcInstallment();
+  announcePresetResult('inst');
 }
 
 function loadLoanPreset(amount, rate, n, type) {
@@ -1077,34 +1250,7 @@ function loadLoanPreset(amount, rate, n, type) {
   const panel = document.getElementById('grace-panel');
   if (panel.classList.contains('open')) toggleGrace();
   calcLoan();
-}
-
-function loadComparePreset(kind) {
-  const presets = {
-    phone: [
-      { cash: 62000000, down: 12000000, payment: 6800000, n: 12 },
-      { cash: 60000000, down: 5000000, payment: 6500000, n: 14 }
-    ],
-    loanVsInstallment: [
-      { cash: 90000000, down: 0, payment: 9600000, n: 12 },
-      { cash: 90000000, down: 25000000, payment: 7700000, n: 12 }
-    ],
-    shortLong: [
-      { cash: 45000000, down: 5000000, payment: 7600000, n: 6 },
-      { cash: 45000000, down: 5000000, payment: 4200000, n: 12 }
-    ]
-  };
-  const [a, b] = presets[kind];
-  [
-    ['c1', a],
-    ['c2', b]
-  ].forEach(([prefix, o]) => {
-    setFmtValue(prefix + '-cash', o.cash, 'money');
-    setFmtValue(prefix + '-down', o.down, 'money');
-    setFmtValue(prefix + '-payment', o.payment, 'money');
-    setFmtValue(prefix + '-n', o.n, 'count');
-  });
-  calcCompare();
+  announcePresetResult('loan');
 }
 
 // ── Validation helpers ───────────────────────────────────────────────────
@@ -1133,9 +1279,32 @@ function calcInstallment() {
   }
 
   const principal = cash - down;
-  let payments, n, totalInstallments, ear;
+  let payments, n, totalInstallments, payment;
 
-  if (instVariableMode) {
+  if (instEntryMode === 'store') {
+    const storeKind = document.getElementById('inst-store-kind').value;
+    const storeValue = v('inst-store-value');
+    n = v('inst-store-n');
+    if (!storeValue || !n) {
+      showFormError('inst-error', 'لطفاً مجموع اضافه‌پرداخت یا مجموع کل پرداخت و تعداد اقساط را وارد کنید.');
+      return;
+    }
+    if (n < 1 || n > 360) {
+      showFormError('inst-error', 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.');
+      return;
+    }
+    const totalPaidFromStore = storeKind === 'extra' ? cash + storeValue : storeValue;
+    if (totalPaidFromStore <= cash) {
+      showFormError('inst-error', storeKind === 'extra'
+        ? 'مجموع اضافه‌پرداخت باید بیشتر از صفر باشد.'
+        : 'مجموع کل پرداخت باید بیشتر از قیمت نقدی باشد.');
+      return;
+    }
+    totalInstallments = totalPaidFromStore - down;
+    payment = totalInstallments / n;
+    payments = Array.from({ length: Math.round(n) }, () => payment);
+    n = payments.length;
+  } else if (instVariableMode) {
     // ── Variable mode ──────────────────────────────────────────────────────
     payments = parseVarPayments().filter(p => p > 0);
     n = payments.length;
@@ -1152,10 +1321,9 @@ function calcInstallment() {
       showFormError('inst-error', 'مجموع اقساط از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.');
       return;
     }
-    ear = solveAnnualEffectiveVariable(principal, payments);
   } else {
     // ── Equal mode ─────────────────────────────────────────────────────────
-    const payment = v('inst-payment');
+    payment = v('inst-payment');
     n = v('inst-n');
     if (!payment || !n) {
       showFormError('inst-error', 'لطفاً مبلغ قسط و تعداد اقساط را وارد کنید.');
@@ -1170,20 +1338,30 @@ function calcInstallment() {
       showFormError('inst-error', 'مجموع اقساط (پیش‌پرداخت + قسط × تعداد) از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.');
       return;
     }
-    payments = null;
-    ear = aprFromMonthly(solveRate(principal, payment, n));
+    payments = Array.from({ length: Math.round(n) }, () => payment);
+    n = payments.length;
   }
 
+  if (instFirstPaymentNow && payments[0] >= principal) {
+    showFormError('inst-error', 'پرداخت امروز تمام قیمتِ باقی‌مانده را پوشش می‌دهد؛ برای این حالت نرخ مؤثر قابل محاسبه نیست.');
+    return;
+  }
+
+  const ear = solveAnnualEffectiveVariable(principal, payments, instFirstPaymentNow);
   const totalPaid = down + totalInstallments;
   const extra     = totalPaid - cash;
   const pct       = (extra / cash) * 100;
+  const financedAmount = principal - (instFirstPaymentNow ? payments[0] : 0);
   const summaryLead = `نرخ مؤثر سالانه این پیشنهاد <strong>${fmtPct(ear)}</strong> است؛ یعنی حدود <strong>${rateMultiple(ear)}</strong> نرخ مرجع ۲۳٪. شما در مجموع <strong>${fmt(extra)}</strong> بیشتر از قیمت نقدی پرداخت می‌کنید.`;
 
   document.getElementById('inst-r-cash').textContent      = fmt(cash);
   document.getElementById('inst-r-down').textContent      = fmt(down);
-  document.getElementById('inst-r-principal').textContent = fmt(principal);
-  document.getElementById('inst-r-n-row').style.display   = instVariableMode ? '' : 'none';
+  document.getElementById('inst-r-principal').textContent = fmt(financedAmount);
+  document.getElementById('inst-r-payment-row').style.display = instVariableMode ? 'none' : '';
+  document.getElementById('inst-r-payment').textContent   = instVariableMode ? 'نامساوی' : fmt(payment);
   document.getElementById('inst-r-n').textContent         = toPersian(n) + ' ماه';
+  document.getElementById('inst-r-first-payment').textContent =
+    instFirstPaymentNow ? 'همین امروز' : 'یک ماه بعد';
   document.getElementById('inst-r-total').textContent     = fmt(totalPaid);
   document.getElementById('inst-r-extra').textContent     = fmt(extra);
   document.getElementById('inst-r-pct').textContent       = fmtPct(pct);
@@ -1192,35 +1370,39 @@ function calcInstallment() {
 
   renderSummary('inst', ear, summaryLead);
   let verdict = verdictText(ear);
-  if (down > 0 && principal < cash * 0.3) {
-    verdict += `<br><br><em style="font-size:0.82rem;color:var(--muted)">توجه: چون پیش‌پرداخت بالاست، اعتبار دریافتی فقط ${fmt(principal)} است. نرخ مؤثر سالانه روی همین مبلغ کوچک محاسبه می‌شود — به همین دلیل ممکن است عدد بالا به نظر برسد، حتی اگر کل اضافه‌پرداخت کم باشد.</em>`;
+  if (financedAmount < cash * 0.3) {
+    verdict += `<br><br><em style="font-size:0.82rem;color:var(--muted)">توجه: بعد از پرداخت‌های امروز، فقط ${fmt(financedAmount)} عملاً تأمین مالی می‌شود. نرخ مؤثر سالانه روی همین مبلغ محاسبه می‌شود — به همین دلیل ممکن است عدد بالا به نظر برسد، حتی اگر کل اضافه‌پرداخت کم باشد.</em>`;
   }
   document.getElementById('inst-verdict').innerHTML = verdict;
   document.getElementById('inst-result').classList.add('show');
   trackEvent('calculator_result', {
-    calculator_type: instVariableMode ? 'installment_variable' : 'installment_equal',
+    calculator_type: instEntryMode === 'store'
+      ? 'installment_store_summary'
+      : (instVariableMode ? 'installment_variable' : 'installment_equal'),
     installment_count: Math.round(n),
-    has_down_payment: down > 0
+    has_down_payment: down > 0,
+    first_payment_timing: instFirstPaymentNow ? 'now' : 'next_month'
   });
 }
 
 // Solver for variable installment schedules.
-function solveAnnualEffectiveVariable(pv, payments) {
-  let r = 0.01;
-  for (let i = 0; i < 300; i++) {
-    let npv = 0, dnpv = 0;
-    payments.forEach((pmt, idx) => {
-      const t    = idx + 1;
-      const disc = Math.pow(1 + r, t);
-      npv  += pmt / disc;
-      dnpv -= t * pmt / (disc * (1 + r));
-    });
-    npv -= pv;
-    const r2 = r - npv / dnpv;
-    if (Math.abs(r2 - r) < 1e-10) { r = r2; break; }
-    r = Math.max(r2, 1e-6);
+function solveAnnualEffectiveVariable(pv, payments, firstPaymentNow = false) {
+  const offset = firstPaymentNow ? 0 : 1;
+  const npv = rate => payments.reduce((sum, pmt, idx) => {
+    return sum + pmt / Math.pow(1 + rate, idx + offset);
+  }, 0) - pv;
+
+  let low = 0;
+  let high = 1;
+  while (npv(high) > 0 && high < 1000000) {
+    high *= 2;
   }
-  return aprFromMonthly(r);
+  for (let i = 0; i < 160; i++) {
+    const mid = (low + high) / 2;
+    if (npv(mid) > 0) low = mid;
+    else high = mid;
+  }
+  return aprFromMonthly((low + high) / 2);
 }
 
 // ── Panel 2: Bank Loan ───────────────────────────────────────────────────
@@ -1381,96 +1563,6 @@ function solveAnnualEffectiveWithGrace(pv, gracePmt, graceN, payment, repayN) {
   return aprFromMonthly(r);
 }
 
-// ── Panel 3: Compare ─────────────────────────────────────────────────────
-function calcCompare() {
-  clearFormError('compare-error');
-
-  function getOption(prefix) {
-    const cash    = v(prefix+'-cash');
-    const payment = v(prefix+'-payment');
-    const n       = v(prefix+'-n');
-    const down    = v(prefix+'-down');
-    return { cash, payment, n, down };
-  }
-
-  function validateOption(o, label) {
-    if (!o.cash || !o.payment || !o.n)
-      return `${label}: قیمت نقدی، مبلغ قسط، و تعداد اقساط را وارد کنید.`;
-    if (o.down >= o.cash)
-      return `${label}: پیش‌پرداخت نمی‌تواند بیشتر یا مساوی قیمت نقدی باشد.`;
-    if (o.down + o.payment * o.n <= o.cash)
-      return `${label}: مجموع اقساط از قیمت نقدی کمتر یا مساوی است.`;
-    if (o.n < 1 || o.n > 360)
-      return `${label}: تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.`;
-    return null;
-  }
-
-  const r1 = getOption('c1'), r2 = getOption('c2');
-  const e1 = validateOption(r1, 'گزینه اول');
-  const e2 = validateOption(r2, 'گزینه دوم');
-  if (e1 || e2) { showFormError('compare-error', e1 || e2); return; }
-
-  function buildOption(o) {
-    const totalPaid = o.down + o.payment * o.n;
-    const extra     = totalPaid - o.cash;
-    const pct       = (extra / o.cash) * 100;
-    const principal = o.cash - o.down;
-    const r         = solveRate(principal, o.payment, o.n);
-    const ear       = aprFromMonthly(r);
-    return { ...o, totalPaid, extra, pct, ear };
-  }
-
-  const o1 = buildOption(r1);
-  const o2 = buildOption(r2);
-
-  const rows = [
-    ['قیمت نقدی',              fmt(o1.cash),        fmt(o2.cash)],
-    ['پیش‌پرداخت',              fmt(o1.down),        fmt(o2.down)],
-    ['مبلغ هر قسط × تعداد',    `${fmt(o1.payment)} × ${toPersian(Math.round(o1.n))}`, `${fmt(o2.payment)} × ${toPersian(Math.round(o2.n))}`],
-    ['مجموع پرداخت',           fmt(o1.totalPaid),   fmt(o2.totalPaid)],
-    ['اضافه‌پرداخت',            fmt(o1.extra),       fmt(o2.extra)],
-    ['درصد اضافه از قیمت نقد', fmtPct(o1.pct),      fmtPct(o2.pct)],
-    ['نرخ مؤثر سالانه', fmtPct(o1.ear),      fmtPct(o2.ear)],
-  ];
-
-  const tbody = document.getElementById('compare-tbody');
-  tbody.innerHTML = rows.map(([label, v1, v2]) => {
-    return `<tr>
-      <td style="padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.08);color:var(--muted)">${label}</td>
-      <td style="padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center;font-weight:600;color:#f0eeff">${v1}</td>
-      <td style="padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center;font-weight:600;color:#f0eeff">${v2}</td>
-    </tr>`;
-  }).join('');
-
-  let verdict = '';
-  if (!isNaN(o1.ear) && !isNaN(o2.ear)) {
-    if (Math.abs(o1.ear - o2.ear) < 0.5) {
-      verdict = 'هر دو گزینه از نظر نرخ مؤثر سالانه تقریباً یکسان هستند.';
-      renderCompareSummary(
-        'تقریباً برابر',
-        'ok',
-        `از نظر نرخ مؤثر سالانه تفاوت جدی دیده نمی‌شود: گزینه اول <strong>${fmtPct(o1.ear)}</strong> و گزینه دوم <strong>${fmtPct(o2.ear)}</strong>. حالا اضافه‌پرداخت و مبلغ قسط ماهانه را کنار هم ببین.`
-      );
-    } else if (o1.ear < o2.ear) {
-      verdict = `<strong>گزینه اول ارزان‌تر است.</strong> نرخ مؤثر سالانه آن ${fmtPct(o1.ear)} در مقابل ${fmtPct(o2.ear)} گزینه دوم است.`;
-      renderCompareSummary(
-        'گزینه اول بهتره',
-        'good',
-        `گزینه اول نرخ مؤثر سالانه <strong>${fmtPct(o1.ear)}</strong> دارد؛ گزینه دوم <strong>${fmtPct(o2.ear)}</strong>. اختلاف اضافه‌پرداخت کل: <strong>${fmt(Math.abs(o1.extra - o2.extra))}</strong>.`
-      );
-    } else {
-      verdict = `<strong>گزینه دوم ارزان‌تر است.</strong> نرخ مؤثر سالانه آن ${fmtPct(o2.ear)} در مقابل ${fmtPct(o1.ear)} گزینه اول است.`;
-      renderCompareSummary(
-        'گزینه دوم بهتره',
-        'good',
-        `گزینه دوم نرخ مؤثر سالانه <strong>${fmtPct(o2.ear)}</strong> دارد؛ گزینه اول <strong>${fmtPct(o1.ear)}</strong>. اختلاف اضافه‌پرداخت کل: <strong>${fmt(Math.abs(o1.extra - o2.extra))}</strong>.`
-      );
-    }
-  }
-  document.getElementById('compare-verdict').innerHTML = verdict;
-  document.getElementById('compare-result').classList.add('show');
-  trackEvent('calculator_result', { calculator_type: 'compare' });
-}
 </script>
 </body>
 </html>
