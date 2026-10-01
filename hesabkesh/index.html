@@ -917,7 +917,8 @@ function toEn(s) {
   return String(s)
     .replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776)
     .replace(/٬/g, '')   // Arabic thousands separator
-    .replace(/,/g, '');  // Latin thousands separator
+    .replace(/,/g, '')   // Latin thousands separator
+    .replace(/٫/g, '.'); // Arabic decimal separator
 }
 function v(id) { return parseFloat(toEn(document.getElementById(id).value)) || 0; }
 function setFmtValue(id, value, fmtType) {
@@ -1562,6 +1563,105 @@ function solveAnnualEffectiveWithGrace(pv, gracePmt, graceN, payment, repayN) {
   }
   return aprFromMonthly(r);
 }
+
+// ── Shareable URL state ──────────────────────────────────────────────────
+function rawNum(id) {
+  return toEn(document.getElementById(id).value).replace(/[^0-9.]/g, '');
+}
+
+function setSelectIfValid(id, value) {
+  const el = document.getElementById(id);
+  if ([...el.options].some(o => o.value === value)) el.value = value;
+}
+
+function buildStateParams() {
+  const p = new URLSearchParams();
+  const setIf = (key, value) => { if (value) p.set(key, value); };
+
+  if (document.getElementById('panel-loan').classList.contains('active')) p.set('tab', 'loan');
+
+  if (instEntryMode === 'store') p.set('mode', 'store');
+  else if (instVariableMode) p.set('mode', 'variable');
+  if (instFirstPaymentNow) p.set('first', 'now');
+  setIf('cash', rawNum('inst-cash'));
+  setIf('pmt', rawNum('inst-payment'));
+  setIf('n', rawNum('inst-n'));
+  setIf('var', parseVarPayments().filter(x => x > 0).join(','));
+  const storeKind = document.getElementById('inst-store-kind').value;
+  if (storeKind !== 'extra') p.set('kind', storeKind);
+  setIf('sv', rawNum('inst-store-value'));
+  setIf('sn', rawNum('inst-store-n'));
+  if (document.getElementById('inst-down-panel').classList.contains('open')) {
+    p.set('down', rawNum('inst-down') || '0');
+  }
+
+  setIf('amount', rawNum('loan-amount'));
+  setIf('rate', rawNum('loan-rate'));
+  setIf('term', rawNum('loan-n'));
+  const loanType = document.getElementById('loan-type').value;
+  if (loanType !== 'on-principal') p.set('type', loanType);
+  if (document.getElementById('grace-panel').classList.contains('open')) {
+    p.set('grace', rawNum('loan-grace'));
+    const graceType = document.getElementById('loan-grace-type').value;
+    if (graceType !== 'accumulate') p.set('gtype', graceType);
+  }
+  return p;
+}
+
+function syncUrl() {
+  const query = buildStateParams().toString();
+  const url = location.pathname + (query ? '?' + query : '') + location.hash;
+  if (url !== location.pathname + location.search + location.hash) {
+    history.replaceState(null, '', url);
+  }
+}
+
+function restoreFromUrl() {
+  const p = new URLSearchParams(location.search);
+  if (!p.toString()) return;
+  const fill = (key, id, fmtType) => { if (p.get(key)) setFmtValue(id, p.get(key), fmtType); };
+
+  const mode = p.get('mode');
+  setInstallmentEntryMode(mode === 'store' ? 'store' : 'payment');
+  if (mode === 'variable') toggleVariable();
+  setFirstPaymentTiming(p.get('first') === 'now');
+  setInstallmentDownVisibility(p.has('down'));
+  setSelectIfValid('inst-store-kind', p.get('kind'));
+  fill('cash', 'inst-cash', 'money');
+  fill('down', 'inst-down', 'money');
+  fill('pmt', 'inst-payment', 'money');
+  fill('n', 'inst-n', 'count');
+  fill('sv', 'inst-store-value', 'money');
+  fill('sn', 'inst-store-n', 'count');
+  if (p.get('var')) {
+    document.getElementById('inst-payments-var').value = p.get('var').split(',')
+      .map(x => (parseFloat(x) || 0).toLocaleString('fa-IR')).join('\n');
+    updateVarCounter();
+  }
+  updateStoreDerived();
+
+  fill('amount', 'loan-amount', 'money');
+  fill('rate', 'loan-rate', 'rate');
+  fill('term', 'loan-n', 'count');
+  setSelectIfValid('loan-type', p.get('type'));
+  if (p.has('grace')) {
+    if (!document.getElementById('grace-panel').classList.contains('open')) toggleGrace();
+    fill('grace', 'loan-grace', 'count');
+    setSelectIfValid('loan-grace-type', p.get('gtype'));
+  }
+
+  if (p.get('tab') === 'loan') switchTab('loan');
+
+  // Show results for shared links, but don't greet the visitor with validation errors.
+  if (p.get('cash')) { calcInstallment(); clearFormError('inst-error'); }
+  if (p.get('amount')) { calcLoan(); clearFormError('loan-error'); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  restoreFromUrl();
+  // Inline onclick handlers run before these bubble up, so the URL sees the updated state.
+  ['input', 'change', 'click'].forEach(type => document.addEventListener(type, syncUrl));
+});
 
 </script>
 </body>
