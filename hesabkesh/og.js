@@ -64,6 +64,8 @@ function page(r) {
     html = setMeta(html, 'property', 'og:title', title);
     html = setMeta(html, 'property', 'og:description', description);
     html = setMeta(html, 'property', 'og:url', url);
+    // Telegram follows canonical and previews that page instead.
+    html = html.replace(/(<link rel="canonical" href=")[^"]*(")/, (m, open, close) => open + escapeAttr(url) + close);
     html = setMeta(html, 'name', 'twitter:title', title);
     html = setMeta(html, 'name', 'twitter:description', description);
   }
