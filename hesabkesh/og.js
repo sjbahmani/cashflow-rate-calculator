@@ -1,6 +1,9 @@
-// nginx njs handler: fills the link-preview meta tags from the shared-link query, using the page's own calc.js.
+// nginx njs handler: renders / and the landing pages from index.html, and fills link-preview tags for shared links.
 import fs from 'fs';
 import calc from 'calc.js';
+import pages from 'pages.js';
+
+const SITE = 'https://hesabkesh.ir';
 
 const TONE_MARK = { good: '🟢', ok: '🟡', warn: '🟠', high: '🔴', bad: '⛔' };
 
@@ -42,13 +45,45 @@ function escapeAttr(s) {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function fill(html, re, value) {
+  return html.replace(re, (m, open, close) => open + value + close);
+}
+
 function setMeta(html, attr, name, value) {
-  const re = new RegExp('(<meta ' + attr + '="' + name + '" content=")[^"]*(")');
-  return html.replace(re, (m, open, close) => open + escapeAttr(value) + close);
+  return fill(html, new RegExp('(<meta ' + attr + '="' + name + '" content=")[^"]*(")'), escapeAttr(value));
+}
+
+function setPreview(html, title, description, url) {
+  html = setMeta(html, 'property', 'og:title', title);
+  html = setMeta(html, 'property', 'og:description', description);
+  html = setMeta(html, 'property', 'og:url', url);
+  html = setMeta(html, 'name', 'twitter:title', title);
+  html = setMeta(html, 'name', 'twitter:description', description);
+  // Telegram follows canonical and previews that page instead.
+  return fill(html, /(<link rel="canonical" href=")[^"]*(")/, escapeAttr(url));
+}
+
+function applyLanding(html, path, lp) {
+  html = fill(html, /(<title>)[^<]*(<\/title>)/, escapeAttr(lp.title));
+  html = setMeta(html, 'name', 'description', lp.description);
+  html = setPreview(html, lp.title, lp.description, SITE + path);
+  html = html.replace(/(<h1>)[\s\S]*?(<\/h1>\s*<p>)[\s\S]*?(<\/p>)/, (m, h1, mid, end) =>
+    h1 + '<span class="hero-question">' + lp.question + '</span> <span class="hero-answer">' + lp.answer + '</span>' +
+    mid + lp.intro + end);
+  html = html.replace(/<h2 id="seo-title">[\s\S]*?(?=<div class="seo-grid">)/, () => lp.body.trim() + '\n\n    ');
+  return html.replace('<body>', () => '<body data-preset="' + escapeAttr(lp.preset) + '">');
 }
 
 function page(r) {
+  const landing = pages[r.uri];
+  if (r.uri !== '/' && !landing) {
+    r.return(404);
+    return;
+  }
+
   let html = fs.readFileSync(r.variables.document_root + '/index.html', 'utf8');
+  if (landing) html = applyLanding(html, r.uri, landing);
+
   let res = null;
   try {
     res = resultFromQuery(r.args);
@@ -59,18 +94,10 @@ function page(r) {
   if (res && !res.error) {
     const p = calc.verdictProfile(res.ear);
     const title = 'حساب‌کش می‌گه: ' + p.title + ' ' + TONE_MARK[p.tone];
-    const description = res.summaryLead.replace(/<[^>]+>/g, '');
-    const url = 'https://' + r.variables.host + r.variables.request_uri;
-    html = setMeta(html, 'property', 'og:title', title);
-    html = setMeta(html, 'property', 'og:description', description);
-    html = setMeta(html, 'property', 'og:url', url);
-    // Telegram follows canonical and previews that page instead.
-    html = html.replace(/(<link rel="canonical" href=")[^"]*(")/, (m, open, close) => open + escapeAttr(url) + close);
-    html = setMeta(html, 'name', 'twitter:title', title);
-    html = setMeta(html, 'name', 'twitter:description', description);
+    html = setPreview(html, title, res.summaryLead.replace(/<[^>]+>/g, ''), SITE + r.variables.request_uri);
   }
 
-  r.headersOut['Content-Type'] = 'text/html; charset=utf-8';
+  r.headersOut['Content-Type'] = 'text/html';
   r.return(200, html);
 }
 

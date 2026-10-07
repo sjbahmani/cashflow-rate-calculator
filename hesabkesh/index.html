@@ -9,15 +9,14 @@
 <meta name="theme-color" content="#111315">
 <meta name="application-name" content="حساب‌کش">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="canonical" href="https://hesabkesh.ir/index.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="canonical" href="https://hesabkesh.ir/">
+<link rel="preload" href="/fonts/vazirmatn-arabic.woff2" as="font" type="font/woff2" crossorigin>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fa_IR">
 <meta property="og:site_name" content="حساب‌کش">
 <meta property="og:title" content="حساب‌کش | واقعیت‌سنج خرید قسطی">
 <meta property="og:description" content="قیمت نقدی، پیش‌پرداخت و قسط‌ها را وارد کن؛ حساب‌کش می‌گوید واقعاً چند درصد سود می‌دهی.">
-<meta property="og:url" content="https://hesabkesh.ir/index.html">
+<meta property="og:url" content="https://hesabkesh.ir/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="حساب‌کش | واقعیت‌سنج خرید قسطی">
 <meta name="twitter:description" content="ببین پیشنهاد قسطی واقعاً چند درصد برایت تمام می‌شود.">
@@ -27,7 +26,7 @@
   "@type": "WebApplication",
   "name": "حساب‌کش",
   "alternateName": "واقعیت‌سنج خرید قسطی",
-  "url": "https://hesabkesh.ir/index.html",
+  "url": "https://hesabkesh.ir/",
   "applicationCategory": "FinanceApplication",
   "operatingSystem": "Any",
   "inLanguage": "fa-IR",
@@ -97,7 +96,20 @@
   })();
 </script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+  @font-face {
+    font-family: 'Vazirmatn';
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/vazirmatn-arabic.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+200C-200E, U+2010-2011, U+FB50-FDFF, U+FE70-FEFC;
+  }
+  @font-face {
+    font-family: 'Vazirmatn';
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/vazirmatn-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212, U+FEFF;
+  }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -528,6 +540,12 @@
   .faq-list p {
     margin: 10px 0 0;
   }
+  .page-links {
+    margin: 0;
+    padding-right: 20px;
+    line-height: 2;
+  }
+  .page-links a { color: #99f6e4; }
   .site-footer {
     margin-top: 28px;
     padding-top: 18px;
@@ -886,6 +904,15 @@
         </p>
       </details>
     </div>
+
+    <h2>محاسبه‌گرهای حساب‌کش</h2>
+    <ul class="page-links">
+      <li><a href="/">واقعیت‌سنج خرید قسطی و وام</a></li>
+      <li><a href="/installment-purchase">محاسبه سود خرید قسطی</a></li>
+      <li><a href="/phone-installments">محاسبه اقساط خرید گوشی</a></li>
+      <li><a href="/bank-loan">محاسبه اقساط و سود واقعی وام بانکی</a></li>
+      <li><a href="/marriage-loan">محاسبه اقساط وام ازدواج</a></li>
+    </ul>
   </section>
 
   <footer class="site-footer">
@@ -1368,7 +1395,8 @@ function syncUrl() {
 }
 
 function restoreFromUrl() {
-  const p = new URLSearchParams(location.search);
+  // Landing pages carry their example numbers in data-preset.
+  const p = new URLSearchParams(location.search || document.body.dataset.preset || '');
   if (!p.toString()) return;
   const fill = (key, id, fmtType) => { if (p.get(key)) setFmtValue(id, p.get(key), fmtType); };
 
