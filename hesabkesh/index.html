@@ -894,6 +894,12 @@
 
 </div><!-- /container -->
 
+<script type="module">
+  // Module scripts run before DOMContentLoaded, so the handlers below see these globals.
+  import calc from './calc.js';
+  window.calc = calc;
+  Object.assign(window, calc);
+</script>
 <script>
 function trackEvent(eventName, params = {}) {
   if (typeof window.gtag !== 'function') return;
@@ -901,17 +907,6 @@ function trackEvent(eventName, params = {}) {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-function fmt(n) {
-  if (n === null || isNaN(n)) return '—';
-  return Math.round(n).toLocaleString('fa-IR') + ' تومان';
-}
-function toPersian(s) {
-  return String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-}
-function fmtPct(n) {
-  if (isNaN(n) || !isFinite(n)) return '—';
-  return toPersian(n.toFixed(1)).replace('.', '٫') + '٪';
-}
 // Convert any mix of Persian/Latin digits to Latin, strip thousand separators
 function toEn(s) {
   return String(s)
@@ -975,59 +970,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById(id).addEventListener('input', updateStoreDerived);
   });
 });
-
-// Newton-Raphson to solve for monthly rate given PV, PMT, N
-function solveRate(pv, pmt, n) {
-  if (pmt <= 0 || pv <= 0 || n <= 0) return NaN;
-  // Total paid vs principal — if no interest, return 0
-  if (Math.abs(pmt * n - pv) < 0.01) return 0;
-  let r = 0.01; // initial guess: 1% per month
-  for (let i = 0; i < 200; i++) {
-    const f  = pv * r * Math.pow(1+r, n) / (Math.pow(1+r, n) - 1) - pmt;
-    const df = pv * (Math.pow(1+r,n)*(1 + r*n) - Math.pow(1+r,n+1) + 1) /
-               Math.pow(Math.pow(1+r,n)-1, 2);
-    const r2 = r - f/df;
-    if (Math.abs(r2 - r) < 1e-10) { r = r2; break; }
-    r = r2;
-    if (r <= 0) r = 1e-6;
-  }
-  return r;
-}
-
-function aprFromMonthly(r) {
-  return (Math.pow(1 + r, 12) - 1) * 100;
-}
-function monthlyFromAnnualEffective(ear) {
-  // ear is a percentage, returns monthly rate as percentage
-  return (Math.pow(1 + ear / 100, 1 / 12) - 1) * 100;
-}
-
-const OFFICIAL_BENCHMARK = 23;
-
-function rateMultiple(apr) {
-  if (!isFinite(apr)) return '';
-  return toPersian((apr / OFFICIAL_BENCHMARK).toFixed(1)).replace('.', '٫') + ' برابر';
-}
-
-// Verdict text thresholds are calibrated against the 23% reference benchmark used in this tool.
-function verdictProfile(apr) {
-  if (isNaN(apr) || !isFinite(apr)) {
-    return { tone: 'warn', title: 'نیاز به بررسی', msg: 'عددها برای محاسبه نرخ کافی نیستند.' };
-  }
-  if (apr < 26) {
-    return { tone: 'good', title: 'قابل قبول', msg: 'پایین‌تر یا نزدیک نرخ مرجع است؛ از نظر نرخ، پیشنهاد آرام‌تری به نظر می‌رسد.' };
-  }
-  if (apr < 40) {
-    return { tone: 'ok', title: 'کمی گران', msg: 'بالاتر از نرخ مرجع است؛ اگر وام بانکی در دسترس داری، مقایسه‌اش ارزش دارد.' };
-  }
-  if (apr < 60) {
-    return { tone: 'warn', title: 'گران', msg: 'این دیگر فقط قسط‌بندی ساده نیست؛ بخشی جدی از پولت دارد هزینه زمان می‌شود.' };
-  }
-  if (apr < 90) {
-    return { tone: 'high', title: 'خیلی گران', msg: 'نرخ فشارآور است؛ قبل از امضا یک گزینه دیگر هم پیدا کن و مقایسه بگیر.' };
-  }
-  return { tone: 'bad', title: 'فرار کن', msg: 'ظاهرش قسطی است، باطنش وام با سود سنگین. این پیشنهاد را جدی دوباره بررسی کن.' };
-}
 
 function verdictText(apr) {
   const p = verdictProfile(apr);
@@ -1269,91 +1211,23 @@ function calcInstallment() {
   clearFormError('inst-error');
   const cash = v('inst-cash');
   const down = v('inst-down');
-
-  if (!cash) {
-    showFormError('inst-error', 'لطفاً قیمت نقدی را وارد کنید.');
+  const res = calc.installment({
+    cash,
+    down,
+    mode: instEntryMode === 'store' ? 'store' : (instVariableMode ? 'variable' : 'payment'),
+    payment: v('inst-payment'),
+    n: v('inst-n'),
+    storeKind: document.getElementById('inst-store-kind').value,
+    storeValue: v('inst-store-value'),
+    storeN: v('inst-store-n'),
+    varPayments: parseVarPayments(),
+    firstPaymentNow: instFirstPaymentNow
+  });
+  if (res.error) {
+    showFormError('inst-error', res.error);
     return;
   }
-  if (down >= cash) {
-    showFormError('inst-error', 'پیش‌پرداخت نمی‌تواند بیشتر یا مساوی قیمت نقدی باشد.');
-    return;
-  }
-
-  const principal = cash - down;
-  let payments, n, totalInstallments, payment;
-
-  if (instEntryMode === 'store') {
-    const storeKind = document.getElementById('inst-store-kind').value;
-    const storeValue = v('inst-store-value');
-    n = v('inst-store-n');
-    if (!storeValue || !n) {
-      showFormError('inst-error', 'لطفاً مجموع اضافه‌پرداخت یا مجموع کل پرداخت و تعداد اقساط را وارد کنید.');
-      return;
-    }
-    if (n < 1 || n > 360) {
-      showFormError('inst-error', 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.');
-      return;
-    }
-    const totalPaidFromStore = storeKind === 'extra' ? cash + storeValue : storeValue;
-    if (totalPaidFromStore <= cash) {
-      showFormError('inst-error', storeKind === 'extra'
-        ? 'مجموع اضافه‌پرداخت باید بیشتر از صفر باشد.'
-        : 'مجموع کل پرداخت باید بیشتر از قیمت نقدی باشد.');
-      return;
-    }
-    totalInstallments = totalPaidFromStore - down;
-    payment = totalInstallments / n;
-    payments = Array.from({ length: Math.round(n) }, () => payment);
-    n = payments.length;
-  } else if (instVariableMode) {
-    // ── Variable mode ──────────────────────────────────────────────────────
-    payments = parseVarPayments().filter(p => p > 0);
-    n = payments.length;
-    if (n < 1) {
-      showFormError('inst-error', 'لطفاً حداقل یک مبلغ قسط وارد کنید.');
-      return;
-    }
-    if (n > 360) {
-      showFormError('inst-error', 'تعداد اقساط نمی‌تواند بیشتر از ۳۶۰ باشد.');
-      return;
-    }
-    totalInstallments = payments.reduce((s, p) => s + p, 0);
-    if (down + totalInstallments <= cash) {
-      showFormError('inst-error', 'مجموع اقساط از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.');
-      return;
-    }
-  } else {
-    // ── Equal mode ─────────────────────────────────────────────────────────
-    payment = v('inst-payment');
-    n = v('inst-n');
-    if (!payment || !n) {
-      showFormError('inst-error', 'لطفاً مبلغ قسط و تعداد اقساط را وارد کنید.');
-      return;
-    }
-    if (n < 1 || n > 360) {
-      showFormError('inst-error', 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.');
-      return;
-    }
-    totalInstallments = payment * n;
-    if (down + totalInstallments <= cash) {
-      showFormError('inst-error', 'مجموع اقساط (پیش‌پرداخت + قسط × تعداد) از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.');
-      return;
-    }
-    payments = Array.from({ length: Math.round(n) }, () => payment);
-    n = payments.length;
-  }
-
-  if (instFirstPaymentNow && payments[0] >= principal) {
-    showFormError('inst-error', 'پرداخت امروز تمام قیمتِ باقی‌مانده را پوشش می‌دهد؛ برای این حالت نرخ مؤثر قابل محاسبه نیست.');
-    return;
-  }
-
-  const ear = solveAnnualEffectiveVariable(principal, payments, instFirstPaymentNow);
-  const totalPaid = down + totalInstallments;
-  const extra     = totalPaid - cash;
-  const pct       = (extra / cash) * 100;
-  const financedAmount = principal - (instFirstPaymentNow ? payments[0] : 0);
-  const summaryLead = `نرخ مؤثر سالانه این پیشنهاد <strong>${fmtPct(ear)}</strong> است؛ یعنی حدود <strong>${rateMultiple(ear)}</strong> نرخ مرجع ۲۳٪. شما در مجموع <strong>${fmt(extra)}</strong> بیشتر از قیمت نقدی پرداخت می‌کنید.`;
+  const { n, payment, ear, totalPaid, extra, pct, financedAmount, summaryLead } = res;
 
   document.getElementById('inst-r-cash').textContent      = fmt(cash);
   document.getElementById('inst-r-down').textContent      = fmt(down);
@@ -1386,113 +1260,22 @@ function calcInstallment() {
   });
 }
 
-// Solver for variable installment schedules.
-function solveAnnualEffectiveVariable(pv, payments, firstPaymentNow = false) {
-  const offset = firstPaymentNow ? 0 : 1;
-  const npv = rate => payments.reduce((sum, pmt, idx) => {
-    return sum + pmt / Math.pow(1 + rate, idx + offset);
-  }, 0) - pv;
-
-  let low = 0;
-  let high = 1;
-  while (npv(high) > 0 && high < 1000000) {
-    high *= 2;
-  }
-  for (let i = 0; i < 160; i++) {
-    const mid = (low + high) / 2;
-    if (npv(mid) > 0) low = mid;
-    else high = mid;
-  }
-  return aprFromMonthly((low + high) / 2);
-}
-
 // ── Panel 2: Bank Loan ───────────────────────────────────────────────────
 function calcLoan() {
   clearFormError('loan-error');
   const amount     = v('loan-amount');
   const rateAnn    = v('loan-rate');
-  const n          = v('loan-n');
-  const loanType   = document.getElementById('loan-type').value;
   const graceOpen  = document.getElementById('grace-panel').classList.contains('open');
   const grace      = graceOpen ? (v('loan-grace') || 0) : 0;
+  const loanType   = document.getElementById('loan-type').value;
   const graceType  = document.getElementById('loan-grace-type').value;
-
-  if (!amount || !rateAnn || !n) {
-    showFormError('loan-error', 'لطفاً مبلغ وام، نرخ سود، و مدت وام را وارد کنید.');
+  const n          = v('loan-n');
+  const res = calc.loan({ amount, rateAnn, n, loanType, grace, graceType });
+  if (res.error) {
+    showFormError('loan-error', res.error);
     return;
   }
-  if (rateAnn <= 0 || rateAnn > 300) {
-    showFormError('loan-error', 'نرخ سود باید عددی مثبت و منطقی باشد (مثلاً ۲۳).');
-    return;
-  }
-  if (n < 1 || n > 360) {
-    showFormError('loan-error', 'مدت وام باید بین ۱ تا ۳۶۰ ماه باشد.');
-    return;
-  }
-  if (grace < 0 || grace >= n) {
-    showFormError('loan-error', 'دوره تنفس باید کمتر از مدت کل وام باشد.');
-    return;
-  }
-
-  const rMonthly = (rateAnn / 100) / 12;
-  let payment, totalPaid, extra, ear;
-  let gracePmt = 0;       // what's paid each month during grace
-  let graceTotalPaid = 0; // total outflow during grace period
-  let effectivePrincipal = amount; // principal used for repayment phase
-
-  // ── Flat rate ────────────────────────────────────────────────────────────
-  if (loanType === 'on-principal') {
-    if (grace > 0) {
-      if (graceType === 'accumulate') {
-        // Interest accumulates, added to principal
-        const graceInterest   = amount * rMonthly * grace;
-        effectivePrincipal    = amount + graceInterest;
-        gracePmt              = 0;
-        graceTotalPaid        = 0;
-      } else {
-        // Interest-only payments during grace
-        gracePmt              = amount * rMonthly;
-        graceTotalPaid        = gracePmt * grace;
-        effectivePrincipal    = amount; // principal unchanged
-      }
-    }
-    const repayMonths  = n - grace;
-    const repayYears   = repayMonths / 12;
-    const repayInterest= effectivePrincipal * (rateAnn / 100) * repayYears;
-    const repayTotal   = effectivePrincipal + repayInterest;
-    payment    = repayTotal / repayMonths;
-    totalPaid  = graceTotalPaid + payment * repayMonths;
-    extra      = totalPaid - amount;
-    // Solve for the rate on the full cash flow stream.
-    ear = solveAnnualEffectiveWithGrace(amount, gracePmt, grace, payment, n - grace);
-
-  // ── Reducing balance ─────────────────────────────────────────────────────
-  } else {
-    if (rMonthly === 0) {
-      payment   = amount / n;
-      totalPaid = amount;
-      extra     = 0;
-      ear       = 0;
-    } else {
-      if (grace > 0) {
-        if (graceType === 'accumulate') {
-          effectivePrincipal = amount * Math.pow(1 + rMonthly, grace);
-          gracePmt           = 0;
-          graceTotalPaid     = 0;
-        } else {
-          gracePmt           = amount * rMonthly;
-          graceTotalPaid     = gracePmt * grace;
-          effectivePrincipal = amount;
-        }
-      }
-      const repayMonths = n - grace;
-      payment    = effectivePrincipal * rMonthly * Math.pow(1+rMonthly, repayMonths)
-                   / (Math.pow(1+rMonthly, repayMonths) - 1);
-      totalPaid  = graceTotalPaid + payment * repayMonths;
-      extra      = totalPaid - amount;
-      ear        = solveAnnualEffectiveWithGrace(amount, gracePmt, grace, payment, repayMonths);
-    }
-  }
+  const { payment, gracePmt, ear, totalPaid, extra, summaryLead } = res;
 
   // ── Render ───────────────────────────────────────────────────────────────
   const graceRow        = document.getElementById('loan-r-grace-row');
@@ -1515,9 +1298,6 @@ function calcLoan() {
   const pmtLabel = document.querySelector('#loan-r-payment').previousElementSibling;
   pmtLabel.textContent = grace > 0 ? 'مبلغ هر قسط (پس از تنفس)' : 'مبلغ هر قسط';
 
-  const methodLabel = loanType === 'on-principal' ? 'روش سود روی اصل وام' : 'روش سود روی مانده بدهی';
-  const summaryLead = `با ${methodLabel}، نرخ اعلامی <strong>${fmtPct(rateAnn)}</strong> به هزینه واقعی <strong>${fmtPct(ear)}</strong> می‌رسد. اضافه‌پرداخت کل شما <strong>${fmt(extra)}</strong> است.`;
-
   document.getElementById('loan-r-amount').textContent  = fmt(amount);
   document.getElementById('loan-r-payment').textContent = fmt(payment);
   document.getElementById('loan-r-total').textContent   = fmt(totalPaid);
@@ -1533,35 +1313,6 @@ function calcLoan() {
     term_months: Math.round(n),
     has_grace_period: grace > 0
   });
-}
-
-// Solve the effective annual rate from the full cash flow.
-function solveAnnualEffectiveWithGrace(pv, gracePmt, graceN, payment, repayN) {
-  if (graceN === 0) {
-    const r = solveRate(pv, payment, repayN);
-    return aprFromMonthly(r);
-  }
-  // Newton-Raphson on NPV of all cash flows = PV
-  // NPV(r) = sum(gracePmt/(1+r)^t, t=1..graceN) + sum(payment/(1+r)^t, t=graceN+1..graceN+repayN) - pv = 0
-  let r = 0.01;
-  for (let i = 0; i < 300; i++) {
-    let npv = 0, dnpv = 0;
-    for (let t = 1; t <= graceN; t++) {
-      const disc = Math.pow(1+r, t);
-      npv  += gracePmt / disc;
-      dnpv -= t * gracePmt / (disc * (1+r));
-    }
-    for (let t = graceN+1; t <= graceN+repayN; t++) {
-      const disc = Math.pow(1+r, t);
-      npv  += payment / disc;
-      dnpv -= t * payment / (disc * (1+r));
-    }
-    npv -= pv;
-    const r2 = r - npv / dnpv;
-    if (Math.abs(r2 - r) < 1e-10) { r = r2; break; }
-    r = Math.max(r2, 1e-6);
-  }
-  return aprFromMonthly(r);
 }
 
 // ── Shareable URL state ──────────────────────────────────────────────────

@@ -5,6 +5,8 @@ This repository contains a Persian static website for calculating the real cost 
 
 ## Main Files
 - `index.html` is the primary user-facing page.
+- `calc.js` holds the rate math, shared by the page and `og.js`; keep it njs-compatible (no `Array.from`, no `Intl`).
+- `og.js` is an nginx njs handler that fills link-preview meta tags for shared URLs.
 - `favicon.svg` is the site favicon.
 - `robots.txt` and `sitemap.xml` support search indexing.
 - Python files in the repo are earlier calculation/reference utilities.
