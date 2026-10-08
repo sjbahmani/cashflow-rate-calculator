@@ -35,7 +35,8 @@ function resultFromQuery(args) {
       storeValue: num(args, 'sv'),
       storeN: num(args, 'sn'),
       varPayments: (args['var'] || '').split(',').map(x => parseFloat(x) || 0),
-      firstPaymentNow: args.first === 'now'
+      firstPaymentNow: args.first === 'now',
+      kind: args.inst === 'loan' ? 'loan' : 'purchase'
     });
   }
   return null;

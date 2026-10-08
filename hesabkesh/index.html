@@ -447,6 +447,18 @@
   }
   .grace-toggle:hover { background: rgba(45,212,191,0.1); }
   .optional-toggle { background: transparent; font-family: inherit; }
+  .panel-switch {
+    margin-bottom: 18px; padding: 10px 13px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: rgba(0,0,0,0.16); color: var(--muted);
+    font-size: 0.84rem; line-height: 1.8;
+  }
+  .link-btn {
+    padding: 0; border: 0; background: transparent; color: #99f6e4;
+    font-family: inherit; font-size: inherit; font-weight: 700; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 4px;
+  }
+  .link-btn:hover, .link-btn:focus-visible { color: #ccfbf1; }
   .grace-panel { display: none; margin-bottom: 4px; }
   .grace-panel.open { display: block; }
 
@@ -581,23 +593,31 @@
 
   <header>
     <div class="brand-line">
-      <div><span class="brand">حساب‌کش</span> / واقعیت‌سنج خرید قسطی</div>
+      <div><span class="brand">حساب‌کش</span> / واقعیت‌سنج قسط و وام</div>
       <a class="trust-pill" href="#ref-box">راهنما</a>
     </div>
-    <h1><span class="hero-question">قسطی می‌خری؟</span> <span class="hero-answer">اول ببین واقعاً چند درصد گرون‌تر می‌خری!</span></h1>
+    <h1><span class="hero-question">قسطی می‌خری یا وام می‌گیری؟</span> <span class="hero-answer">اول ببین واقعاً چند درصد گرون‌تر تموم می‌شه!</span></h1>
     <p>شرایط معامله را وارد کن؛ حساب‌کش اضافه‌پرداخت واقعی، نرخ مؤثر سالانه و برچسب گرانی را محاسبه می‌کند.</p>
   </header>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('installment')">اقساط / خرید اعتباری</button>
-    <button class="tab-btn" onclick="switchTab('loan')">وام بانکی</button>
+    <button class="tab-btn active" onclick="switchTab('installment')">خرید قسطی / وام</button>
+    <button class="tab-btn" onclick="switchTab('loan')">وام بانکی با نرخ سود</button>
   </div>
 
   <!-- ===== PANEL 1: Installment / Credit ===== -->
   <div id="panel-installment" class="panel active">
     <div class="card">
+      <div class="input-choice">
+        <label id="inst-kind-label">چی رو می‌خوای حساب کنی؟</label>
+        <div class="choice-group" role="group" aria-labelledby="inst-kind-label">
+          <button class="choice-btn active" type="button" id="inst-kind-purchase" aria-pressed="true" onclick="setInstallmentKind('purchase')">خرید قسطی کالا</button>
+          <button class="choice-btn" type="button" id="inst-kind-loan" aria-pressed="false" onclick="setInstallmentKind('loan')">وامی که قسطش را می‌دانم</button>
+        </div>
+        <p class="choice-help" id="inst-kind-help">خرید از فروشگاه، اپ‌های خرید اعتباری یا با چک.</p>
+      </div>
       <div class="preset-label">مثال‌ها</div>
-      <div class="presets" aria-label="نمونه‌های آماده خرید قسطی">
+      <div class="presets" id="inst-presets-purchase" aria-label="نمونه‌های آماده خرید قسطی">
         <button class="preset-btn" type="button" onclick="loadStorePreset(18000000, 0, 3600000, 4, 'extra', true)">
           <strong>تبلت</strong>
           <span>۱۸ نقدی، ۳٫۶ اضافه، قسط اول امروز</span>
@@ -611,14 +631,28 @@
           <span>۳۰ نقدی، مجموع کل ۳۸، ۱۰ قسط</span>
         </button>
       </div>
+      <div class="presets" id="inst-presets-loan" aria-label="نمونه‌های آماده وام" style="display:none">
+        <button class="preset-btn" type="button" onclick="loadStorePreset(100000000, 0, 40000000, 24, 'extra', false, 'loan')">
+          <strong>وام با سود اعلام‌شده</strong>
+          <span>۱۰۰ وام، سود کل ۴۰، ۲۴ قسط</span>
+        </button>
+        <button class="preset-btn" type="button" onclick="loadInstallmentPreset(50000000, 3000000, 5000000, 12, 'loan')">
+          <strong>وام با کارمزد</strong>
+          <span>۵۰ وام، ۳ کارمزد، ۱۲ قسط ۵</span>
+        </button>
+        <button class="preset-btn" type="button" onclick="loadInstallmentPreset(300000000, 45000000, 5500000, 60, 'loan')">
+          <strong>خرید امتیاز وام</strong>
+          <span>۳۰۰ وام، ۴۵ امتیاز، ۶۰ قسط ۵٫۵</span>
+        </button>
+      </div>
       <hr class="preset-separator">
       <div class="field">
-        <label>قیمت نقدی کالا یا خدمات <span class="hint">(تومان)</span></label>
+        <label for="inst-cash"><span id="inst-cash-text">قیمت نقدی کالا یا خدمات</span> <span class="hint">(تومان)</span></label>
         <input type="text" inputmode="numeric" id="inst-cash" data-fmt="money" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰">
       </div>
 
       <div class="input-choice">
-        <label>فروشگاه چه اطلاعاتی بهت داده؟</label>
+        <label id="inst-entry-label">فروشگاه چه اطلاعاتی بهت داده؟</label>
         <div class="choice-group" role="group" aria-label="نوع اطلاعات خرید قسطی">
           <button class="choice-btn active" type="button" id="inst-entry-payment" aria-pressed="true" onclick="setInstallmentEntryMode('payment')">مبلغ هر قسط</button>
           <button class="choice-btn" type="button" id="inst-entry-store" aria-pressed="false" onclick="setInstallmentEntryMode('store')">اضافه‌پرداخت یا مجموع</button>
@@ -683,7 +717,7 @@
           <button class="choice-btn" type="button" id="inst-first-now" aria-pressed="false" onclick="setFirstPaymentTiming(true)">همین امروز</button>
           <button class="choice-btn active" type="button" id="inst-first-next" aria-pressed="true" onclick="setFirstPaymentTiming(false)">یک ماه بعد</button>
         </div>
-        <p class="choice-help">اگر اولین قسط موقع ثبت سفارش کم می‌شود، «همین امروز» را بزن.</p>
+        <p class="choice-help" id="inst-first-help">اگر اولین قسط موقع ثبت سفارش کم می‌شود، «همین امروز» را بزن.</p>
       </div>
 
       <button class="grace-toggle optional-toggle" type="button" id="inst-down-toggle"
@@ -691,8 +725,9 @@
               onclick="toggleInstallmentDown()">پیش‌پرداخت جداگانه دارم</button>
       <div class="grace-panel" id="inst-down-panel">
         <div class="field">
-          <label>مبلغ پیش‌پرداخت جدا از اقساط <span class="hint">(تومان)</span></label>
+          <label for="inst-down"><span id="inst-down-text">مبلغ پیش‌پرداخت جدا از اقساط</span> <span class="hint">(تومان)</span></label>
           <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰" value="۰">
+          <p class="choice-help" id="inst-down-help" style="display:none">اگر امتیاز وام را خریده‌ای، قیمت امتیاز را هم همین‌جا بنویس. سپرده‌ای که آخر کار پس می‌گیری را اینجا ننویس.</p>
         </div>
       </div>
       <div class="form-error" id="inst-error"></div>
@@ -712,15 +747,15 @@
         <div class="verdict-lead" id="inst-verdict-lead">—</div>
       </div>
       <h3>جزئیات عددی</h3>
-      <div class="result-row"><span class="label">قیمت نقدی</span><span class="value" id="inst-r-cash">—</span></div>
-      <div class="result-row"><span class="label">پیش‌پرداخت</span><span class="value" id="inst-r-down">—</span></div>
-      <div class="result-row"><span class="label">مبلغی که عملاً تأمین مالی می‌شود</span><span class="value" id="inst-r-principal">—</span></div>
+      <div class="result-row"><span class="label" id="inst-r-cash-label">قیمت نقدی</span><span class="value" id="inst-r-cash">—</span></div>
+      <div class="result-row"><span class="label" id="inst-r-down-label">پیش‌پرداخت</span><span class="value" id="inst-r-down">—</span></div>
+      <div class="result-row"><span class="label" id="inst-r-principal-label">مبلغی که عملاً تأمین مالی می‌شود</span><span class="value" id="inst-r-principal">—</span></div>
       <div class="result-row" id="inst-r-payment-row"><span class="label">مبلغ هر قسط</span><span class="value" id="inst-r-payment">—</span></div>
       <div class="result-row"><span class="label">تعداد اقساط</span><span class="value" id="inst-r-n">—</span></div>
       <div class="result-row"><span class="label">زمان قسط اول</span><span class="value" id="inst-r-first-payment">—</span></div>
       <div class="result-row"><span class="label">مجموع پرداخت شما</span><span class="value" id="inst-r-total">—</span></div>
       <div class="result-row"><span class="label">مبلغ اضافه‌پرداخت</span><span class="value big" id="inst-r-extra">—</span></div>
-      <div class="result-row"><span class="label">درصد اضافه از قیمت نقدی</span><span class="value" id="inst-r-pct">—</span></div>
+      <div class="result-row"><span class="label" id="inst-r-pct-label">درصد اضافه از قیمت نقدی</span><span class="value" id="inst-r-pct">—</span></div>
       <div class="result-row"><span class="label">نرخ بهره ماهانه</span><span class="value apr" id="inst-r-monthly">—</span></div>
       <div class="result-row"><span class="label">نرخ مؤثر سالانه <span style="font-weight:400;font-size:0.8rem;color:var(--muted)">— روی مبلغ اعتبار</span></span><span class="value apr" id="inst-r-apr">—</span></div>
       <div class="verdict" id="inst-verdict"></div>
@@ -735,6 +770,9 @@
   <!-- ===== PANEL 2: Bank Loan ===== -->
   <div id="panel-loan" class="panel">
     <div class="card">
+      <p class="panel-switch">نرخ سود را نمی‌دانی ولی مبلغ قسط را داری؟
+        <button type="button" class="link-btn" onclick="openLoanByPayment()">با مبلغ قسط حساب کن</button>
+      </p>
       <div class="preset-label">مثال‌ها</div>
       <div class="presets" aria-label="نمونه‌های آماده وام">
         <button class="preset-btn" type="button" onclick="loadLoanPreset(150000000, 18, 24, 'on-principal')">
@@ -921,6 +959,7 @@
       <li><a href="/phone-installments">محاسبه اقساط خرید گوشی</a></li>
       <li><a href="/bank-loan">محاسبه اقساط و سود واقعی وام بانکی</a></li>
       <li><a href="/marriage-loan">محاسبه اقساط وام ازدواج</a></li>
+      <li><a href="/loan-installments">محاسبه سود وام از روی مبلغ قسط</a></li>
     </ul>
   </section>
 
@@ -1023,6 +1062,7 @@ function renderSummary(prefix, apr, lead) {
 }
 
 // ── Installment input modes ───────────────────────────────────────────────
+let instKind = 'purchase';
 let instEntryMode = 'payment';
 let instFirstPaymentNow = false;
 let instVariableMode = false;
@@ -1033,6 +1073,60 @@ function setChoice(ids, activeId) {
     btn.classList.toggle('active', id === activeId);
     btn.setAttribute('aria-pressed', String(id === activeId));
   });
+}
+
+// Same math for both kinds: the loan amount plays the cash price and the upfront fee plays the down payment.
+const INST_KIND_TEXT = {
+  'inst-kind-help':            ['خرید از فروشگاه، اپ‌های خرید اعتباری یا با چک.',
+                                'وام صندوق، اپ‌های وام، وام محل کار یا خرید امتیاز وام؛ هر وامی که مبلغ قسطش را می‌دانی.'],
+  'inst-cash-text':            ['قیمت نقدی کالا یا خدمات', 'مبلغ وام'],
+  'inst-entry-label':          ['فروشگاه چه اطلاعاتی بهت داده؟', 'وام‌دهنده چه چیزی گفته؟'],
+  'inst-entry-store':          ['اضافه‌پرداخت یا مجموع', 'سود کل یا مجموع بازپرداخت'],
+  'inst-store-kind-label':     ['کدام عدد را در فروشگاه می‌بینی؟', 'کدام عدد را گفته؟'],
+  'inst-store-extra':          ['مجموع اضافه‌پرداخت', 'سود کل'],
+  'inst-store-total':          ['مجموع کل پرداخت', 'مجموع بازپرداخت اقساط'],
+  'inst-first-help':           ['اگر اولین قسط موقع ثبت سفارش کم می‌شود، «همین امروز» را بزن.',
+                                'قسط اول بیشتر وام‌ها یک ماه بعد از دریافت است.'],
+  'inst-down-text':            ['مبلغ پیش‌پرداخت جدا از اقساط', 'کارمزد یا هزینه‌ای که موقع گرفتن وام می‌دهی'],
+  'inst-r-cash-label':         ['قیمت نقدی', 'مبلغ وام'],
+  'inst-r-down-label':         ['پیش‌پرداخت', 'کارمزد اول کار'],
+  'inst-r-principal-label':    ['مبلغی که عملاً تأمین مالی می‌شود', 'پولی که واقعاً دستت می‌رسد'],
+  'inst-r-pct-label':          ['درصد اضافه از قیمت نقدی', 'درصد اضافه از مبلغ وام']
+};
+
+function setInstallmentKind(kind) {
+  instKind = kind === 'loan' ? 'loan' : 'purchase';
+  const i = instKind === 'loan' ? 1 : 0;
+  Object.keys(INST_KIND_TEXT).forEach(id => {
+    document.getElementById(id).textContent = INST_KIND_TEXT[id][i];
+  });
+  setChoice(['inst-kind-purchase', 'inst-kind-loan'], `inst-kind-${instKind}`);
+  document.getElementById('inst-presets-purchase').style.display = i ? 'none' : '';
+  document.getElementById('inst-presets-loan').style.display = i ? '' : 'none';
+  document.getElementById('inst-down-help').style.display = i ? '' : 'none';
+  document.getElementById('inst-cash').placeholder = i ? 'مثلاً ۱۰۰٬۰۰۰٬۰۰۰' : 'مثلاً ۵۰٬۰۰۰٬۰۰۰';
+  document.getElementById('inst-down').placeholder = i ? 'مثلاً ۲٬۰۰۰٬۰۰۰' : 'مثلاً ۱۰٬۰۰۰٬۰۰۰';
+  setInstallmentEntryHelp();
+  updateDownToggleText();
+  updateStoreDerived();
+  resetInstallmentResult();
+}
+
+function setInstallmentEntryHelp() {
+  const loan = instKind === 'loan';
+  document.getElementById('inst-entry-help').textContent = instEntryMode === 'payment'
+    ? 'اگر مبلغ هر قسط را می‌دانی، همان را مستقیم وارد کن.'
+    : (loan
+      ? 'سود کل یا مجموع بازپرداخت اقساط را وارد کن؛ مبلغ هر قسط خودکار حساب می‌شود. کارمزد را جدا وارد کن.'
+      : 'مثل صفحه پرداخت فروشگاه: مجموع اضافه‌پرداخت یا مجموع کل پرداخت را وارد کن؛ مبلغ هر قسط خودکار حساب می‌شود.');
+}
+
+function updateDownToggleText() {
+  const open = document.getElementById('inst-down-panel').classList.contains('open');
+  const loan = instKind === 'loan';
+  document.getElementById('inst-down-toggle').textContent = open
+    ? (loan ? 'حذف کارمزد' : 'حذف پیش‌پرداخت جداگانه')
+    : (loan ? 'کارمزد یا هزینه اول کار دارم' : 'پیش‌پرداخت جداگانه دارم');
 }
 
 function resetInstallmentResult() {
@@ -1071,9 +1165,7 @@ function setInstallmentEntryMode(mode) {
   document.getElementById('inst-payment-source-fields').style.display = mode === 'payment' ? '' : 'none';
   document.getElementById('inst-store-source-fields').style.display = mode === 'store' ? '' : 'none';
   setChoice(['inst-entry-payment', 'inst-entry-store'], `inst-entry-${mode}`);
-  document.getElementById('inst-entry-help').textContent = mode === 'payment'
-    ? 'اگر مبلغ هر قسط را می‌دانی، همان را مستقیم وارد کن.'
-    : 'مثل صفحه پرداخت فروشگاه: مجموع اضافه‌پرداخت یا مجموع کل پرداخت را وارد کن؛ مبلغ هر قسط خودکار حساب می‌شود.';
+  setInstallmentEntryHelp();
 
   updateStoreDerived();
   resetInstallmentResult();
@@ -1090,7 +1182,7 @@ function setInstallmentDownVisibility(open) {
   const toggle = document.getElementById('inst-down-toggle');
   panel.classList.toggle('open', open);
   toggle.setAttribute('aria-expanded', open);
-  toggle.textContent = open ? 'حذف پیش‌پرداخت جداگانه' : 'پیش‌پرداخت جداگانه دارم';
+  updateDownToggleText();
 
   if (!open) setFmtValue('inst-down', 0, 'money');
   updateStoreDerived();
@@ -1112,8 +1204,10 @@ function updateStoreDerived() {
   const down = v('inst-down');
   const storeValue = v('inst-store-value');
   const n = v('inst-store-n');
-  const totalPaid = kind === 'extra' ? cash + storeValue : storeValue;
-  const installmentTotal = totalPaid - down;
+  const loan = instKind === 'loan';
+  const statedTotal = kind === 'extra' ? cash + storeValue : storeValue;
+  // A lender's stated interest or total covers the installments only; the fee comes on top.
+  const installmentTotal = loan ? statedTotal : statedTotal - down;
 
   if (instEntryMode !== 'store' || !cash || !storeValue || !n || installmentTotal <= 0) {
     note.classList.remove('show');
@@ -1122,9 +1216,13 @@ function updateStoreDerived() {
   }
 
   const payment = installmentTotal / n;
-  const sourceText = kind === 'extra'
-    ? `با افزودن اضافه‌پرداخت، مجموع کل پرداخت ${fmt(totalPaid)} می‌شود.`
-    : `مجموع کل پرداخت اعلام‌شده ${fmt(totalPaid)} است.`;
+  const sourceText = loan
+    ? (kind === 'extra'
+      ? `با افزودن سود کل، مجموع بازپرداخت اقساط ${fmt(statedTotal)} می‌شود.`
+      : `مجموع بازپرداخت اقساط ${fmt(statedTotal)} است.`)
+    : (kind === 'extra'
+      ? `با افزودن اضافه‌پرداخت، مجموع کل پرداخت ${fmt(statedTotal)} می‌شود.`
+      : `مجموع کل پرداخت اعلام‌شده ${fmt(statedTotal)} است.`);
   note.innerHTML = `${sourceText} حساب‌کش مبلغ هر قسط را حدود <strong>${fmt(payment)}</strong> در نظر می‌گیرد.`;
   note.classList.add('show');
 }
@@ -1216,7 +1314,8 @@ function announcePresetResult(prefix) {
   window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
 }
 
-function loadInstallmentPreset(cash, down, payment, n) {
+function loadInstallmentPreset(cash, down, payment, n, kind = 'purchase') {
+  setInstallmentKind(kind);
   setInstallmentEntryMode('payment');
   setFirstPaymentTiming(false);
   if (instVariableMode) toggleVariable();
@@ -1229,7 +1328,8 @@ function loadInstallmentPreset(cash, down, payment, n) {
   announcePresetResult('inst');
 }
 
-function loadStorePreset(cash, down, storeValue, n, storeKind, firstPaymentNow) {
+function loadStorePreset(cash, down, storeValue, n, storeKind, firstPaymentNow, kind = 'purchase') {
+  setInstallmentKind(kind);
   setInstallmentEntryMode('store');
   setFirstPaymentTiming(firstPaymentNow);
   setInstallmentDownVisibility(down > 0);
@@ -1241,6 +1341,17 @@ function loadStorePreset(cash, down, storeValue, n, storeKind, firstPaymentNow) 
   updateStoreDerived();
   calcInstallment();
   announcePresetResult('inst');
+}
+
+// For loans whose installment is known but whose rate is not.
+function openLoanByPayment() {
+  const amount = rawNum('loan-amount');
+  switchTab('installment');
+  setInstallmentKind('loan');
+  setInstallmentEntryMode('payment');
+  if (amount) setFmtValue('inst-cash', amount, 'money');
+  document.getElementById('panel-installment').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById(rawNum('inst-cash') ? 'inst-payment' : 'inst-cash').focus({ preventScroll: true });
 }
 
 function loadLoanPreset(amount, rate, n, type) {
@@ -1279,7 +1390,8 @@ function calcInstallment() {
     storeValue: v('inst-store-value'),
     storeN: v('inst-store-n'),
     varPayments: parseVarPayments(),
-    firstPaymentNow: instFirstPaymentNow
+    firstPaymentNow: instFirstPaymentNow,
+    kind: instKind
   });
   if (res.error) {
     showFormError('inst-error', res.error);
@@ -1313,6 +1425,7 @@ function calcInstallment() {
       ? 'installment_store_summary'
       : (instVariableMode ? 'installment_variable' : 'installment_equal'),
     installment_count: Math.round(n),
+    installment_kind: instKind,
     has_down_payment: down > 0,
     first_payment_timing: instFirstPaymentNow ? 'now' : 'next_month'
   });
@@ -1389,6 +1502,7 @@ function buildStateParams() {
 
   if (document.getElementById('panel-loan').classList.contains('active')) p.set('tab', 'loan');
 
+  if (instKind === 'loan') p.set('inst', 'loan');
   if (instEntryMode === 'store') p.set('mode', 'store');
   else if (instVariableMode) p.set('mode', 'variable');
   if (instFirstPaymentNow) p.set('first', 'now');
@@ -1431,6 +1545,7 @@ function restoreFromUrl() {
   if (!p.toString()) return;
   const fill = (key, id, fmtType) => { if (p.get(key)) setFmtValue(id, p.get(key), fmtType); };
 
+  setInstallmentKind(p.get('inst'));
   const mode = p.get('mode');
   setInstallmentEntryMode(mode === 'store' ? 'store' : 'payment');
   if (mode === 'variable') toggleVariable();
