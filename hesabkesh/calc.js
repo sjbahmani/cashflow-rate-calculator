@@ -117,16 +117,25 @@ function solveAnnualEffectiveWithGrace(pv, gracePmt, graceN, payment, repayN) {
 }
 
 // inp: cash, down, mode ('payment' | 'store' | 'variable'), payment, n,
-// storeKind ('extra' | 'total'), storeValue, storeN, varPayments, firstPaymentNow
+// storeKind ('extra' | 'total'), storeValue, storeN, varPayments, firstPaymentNow,
+// kind ('purchase' | 'loan'). For a loan, cash is the loan amount and down is the upfront fee,
+// which the lender's stated interest or total repayment does not include.
+const INST_WORDS = {
+  purchase: { cash: 'قیمت نقدی', down: 'پیش‌پرداخت', extra: 'مجموع اضافه‌پرداخت', total: 'مجموع کل پرداخت', offer: 'پیشنهاد', note: 'در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.' },
+  loan:     { cash: 'مبلغ وام', down: 'کارمزد', extra: 'سود کل', total: 'مجموع بازپرداخت', offer: 'وام', note: 'وامی که هزینه‌ای ندارد نرخ سودی هم ندارد.' }
+};
+
 function installment(inp) {
   const cash = inp.cash;
   const down = inp.down;
+  const isLoan = inp.kind === 'loan';
+  const w = INST_WORDS[isLoan ? 'loan' : 'purchase'];
 
   if (!cash) {
-    return { error: 'لطفاً قیمت نقدی را وارد کنید.' };
+    return { error: `لطفاً ${w.cash} را وارد کنید.` };
   }
   if (down >= cash) {
-    return { error: 'پیش‌پرداخت نمی‌تواند بیشتر یا مساوی قیمت نقدی باشد.' };
+    return { error: `${w.down} نمی‌تواند بیشتر یا مساوی ${w.cash} باشد.` };
   }
 
   const principal = cash - down;
@@ -135,7 +144,7 @@ function installment(inp) {
   if (inp.mode === 'store') {
     n = inp.storeN;
     if (!inp.storeValue || !n) {
-      return { error: 'لطفاً مجموع اضافه‌پرداخت یا مجموع کل پرداخت و تعداد اقساط را وارد کنید.' };
+      return { error: `لطفاً ${w.extra} یا ${w.total} و تعداد اقساط را وارد کنید.` };
     }
     if (n < 1 || n > 360) {
       return { error: 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.' };
@@ -143,10 +152,10 @@ function installment(inp) {
     const totalPaidFromStore = inp.storeKind === 'extra' ? cash + inp.storeValue : inp.storeValue;
     if (totalPaidFromStore <= cash) {
       return { error: inp.storeKind === 'extra'
-        ? 'مجموع اضافه‌پرداخت باید بیشتر از صفر باشد.'
-        : 'مجموع کل پرداخت باید بیشتر از قیمت نقدی باشد.' };
+        ? `${w.extra} باید بیشتر از صفر باشد.`
+        : `${w.total} باید بیشتر از ${w.cash} باشد.` };
     }
-    totalInstallments = totalPaidFromStore - down;
+    totalInstallments = isLoan ? totalPaidFromStore : totalPaidFromStore - down;
     payment = totalInstallments / n;
     payments = new Array(Math.round(n)).fill(payment);
     n = payments.length;
@@ -161,7 +170,7 @@ function installment(inp) {
     }
     totalInstallments = payments.reduce((s, p) => s + p, 0);
     if (down + totalInstallments <= cash) {
-      return { error: 'مجموع اقساط از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.' };
+      return { error: `مجموع اقساط از ${w.cash} کمتر یا مساوی است — ${w.note}` };
     }
   } else {
     payment = inp.payment;
@@ -174,14 +183,16 @@ function installment(inp) {
     }
     totalInstallments = payment * n;
     if (down + totalInstallments <= cash) {
-      return { error: 'مجموع اقساط (پیش‌پرداخت + قسط × تعداد) از قیمت نقدی کمتر یا مساوی است — در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.' };
+      return { error: `مجموع اقساط (${w.down} + قسط × تعداد) از ${w.cash} کمتر یا مساوی است — ${w.note}` };
     }
     payments = new Array(Math.round(n)).fill(payment);
     n = payments.length;
   }
 
   if (inp.firstPaymentNow && payments[0] >= principal) {
-    return { error: 'پرداخت امروز تمام قیمتِ باقی‌مانده را پوشش می‌دهد؛ برای این حالت نرخ مؤثر قابل محاسبه نیست.' };
+    return { error: isLoan
+      ? 'قسط امروز تمام پولی را که دستت می‌رسد پوشش می‌دهد؛ برای این حالت نرخ مؤثر قابل محاسبه نیست.'
+      : 'پرداخت امروز تمام قیمتِ باقی‌مانده را پوشش می‌دهد؛ برای این حالت نرخ مؤثر قابل محاسبه نیست.' };
   }
 
   const ear = solveAnnualEffectiveVariable(principal, payments, inp.firstPaymentNow);
@@ -195,7 +206,7 @@ function installment(inp) {
     extra: extra,
     pct: (extra / cash) * 100,
     financedAmount: principal - (inp.firstPaymentNow ? payments[0] : 0),
-    summaryLead: `نرخ مؤثر سالانه این پیشنهاد <strong>${fmtPct(ear)}</strong> است؛ یعنی حدود <strong>${rateMultiple(ear)}</strong> نرخ مرجع ۲۳٪. شما در مجموع <strong>${fmt(extra)}</strong> بیشتر از قیمت نقدی پرداخت می‌کنید.`
+    summaryLead: `نرخ مؤثر سالانه این ${w.offer} <strong>${fmtPct(ear)}</strong> است؛ یعنی حدود <strong>${rateMultiple(ear)}</strong> نرخ مرجع ۲۳٪. شما در مجموع <strong>${fmt(extra)}</strong> بیشتر از ${w.cash} پرداخت می‌کنید.`
   };
 }
 
