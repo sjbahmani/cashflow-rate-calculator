@@ -258,6 +258,10 @@
     background: rgba(45,212,191,0.18); color: #b7fff2;
     box-shadow: inset 0 0 0 1px rgba(45,212,191,0.48);
   }
+  .choice-stack { grid-template-columns: 1fr; }
+  .choice-stack .choice-btn {
+    white-space: normal; line-height: 1.65; text-align: right; padding: 10px 12px;
+  }
   .choice-help {
     color: var(--muted); font-size: 0.8rem; line-height: 1.7;
     margin-top: 7px;
@@ -758,11 +762,12 @@
         </div>
       </div>
       <div class="field">
-        <label>نوع محاسبه بانک</label>
-        <select id="loan-type">
-          <option value="on-principal">سود روی اصل وام — رایج در بانک‌های ایران</option>
-          <option value="on-balance">سود روی مانده بدهی — روش دقیق‌تر و رایج جهانی</option>
-        </select>
+        <label id="loan-type-label">نوع محاسبه بانک</label>
+        <div class="choice-group choice-stack" role="group" aria-labelledby="loan-type-label">
+          <button class="choice-btn active" type="button" id="loan-type-principal" aria-pressed="true" onclick="setLoanType('on-principal')">سود روی اصل وام — رایج در بانک‌های ایران</button>
+          <button class="choice-btn" type="button" id="loan-type-balance" aria-pressed="false" onclick="setLoanType('on-balance')">سود روی مانده بدهی — روش دقیق‌تر و رایج جهانی</button>
+        </div>
+        <input type="hidden" id="loan-type" value="on-principal">
       </div>
       <div class="grace-toggle" onclick="toggleGrace()">
         <span id="grace-toggle-label">حالت پیشرفته: افزودن دوره تنفس</span>
@@ -1143,10 +1148,22 @@ function toggleGrace() {
   if (!open) document.getElementById('loan-grace').value = '';
 }
 
+function setLoanType(value) {
+  const type = value === 'on-balance' ? 'on-balance' : 'on-principal';
+  document.getElementById('loan-type').value = type;
+  const principal = document.getElementById('loan-type-principal');
+  const balance = document.getElementById('loan-type-balance');
+  const isBalance = type === 'on-balance';
+  principal.classList.toggle('active', !isBalance);
+  balance.classList.toggle('active', isBalance);
+  principal.setAttribute('aria-pressed', String(!isBalance));
+  balance.setAttribute('aria-pressed', String(isBalance));
+}
+
 function resetLoanForm() {
   ['loan-amount', 'loan-rate', 'loan-n', 'loan-grace']
     .forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('loan-type').value = 'on-principal';
+  setLoanType('on-principal');
   document.getElementById('loan-grace-type').value = 'accumulate';
   const panel = document.getElementById('grace-panel');
   if (panel.classList.contains('open')) toggleGrace();
@@ -1216,7 +1233,7 @@ function loadLoanPreset(amount, rate, n, type) {
   setFmtValue('loan-amount', amount, 'money');
   setFmtValue('loan-rate', rate, 'rate');
   setFmtValue('loan-n', n, 'count');
-  document.getElementById('loan-type').value = type;
+  setLoanType(type);
   const panel = document.getElementById('grace-panel');
   if (panel.classList.contains('open')) toggleGrace();
   calcLoan();
@@ -1422,7 +1439,7 @@ function restoreFromUrl() {
   fill('amount', 'loan-amount', 'money');
   fill('rate', 'loan-rate', 'rate');
   fill('term', 'loan-n', 'count');
-  setSelectIfValid('loan-type', p.get('type'));
+  if (p.get('type')) setLoanType(p.get('type'));
   if (p.has('grace')) {
     if (!document.getElementById('grace-panel').classList.contains('open')) toggleGrace();
     fill('grace', 'loan-grace', 'count');
