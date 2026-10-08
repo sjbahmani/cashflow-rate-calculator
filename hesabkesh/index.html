@@ -265,6 +265,9 @@
     justify-content: flex-start;
     line-height: 1.65; text-align: right; padding: 10px 12px;
   }
+  .choice-stack .choice-example { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .choice-example strong { font-weight: 700; }
+  .choice-example span { font-size: 0.78rem; font-weight: 400; color: var(--muted); }
   .choice-help {
     color: var(--muted); font-size: 0.8rem; line-height: 1.7;
     margin-top: 7px;
@@ -614,7 +617,7 @@
           <button class="choice-btn active" type="button" id="inst-kind-purchase" aria-pressed="true" onclick="setInstallmentKind('purchase')">خرید قسطی کالا</button>
           <button class="choice-btn" type="button" id="inst-kind-loan" aria-pressed="false" onclick="setInstallmentKind('loan')">وامی که قسطش را می‌دانم</button>
         </div>
-        <p class="choice-help" id="inst-kind-help">خرید از فروشگاه، اپ‌های خرید اعتباری یا با چک.</p>
+        <p class="choice-help" id="inst-kind-help">خرید اعتباری از فروشگاه، بانک یا اپ‌ها، یا خرید با چک.</p>
       </div>
       <div class="preset-label">مثال‌ها</div>
       <div class="presets" id="inst-presets-purchase" aria-label="نمونه‌های آماده خرید قسطی">
@@ -652,12 +655,19 @@
       </div>
 
       <div class="input-choice">
-        <label id="inst-entry-label">فروشگاه چه اطلاعاتی بهت داده؟</label>
-        <div class="choice-group" role="group" aria-label="نوع اطلاعات خرید قسطی">
-          <button class="choice-btn active" type="button" id="inst-entry-payment" aria-pressed="true" onclick="setInstallmentEntryMode('payment')">مبلغ هر قسط</button>
-          <button class="choice-btn" type="button" id="inst-entry-store" aria-pressed="false" onclick="setInstallmentEntryMode('store')">اضافه‌پرداخت یا مجموع</button>
+        <label id="inst-entry-label">کدام عدد را می‌دانی؟</label>
+        <div class="choice-group choice-stack" role="group" aria-labelledby="inst-entry-label">
+          <button class="choice-btn choice-example active" type="button" id="inst-entry-payment" aria-pressed="true" onclick="selectInstallmentEntry('payment')">
+            <strong>مبلغ هر قسط</strong><span id="inst-entry-payment-ex">مثلاً «ماهی ۵ میلیون، ۱۲ قسط»</span>
+          </button>
+          <button class="choice-btn choice-example" type="button" id="inst-entry-extra" aria-pressed="false" onclick="selectInstallmentEntry('extra')">
+            <strong id="inst-entry-extra-title">سود یا اضافه‌پرداخت کل</strong><span id="inst-entry-extra-ex">مثلاً «۳٫۶ میلیون روی قیمت اضافه می‌شود»</span>
+          </button>
+          <button class="choice-btn choice-example" type="button" id="inst-entry-total" aria-pressed="false" onclick="selectInstallmentEntry('total')">
+            <strong id="inst-entry-total-title">جمع کل پرداخت</strong><span id="inst-entry-total-ex">مثلاً «در مجموع ۳۸ میلیون پرداخت می‌کنی»</span>
+          </button>
         </div>
-        <p class="choice-help" id="inst-entry-help">اگر مبلغ هر قسط را می‌دانی، همان را مستقیم وارد کن.</p>
+        <p class="choice-help" id="inst-entry-help" style="display:none"></p>
       </div>
 
       <div id="inst-payment-source-fields">
@@ -690,17 +700,10 @@
       </div>
 
       <div id="inst-store-source-fields" style="display:none">
-        <div class="field">
-          <label id="inst-store-kind-label">کدام عدد را در فروشگاه می‌بینی؟</label>
-          <div class="choice-group" role="group" aria-labelledby="inst-store-kind-label">
-            <button class="choice-btn active" type="button" id="inst-store-extra" aria-pressed="true" onclick="setStoreKind('extra')">مجموع اضافه‌پرداخت</button>
-            <button class="choice-btn" type="button" id="inst-store-total" aria-pressed="false" onclick="setStoreKind('total')">مجموع کل پرداخت</button>
-          </div>
-          <input type="hidden" id="inst-store-kind" value="extra">
-        </div>
+        <input type="hidden" id="inst-store-kind" value="extra">
         <div class="row-2">
           <div class="field">
-            <label>مبلغ همان عدد <span class="hint">(تومان)</span></label>
+            <label for="inst-store-value"><span id="inst-store-value-text">سود یا اضافه‌پرداخت کل</span> <span class="hint">(تومان)</span></label>
             <input type="text" inputmode="numeric" id="inst-store-value" data-fmt="money" placeholder="مثلاً ۳٬۶۰۰٬۰۰۰">
           </div>
           <div class="field">
@@ -1077,14 +1080,13 @@ function setChoice(ids, activeId) {
 
 // Same math for both kinds: the loan amount plays the cash price and the upfront fee plays the down payment.
 const INST_KIND_TEXT = {
-  'inst-kind-help':            ['خرید از فروشگاه، اپ‌های خرید اعتباری یا با چک.',
+  'inst-kind-help':            ['خرید اعتباری از فروشگاه، بانک یا اپ‌ها، یا خرید با چک.',
                                 'وام صندوق، اپ‌های وام، وام محل کار یا خرید امتیاز وام؛ هر وامی که مبلغ قسطش را می‌دانی.'],
   'inst-cash-text':            ['قیمت نقدی کالا یا خدمات', 'مبلغ وام'],
-  'inst-entry-label':          ['فروشگاه چه اطلاعاتی بهت داده؟', 'وام‌دهنده چه چیزی گفته؟'],
-  'inst-entry-store':          ['اضافه‌پرداخت یا مجموع', 'سود کل یا مجموع بازپرداخت'],
-  'inst-store-kind-label':     ['کدام عدد را در فروشگاه می‌بینی؟', 'کدام عدد را گفته؟'],
-  'inst-store-extra':          ['مجموع اضافه‌پرداخت', 'سود کل'],
-  'inst-store-total':          ['مجموع کل پرداخت', 'مجموع بازپرداخت اقساط'],
+  'inst-entry-extra-title':    ['سود یا اضافه‌پرداخت کل', 'سود کل وام'],
+  'inst-entry-extra-ex':       ['مثلاً «۳٫۶ میلیون روی قیمت اضافه می‌شود»', 'مثلاً «سود کل ۴۰ میلیون»'],
+  'inst-entry-total-title':    ['جمع کل پرداخت', 'جمع کل بازپرداخت'],
+  'inst-entry-total-ex':       ['مثلاً «در مجموع ۳۸ میلیون پرداخت می‌کنی»', 'مثلاً «در مجموع ۱۴۰ میلیون پس می‌دهی»'],
   'inst-first-help':           ['اگر اولین قسط موقع ثبت سفارش کم می‌شود، «همین امروز» را بزن.',
                                 'قسط اول بیشتر وام‌ها یک ماه بعد از دریافت است.'],
   'inst-down-text':            ['مبلغ پیش‌پرداخت جدا از اقساط', 'کارمزد یا هزینه‌ای که موقع گرفتن وام می‌دهی'],
@@ -1106,19 +1108,38 @@ function setInstallmentKind(kind) {
   document.getElementById('inst-down-help').style.display = i ? '' : 'none';
   document.getElementById('inst-cash').placeholder = i ? 'مثلاً ۱۰۰٬۰۰۰٬۰۰۰' : 'مثلاً ۵۰٬۰۰۰٬۰۰۰';
   document.getElementById('inst-down').placeholder = i ? 'مثلاً ۲٬۰۰۰٬۰۰۰' : 'مثلاً ۱۰٬۰۰۰٬۰۰۰';
-  setInstallmentEntryHelp();
+  updateEntryChoice();
   updateDownToggleText();
   updateStoreDerived();
   resetInstallmentResult();
 }
 
-function setInstallmentEntryHelp() {
-  const loan = instKind === 'loan';
-  document.getElementById('inst-entry-help').textContent = instEntryMode === 'payment'
-    ? 'اگر مبلغ هر قسط را می‌دانی، همان را مستقیم وارد کن.'
-    : (loan
-      ? 'سود کل یا مجموع بازپرداخت اقساط را وارد کن؛ مبلغ هر قسط خودکار حساب می‌شود. کارمزد را جدا وارد کن.'
-      : 'مثل صفحه پرداخت فروشگاه: مجموع اضافه‌پرداخت یا مجموع کل پرداخت را وارد کن؛ مبلغ هر قسط خودکار حساب می‌شود.');
+// The three entry options map onto entry mode ('payment' | 'store') plus store kind ('extra' | 'total').
+const ENTRY_HELP = {
+  purchase: { extra: 'فرق جمع پرداخت‌ها با قیمت نقدی؛ مبلغ هر قسط خودکار حساب می‌شود.',
+              total: 'همه پرداخت‌ها با پیش‌پرداخت؛ مبلغ هر قسط خودکار حساب می‌شود.' },
+  loan:     { extra: 'سودی که روی مبلغ وام پس می‌دهی، بدون کارمزد؛ مبلغ هر قسط خودکار حساب می‌شود.',
+              total: 'جمع همه قسط‌ها، بدون کارمزد؛ مبلغ هر قسط خودکار حساب می‌شود.' }
+};
+
+function selectInstallmentEntry(choice) {
+  if (choice === 'payment') {
+    setInstallmentEntryMode('payment');
+  } else {
+    setStoreKind(choice);
+    setInstallmentEntryMode('store');
+  }
+}
+
+function updateEntryChoice() {
+  const storeKind = document.getElementById('inst-store-kind').value;
+  const choice = instEntryMode === 'store' ? storeKind : 'payment';
+  setChoice(['inst-entry-payment', 'inst-entry-extra', 'inst-entry-total'], `inst-entry-${choice}`);
+  const help = document.getElementById('inst-entry-help');
+  help.textContent = choice === 'payment' ? '' : ENTRY_HELP[instKind][choice];
+  help.style.display = choice === 'payment' ? 'none' : '';
+  document.getElementById('inst-store-value-text').textContent =
+    document.getElementById(`inst-entry-${storeKind}-title`).textContent;
 }
 
 function updateDownToggleText() {
@@ -1153,7 +1174,7 @@ function resetInstallmentForm() {
 function setStoreKind(value) {
   const kind = value === 'total' ? 'total' : 'extra';
   document.getElementById('inst-store-kind').value = kind;
-  setChoice(['inst-store-extra', 'inst-store-total'], `inst-store-${kind}`);
+  updateEntryChoice();
   updateStoreDerived();
   resetInstallmentResult();
 }
@@ -1164,8 +1185,7 @@ function setInstallmentEntryMode(mode) {
 
   document.getElementById('inst-payment-source-fields').style.display = mode === 'payment' ? '' : 'none';
   document.getElementById('inst-store-source-fields').style.display = mode === 'store' ? '' : 'none';
-  setChoice(['inst-entry-payment', 'inst-entry-store'], `inst-entry-${mode}`);
-  setInstallmentEntryHelp();
+  updateEntryChoice();
 
   updateStoreDerived();
   resetInstallmentResult();
@@ -1198,7 +1218,10 @@ function updateStoreDerived() {
   const note = document.getElementById('inst-store-derived');
   const kind = document.getElementById('inst-store-kind').value;
   const valueInput = document.getElementById('inst-store-value');
-  valueInput.placeholder = kind === 'extra' ? 'مثلاً ۳٬۶۰۰٬۰۰۰' : 'مثلاً ۲۱٬۶۰۰٬۰۰۰';
+  const examples = instKind === 'loan'
+    ? { extra: 'مثلاً ۴۰٬۰۰۰٬۰۰۰', total: 'مثلاً ۱۴۰٬۰۰۰٬۰۰۰' }
+    : { extra: 'مثلاً ۳٬۶۰۰٬۰۰۰', total: 'مثلاً ۳۸٬۰۰۰٬۰۰۰' };
+  valueInput.placeholder = examples[kind];
 
   const cash = v('inst-cash');
   const down = v('inst-down');
