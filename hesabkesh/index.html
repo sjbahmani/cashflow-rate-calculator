@@ -263,7 +263,7 @@
   .choice-stack { grid-template-columns: 1fr; }
   .choice-stack .choice-btn {
     justify-content: flex-start;
-    white-space: normal; line-height: 1.65; text-align: right; padding: 10px 12px;
+    line-height: 1.65; text-align: right; padding: 10px 12px;
   }
   .choice-help {
     color: var(--muted); font-size: 0.8rem; line-height: 1.7;
@@ -1027,6 +1027,14 @@ let instEntryMode = 'payment';
 let instFirstPaymentNow = false;
 let instVariableMode = false;
 
+function setChoice(ids, activeId) {
+  ids.forEach(id => {
+    const btn = document.getElementById(id);
+    btn.classList.toggle('active', id === activeId);
+    btn.setAttribute('aria-pressed', String(id === activeId));
+  });
+}
+
 function resetInstallmentResult() {
   clearFormError('inst-error');
   document.getElementById('inst-result').classList.remove('show');
@@ -1051,13 +1059,9 @@ function resetInstallmentForm() {
 function setStoreKind(value) {
   const kind = value === 'total' ? 'total' : 'extra';
   document.getElementById('inst-store-kind').value = kind;
-  const extra = document.getElementById('inst-store-extra');
-  const total = document.getElementById('inst-store-total');
-  extra.classList.toggle('active', kind === 'extra');
-  total.classList.toggle('active', kind === 'total');
-  extra.setAttribute('aria-pressed', String(kind === 'extra'));
-  total.setAttribute('aria-pressed', String(kind === 'total'));
+  setChoice(['inst-store-extra', 'inst-store-total'], `inst-store-${kind}`);
   updateStoreDerived();
+  resetInstallmentResult();
 }
 
 function setInstallmentEntryMode(mode) {
@@ -1066,10 +1070,7 @@ function setInstallmentEntryMode(mode) {
 
   document.getElementById('inst-payment-source-fields').style.display = mode === 'payment' ? '' : 'none';
   document.getElementById('inst-store-source-fields').style.display = mode === 'store' ? '' : 'none';
-  document.getElementById('inst-entry-payment').classList.toggle('active', mode === 'payment');
-  document.getElementById('inst-entry-store').classList.toggle('active', mode === 'store');
-  document.getElementById('inst-entry-payment').setAttribute('aria-pressed', mode === 'payment');
-  document.getElementById('inst-entry-store').setAttribute('aria-pressed', mode === 'store');
+  setChoice(['inst-entry-payment', 'inst-entry-store'], `inst-entry-${mode}`);
   document.getElementById('inst-entry-help').textContent = mode === 'payment'
     ? 'اگر مبلغ هر قسط را می‌دانی، همان را مستقیم وارد کن.'
     : 'مثل صفحه پرداخت فروشگاه: مجموع اضافه‌پرداخت یا مجموع کل پرداخت را وارد کن؛ مبلغ هر قسط خودکار حساب می‌شود.';
@@ -1080,10 +1081,7 @@ function setInstallmentEntryMode(mode) {
 
 function setFirstPaymentTiming(firstPaymentNow) {
   instFirstPaymentNow = firstPaymentNow;
-  document.getElementById('inst-first-now').classList.toggle('active', firstPaymentNow);
-  document.getElementById('inst-first-next').classList.toggle('active', !firstPaymentNow);
-  document.getElementById('inst-first-now').setAttribute('aria-pressed', firstPaymentNow);
-  document.getElementById('inst-first-next').setAttribute('aria-pressed', !firstPaymentNow);
+  setChoice(['inst-first-now', 'inst-first-next'], firstPaymentNow ? 'inst-first-now' : 'inst-first-next');
   resetInstallmentResult();
 }
 
@@ -1167,13 +1165,15 @@ function toggleGrace() {
 function setLoanType(value) {
   const type = value === 'on-balance' ? 'on-balance' : 'on-principal';
   document.getElementById('loan-type').value = type;
-  const principal = document.getElementById('loan-type-principal');
-  const balance = document.getElementById('loan-type-balance');
-  const isBalance = type === 'on-balance';
-  principal.classList.toggle('active', !isBalance);
-  balance.classList.toggle('active', isBalance);
-  principal.setAttribute('aria-pressed', String(!isBalance));
-  balance.setAttribute('aria-pressed', String(isBalance));
+  setChoice(['loan-type-principal', 'loan-type-balance'],
+            type === 'on-balance' ? 'loan-type-balance' : 'loan-type-principal');
+  resetLoanResult();
+}
+
+function resetLoanResult() {
+  clearFormError('loan-error');
+  document.getElementById('loan-result').classList.remove('show');
+  document.getElementById('loan-placeholder').style.display = '';
 }
 
 function resetLoanForm() {
@@ -1183,9 +1183,7 @@ function resetLoanForm() {
   document.getElementById('loan-grace-type').value = 'accumulate';
   const panel = document.getElementById('grace-panel');
   if (panel.classList.contains('open')) toggleGrace();
-  clearFormError('loan-error');
-  document.getElementById('loan-result').classList.remove('show');
-  document.getElementById('loan-placeholder').style.display = '';
+  resetLoanResult();
   trackEvent('calculator_reset', { calculator_type: 'loan' });
 }
 
