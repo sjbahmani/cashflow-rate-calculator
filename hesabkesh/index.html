@@ -807,11 +807,16 @@
         </div>
       </div>
       <div class="field">
-        <label id="loan-type-label">نوع محاسبه بانک</label>
+        <label id="loan-type-label">بانک سود را چطور حساب می‌کند؟</label>
         <div class="choice-group choice-stack" role="group" aria-labelledby="loan-type-label">
-          <button class="choice-btn active" type="button" id="loan-type-principal" aria-pressed="true" onclick="setLoanType('on-principal')">سود روی اصل وام — رایج در بانک‌های ایران</button>
-          <button class="choice-btn" type="button" id="loan-type-balance" aria-pressed="false" onclick="setLoanType('on-balance')">سود روی مانده بدهی — روش دقیق‌تر و رایج جهانی</button>
+          <button class="choice-btn choice-example active" type="button" id="loan-type-principal" aria-pressed="true" onclick="setLoanType('on-principal')">
+            <strong>سود روی اصل وام</strong><span>رایج در بانک‌های ایران؛ سود کل دوره از اول روی همه مبلغ وام حساب می‌شود</span>
+          </button>
+          <button class="choice-btn choice-example" type="button" id="loan-type-balance" aria-pressed="false" onclick="setLoanType('on-balance')">
+            <strong>سود روی مانده بدهی</strong><span>روش رایج جهانی؛ با هر قسط بدهی کم می‌شود و سود ماه بعد هم کمتر است</span>
+          </button>
         </div>
+        <p class="choice-help">اگر مطمئن نیستی، «سود روی اصل وام» را بگذار.</p>
         <input type="hidden" id="loan-type" value="on-principal">
       </div>
       <div class="grace-toggle" onclick="toggleGrace()">
