@@ -240,7 +240,7 @@
     box-shadow: 0 0 0 3px rgba(45,212,191,0.16);
   }
 
-  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: end; }
 
   .input-choice { margin-bottom: 18px; }
   .choice-group {
@@ -249,9 +249,11 @@
     background: rgba(0,0,0,0.16);
   }
   .choice-btn {
-    border: 0; border-radius: 6px; padding: 10px 8px;
+    min-width: 0; border: 0; border-radius: 6px; padding: 10px 8px;
     background: transparent; color: var(--muted); font-family: inherit;
     font-size: 0.86rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    white-space: normal; line-height: 1.45;
     transition: background .2s, color .2s, box-shadow .2s;
   }
   .choice-btn.active {
@@ -260,6 +262,7 @@
   }
   .choice-stack { grid-template-columns: 1fr; }
   .choice-stack .choice-btn {
+    justify-content: flex-start;
     white-space: normal; line-height: 1.65; text-align: right; padding: 10px 12px;
   }
   .choice-help {
@@ -653,22 +656,23 @@
       </div>
 
       <div id="inst-store-source-fields" style="display:none">
-        <div class="row-2">
-          <div class="field">
-            <label>کدام عدد را در فروشگاه می‌بینی؟</label>
-            <select id="inst-store-kind" onchange="updateStoreDerived()">
-              <option value="extra">مجموع اضافه‌پرداخت</option>
-              <option value="total">مجموع کل پرداخت</option>
-            </select>
+        <div class="field">
+          <label id="inst-store-kind-label">کدام عدد را در فروشگاه می‌بینی؟</label>
+          <div class="choice-group" role="group" aria-labelledby="inst-store-kind-label">
+            <button class="choice-btn active" type="button" id="inst-store-extra" aria-pressed="true" onclick="setStoreKind('extra')">مجموع اضافه‌پرداخت</button>
+            <button class="choice-btn" type="button" id="inst-store-total" aria-pressed="false" onclick="setStoreKind('total')">مجموع کل پرداخت</button>
           </div>
+          <input type="hidden" id="inst-store-kind" value="extra">
+        </div>
+        <div class="row-2">
           <div class="field">
             <label>مبلغ همان عدد <span class="hint">(تومان)</span></label>
             <input type="text" inputmode="numeric" id="inst-store-value" data-fmt="money" placeholder="مثلاً ۳٬۶۰۰٬۰۰۰">
           </div>
-        </div>
-        <div class="field">
-          <label>تعداد اقساط <span class="hint">(ماه)</span></label>
-          <input type="text" inputmode="numeric" id="inst-store-n" data-fmt="count" placeholder="مثلاً ۴">
+          <div class="field">
+            <label>تعداد اقساط <span class="hint">(ماه)</span></label>
+            <input type="text" inputmode="numeric" id="inst-store-n" data-fmt="count" placeholder="مثلاً ۴">
+          </div>
         </div>
         <div class="derived-note" id="inst-store-derived" aria-live="polite"></div>
       </div>
@@ -1035,13 +1039,25 @@ function resetInstallmentForm() {
   ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-store-n']
     .forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('inst-payments-var').value = '';
-  document.getElementById('inst-store-kind').value = 'extra';
+  setStoreKind('extra');
   updateVarCounter();
   setInstallmentEntryMode('payment');
   setFirstPaymentTiming(false);
   setInstallmentDownVisibility(false);
   resetInstallmentResult();
   trackEvent('calculator_reset', { calculator_type: 'installment' });
+}
+
+function setStoreKind(value) {
+  const kind = value === 'total' ? 'total' : 'extra';
+  document.getElementById('inst-store-kind').value = kind;
+  const extra = document.getElementById('inst-store-extra');
+  const total = document.getElementById('inst-store-total');
+  extra.classList.toggle('active', kind === 'extra');
+  total.classList.toggle('active', kind === 'total');
+  extra.setAttribute('aria-pressed', String(kind === 'extra'));
+  total.setAttribute('aria-pressed', String(kind === 'total'));
+  updateStoreDerived();
 }
 
 function setInstallmentEntryMode(mode) {
@@ -1219,7 +1235,7 @@ function loadStorePreset(cash, down, storeValue, n, storeKind, firstPaymentNow) 
   setInstallmentEntryMode('store');
   setFirstPaymentTiming(firstPaymentNow);
   setInstallmentDownVisibility(down > 0);
-  document.getElementById('inst-store-kind').value = storeKind;
+  setStoreKind(storeKind);
   setFmtValue('inst-cash', cash, 'money');
   setFmtValue('inst-down', down, 'money');
   setFmtValue('inst-store-value', storeValue, 'money');
@@ -1422,7 +1438,7 @@ function restoreFromUrl() {
   if (mode === 'variable') toggleVariable();
   setFirstPaymentTiming(p.get('first') === 'now');
   setInstallmentDownVisibility(p.has('down'));
-  setSelectIfValid('inst-store-kind', p.get('kind'));
+  if (p.get('kind')) setStoreKind(p.get('kind'));
   fill('cash', 'inst-cash', 'money');
   fill('down', 'inst-down', 'money');
   fill('pmt', 'inst-payment', 'money');
