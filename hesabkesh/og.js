@@ -76,15 +76,6 @@ function applyLanding(html, path, lp) {
 }
 
 function page(r) {
-  // Normalize known landing routes before relative assets are resolved.
-  const cleanPath = r.uri.replace(/\/+$/, '') || '/';
-  if (r.uri !== cleanPath && Object.prototype.hasOwnProperty.call(pages, cleanPath)) {
-    const requestUri = r.variables.request_uri || r.uri;
-    const queryIndex = requestUri.indexOf('?');
-    r.headersOut.Location = cleanPath + (queryIndex < 0 ? '' : requestUri.slice(queryIndex));
-    r.return(301);
-    return;
-  }
   const landing = Object.prototype.hasOwnProperty.call(pages, r.uri) ? pages[r.uri] : null;
   if (r.uri !== '/' && !landing) {
     r.return(404);
