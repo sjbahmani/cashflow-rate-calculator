@@ -1,35 +1,35 @@
+import math
+
 import numpy_financial as npf
 
-# --- ورودی‌های مسئله ---
-PV = 78_600_000     # مبلغ وام (مثبت: چون پول را می‌گیرید)
-PMT = -5_237_300      # مبلغ قسط (منفی: چون پول را می‌دهید)
-n = 24                 # تعداد اقساط
-k = 0                  # تعداد ماه تنفس (Grace Period)
+# Inputs: all amounts are in toman, and each period is one month.
+PV = 78_600_000  # Loan received at month zero (positive inflow).
+PMT = -5_237_300  # Monthly installment (negative outflow).
+n = 24  # Number of installments after the grace period.
+k = 0  # Number of zero-payment grace months.
 
-# --- ساخت جریان نقدی (Cash Flow) ---
-# لیست اعداد به این صورت می‌شود:
-# [100, 0, 0, 0, -10, -10, ..., -10]
-cash_flow = [PV]  + [PMT] * n
+# Include each grace month; the first installment is at the end of month k+1.
+if not isinstance(k, int) or k < 0:
+    raise ValueError("Grace months must be a nonnegative integer.")
+cash_flow = [PV] + [0] * k + [PMT] * n
 
-# --- ۱. محاسبه نرخ ماهانه (r) ---
-# تابع IRR (نرخ بازده داخلی) بهترین راه برای پیدا کردن r در این معادلات است
+# Find the monthly rate that makes the cashflows' net present value zero.
 monthly_rate = npf.irr(cash_flow)
+if not math.isfinite(monthly_rate) or monthly_rate <= -1:
+    raise ValueError("No usable rate was found for these cashflows.")
 
-# --- ۲. محاسبه نرخ اسمی سالیانه (Nominal) ---
-# همان نرخی که بانک‌ها در قرارداد می‌نویسند (سود ساده)
+# Simple annualization; not necessarily the advertised contract rate.
 nominal_annual_rate = monthly_rate * 12
 
-# --- ۳. محاسبه نرخ موثر سالیانه (EAR) ---
-# این نرخ واقعی فشار تورمی روی پول شماست (سود مرکب)
+# Annualized cost including compounding, without adjusting for inflation.
 effective_annual_rate = (1 + monthly_rate) ** 12 - 1
 
-# --- چاپ خروجی‌ها ---
 print("-" * 40)
-print(f"مبلغ وام: {PV:,.0f}")
-print(f"مبلغ قسط: {PMT:,.0f}")
-print(f"تعداد اقساط: {n} | ماه تنفس: {k}")
+print(f"Loan amount (toman): {PV:,.0f}")
+print(f"Installment cashflow (toman): {PMT:,.0f}")
+print(f"Installments: {n} | Grace months: {k}")
 print("-" * 40)
-print(f"نرخ سود ماهانه (r):         {monthly_rate * 100:.4f} %")
-print(f"نرخ سود اسمی (بانکی):       {nominal_annual_rate * 100:.2f} %")
-print(f"نرخ موثر سالیانه (EAR):     {effective_annual_rate * 100:.2f} %")
+print(f"Monthly rate (r): {monthly_rate * 100:.4f}%")
+print(f"Calculated nominal annual rate: {nominal_annual_rate * 100:.2f}%")
+print(f"Effective annual rate (EAR): {effective_annual_rate * 100:.2f}%")
 print("-" * 40)

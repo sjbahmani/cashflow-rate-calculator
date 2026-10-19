@@ -1,6 +1,29 @@
 # Cashflow Rate Calculator
 
-A Python toolkit for analyzing loan scenarios — computing IRR, APR, EAR, PMT, NPV, PV, FV, and amortization schedules using `numpy_financial`.
+The Persian-language static calculator ([hesabkesh](https://hesabkesh.ir)) and Python reference examples for loan cashflows, nominal annual rates, EAR, PMT, NPV, PV, FV, and amortization schedules.
+
+## Website and project layout
+
+- `hesabkesh/index.html`: calculator UI, article summaries, expandable full articles and MathML formulas. No build step.
+- `hesabkesh/calc.js`: shared browser/nginx njs calculation code. Installment schedules use bisection; bank-loan cashflows use Newton-style iteration.
+- `hesabkesh/og.js` and `hesabkesh/pages.js`: server-rendered landing pages and link previews. See `hesabkesh.nginx.conf` for nginx with njs.
+- `test.py`: fixed monthly installments, with `k` zero-payment months before `n` installments.
+- `test2.py`: configurable monthly cashflows; the default is 100 million received and twelve payments of 10 million.
+- `test3.py`: two zero-payment months, four payments, then principal repayment in month seven.
+- `sample_numpy_financial.py`: examples of the financial library functions.
+- `main.py`: placeholder entry point; run the examples directly.
+
+The `test*.py` files are runnable demonstrations, not an automated test suite.
+
+Run the static site from the repository root:
+
+```bash
+python3 -m http.server 8000 --directory hesabkesh
+```
+
+Open `http://localhost:8000/index.html`. Articles are at `?tab=articles`; the effective-rate article is at `#article-effective-rate`. Landing routes and generated social previews require nginx with njs.
+
+To add an article, follow [the article instructions](hesabkesh/AGENTS.md#adding-articles).
 
 ---
 
@@ -45,7 +68,7 @@ All calculations follow the standard financial sign convention:
 
 $$\sum_{t=0}^{n} \frac{CF_t}{(1 + r)^t} = 0$$
 
-IRR is the monthly rate `r` that makes the **Net Present Value of all cashflows equal to zero**. It is solved numerically — there is no closed-form solution.
+IRR is the monthly rate `r` that makes the **Net Present Value of all cashflows equal to zero**. For general payment schedules it is found numerically; simple special cases can have direct solutions.
 
 | Parameter | Description |
 |-----------|-------------|
@@ -58,7 +81,7 @@ IRR is the monthly rate `r` that makes the **Net Present Value of all cashflows 
 monthly_rate = npf.irr([800_000_000, 0, 0, -31_900_000, -31_900_000, -31_900_000, -31_900_000, -800_000_000])
 ```
 
-> IRR is the most accurate way to find the true cost of a loan from any cashflow structure, including grace periods and irregular payments.
+> `npf.irr` assumes equally spaced periods: one array entry per month in these examples, including zeros for skipped months. Amounts may vary, but arbitrary dates require a dated-cashflow method. Multiple sign changes can produce multiple roots or no usable root. IRR names the quantity being calculated, not a particular solver such as Newton–Raphson.
 
 ---
 
@@ -66,7 +89,7 @@ monthly_rate = npf.irr([800_000_000, 0, 0, -31_900_000, -31_900_000, -31_900_000
 
 $$\text{APR} = r \times 12$$
 
-A simple annualization of the monthly rate — the figure typically stated in loan contracts. It does **not** account for compounding.
+Here `APR` denotes simple nominal annualization of the monthly IRR. It is not necessarily the advertised contract rate or a regulatory APR: fee inclusion and legal conventions vary. It does **not** account for compounding.
 
 | Parameter | Description |
 |-----------|-------------|
@@ -90,7 +113,7 @@ $$\text{EAR} = (1 + r)^{12} - 1$$
 
 $$\text{EAR} = \left(1 + \frac{\text{APR}}{12}\right)^{12} - 1$$
 
-EAR is the **true annualized cost** of the loan, accounting for the effect of monthly compounding. It is always higher than APR (except when $r = 0$).
+EAR is the **true annualized cost** of the loan, accounting for the effect of monthly compounding. For a positive monthly rate, EAR exceeds this nominal annualization. All rates in the formulas are decimals (24% = 0.24). EAR is not inflation-adjusted and is not the total extra payment divided by principal. For example, 100 million received and twelve end-of-month payments of 10 million have EAR ≈ 41.30%, although total extra payment is 20 million.
 
 | Parameter | Description |
 |-----------|-------------|
@@ -111,7 +134,7 @@ ear = ((1 + monthly_rate) ** 12 - 1) * 100  # as percentage
 
 $$\text{PMT} = P \times \frac{r \times (1 + r)^n}{(1 + r)^n - 1}$$
 
-Calculates the **equal periodic payment** required to fully repay a loan (principal + interest) over `n` periods.
+Calculates the **equal end-of-period payment** required to fully repay a loan over `n` periods, with no remaining balance. For zero interest use `PMT = P / n`. Formulas show positive payment magnitudes; NumPy functions use opposing signs for receipts and payments.
 
 | Parameter | Description |
 |-----------|-------------|
@@ -198,7 +221,7 @@ npv = npf.npv(discount_rate, [initial_investment] + cash_flows)
 
 $$n = \frac{\ln\left(\frac{\text{PMT}}{\text{PMT} - r \times P}\right)}{\ln(1 + r)}$$
 
-Finds **how many payments** are needed to fully repay a loan given a fixed payment amount.
+Finds **how many payments** are needed for end-of-period repayment with no final balance. For positive `r`, this formula requires `PMT > r × P`; otherwise payments do not reduce principal enough to finish repayment. At zero interest, `n = P / PMT`. A fractional result requires adjusting the final payment.
 
 | Parameter | Description |
 |-----------|-------------|
@@ -251,20 +274,20 @@ principal_payment = npf.ppmt(monthly_rate, month, total_periods, -principal)
 | 2 | 1,933 | 493 | 1,440 | 97,127 |
 | 3 | 1,933 | 486 | 1,447 | 95,680 |
 
-> Early payments are mostly interest; later payments shift toward principal repayment.
+> With a positive fixed rate, the interest portion decreases as the balance falls. Early payments are not necessarily mostly interest; in this example they are already mostly principal.
 
 ---
 
 ## 10. Grace Period
 
-A grace period (تنفس) is a set of months at the beginning of a loan during which **no payments are made**. It is modeled as zeros in the cashflow array.
+A grace period delays principal repayment. A no-payment grace period is represented by zeros; an interest-only grace period must contain the actual interest payments. In `test.py`, `k` adds zero-payment months before the `n` installments; total duration is `k + n` months.
 
 ```
 cashflow = [PV, 0, 0, -PMT, -PMT, ..., -PMT]
               ↑  ←grace→  ←── installments ──→
 ```
 
-The effect of a grace period is that **interest accrues** during the silent months, raising the effective cost of the loan. A longer grace period results in a higher EAR for the same stated APR.
+Zeros only record timing; they do not automatically add accrued interest. Holding the initial receipt and subsequent payment amounts fixed, delaying positive repayments lowers a positive IRR. If the contract capitalizes interest, increase the later payments or final balance according to its terms before solving. With consistent compounding, a longer grace period need not change EAR even when total interest grows.
 
 ---
 
@@ -275,7 +298,7 @@ The effect of a grace period is that **interest accrues** during the silent mont
 uv sync
 
 # Run individual scripts
-uv run test3.py          # IRR/APR/EAR for a specific loan scenario
+uv run test3.py          # Monthly IRR, nominal annual rate and EAR
 uv run test.py           # Loan with fixed installments and grace period
 uv run test2.py          # Custom monthly payment schedule
 uv run sample_numpy_financial.py  # Full demo of all numpy_financial functions
@@ -284,16 +307,16 @@ uv run sample_numpy_financial.py  # Full demo of all numpy_financial functions
 ### Example Output (`test3.py`)
 
 ```
-نرخ سود ماهانه (IRR)     : 0.022518  (2.2518٪)
-نرخ اسمی سالانه (APR)     : 27.02٪
-نرخ موثر سالانه (EAR)     : 30.63٪
+Monthly rate (IRR): 0.022518 (2.2518%)
+Calculated nominal annual rate: 27.02%
+Effective annual rate (EAR): 30.63%
 ```
 
 ---
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.14+ (as specified in `pyproject.toml` and `.python-version`)
 - `numpy_financial`
 - `numpy`
 

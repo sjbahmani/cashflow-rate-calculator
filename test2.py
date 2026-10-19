@@ -1,51 +1,51 @@
+import math
+
 import numpy_financial as npf
 
-# --- ۱. تعریف ورودی‌ها ---
-loan_amount = 100_000_000   # پولی که دریافت می‌کنید (مثبت)
+# Loan received at month zero, in toman (positive inflow).
+loan_amount = 100_000_000
 
-# لیست پرداخت‌ها به ترتیب ماه
-# (هر عدد نشان‌دهنده پرداخت در آن ماه است)
+# End-of-month payments in toman; keep zeros for months without payments.
 monthly_payments = [
-    -10_000_000,    # 1
-    -10_000_000,    # 2
-    -10_000_000,    # ماه ۳
-    -10_000_000,    # ماه ۴
-    -10_000_000,    # ماه ۵
-    -10_000_000,    # ماه ۶
-    -10_000_000,    # ماه ۷
-    -10_000_000,    # ماه ۸
-    -10_000_000,    # ماه ۹
-    -10_000_000,    # ماه ۱۰
-    -10_000_000,    # ماه ۱۱
-    -10_000_000,    # ماه ۱۲
+    -10_000_000,  # Month 1
+    -10_000_000,  # Month 2
+    -10_000_000,  # Month 3
+    -10_000_000,  # Month 4
+    -10_000_000,  # Month 5
+    -10_000_000,  # Month 6
+    -10_000_000,  # Month 7
+    -10_000_000,  # Month 8
+    -10_000_000,  # Month 9
+    -10_000_000,  # Month 10
+    -10_000_000,  # Month 11
+    -10_000_000,  # Month 12
 ]
 
-# --- ۲. ساخت جریان نقدی کلی ---
-# لیست نهایی می‌شود: [100, 0, -2, -2, -15, -15, -10, -70]
+# Initial receipt followed by twelve monthly repayments.
 cash_flow = [loan_amount] + monthly_payments
 
-# --- ۳. محاسبه نرخ واقعی (IRR) ---
-# تابع irr نرخ سودی را پیدا می‌کند که ارزش این پول‌ها را به ۱۰۰ امروز برساند
+# Find the monthly rate that makes the cashflows' net present value zero.
 monthly_rate = npf.irr(cash_flow)
+if not math.isfinite(monthly_rate) or monthly_rate <= -1:
+    raise ValueError("No usable rate was found for these cashflows.")
 
-# --- ۴. تبدیل به نرخ‌های سالیانه ---
+# Nominal annualization and effective annualization with compounding.
 nominal_rate = monthly_rate * 12
 effective_rate = (1 + monthly_rate) ** 12 - 1
 
-# --- ۵. نمایش خروجی ---
 print("-" * 40)
-print(f"مبلغ وام: {loan_amount:,.0f}")
-print(f"مجموع بازپرداخت شما: {sum(monthly_payments)*-1:,.0f}")
-print(f"تعداد کل ماه‌ها: {len(monthly_payments)}")
+print(f"Loan amount (toman): {loan_amount:,.0f}")
+print(f"Total repayments (toman): {-sum(monthly_payments):,.0f}")
+print(f"Total months: {len(monthly_payments)}")
 print("-" * 40)
-print("تحلیل سود:")
-print(f"نرخ سود ماهانه:      {monthly_rate * 100:.4f} %")
-print(f"نرخ اسمی (بانکی):    {nominal_rate * 100:.2f} %")
-print(f"نرخ موثر (EAR):      {effective_rate * 100:.2f} %")
+print("Rate analysis:")
+print(f"Monthly rate: {monthly_rate * 100:.4f}%")
+print(f"Calculated nominal annual rate: {nominal_rate * 100:.2f}%")
+print(f"Effective annual rate (EAR): {effective_rate * 100:.2f}%")
 print("-" * 40)
 
-# نمایش لیست جریان نقدی برای درک بهتر
-print("جدول جریان نقدی:")
+# Display the timing and sign of each cashflow.
+print("Cashflow schedule (toman):")
 for i, cash in enumerate(cash_flow):
-    month_name = "دریافت وام" if i == 0 else f"ماه {i}"
+    month_name = "Loan received" if i == 0 else f"Month {i}"
     print(f"{month_name}: {cash:,.0f}")

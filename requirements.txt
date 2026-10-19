@@ -1,3 +1,2 @@
 numpy-financial>=1.0.0
-numpy>=1.15
-
+numpy>=2.4.0

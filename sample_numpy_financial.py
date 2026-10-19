@@ -4,7 +4,6 @@ This script shows various financial calculations using numpy-financial
 """
 
 import numpy_financial as npf
-import numpy as np
 
 print("=" * 60)
 print("NumPy Financial Functions Examples")
@@ -24,7 +23,7 @@ monthly_rate = annual_rate / 12
 total_payments = years * 12
 
 # Calculate monthly payment
-# Note: principal is negative because it's a cash outflow
+# Use negative PV so payment functions return positive payment magnitudes.
 monthly_payment = npf.pmt(monthly_rate, total_payments, -principal)
 
 print(f"Loan Amount: ${principal:,.2f}")
@@ -118,12 +117,14 @@ pv = 50000  # Present value (loan amount)
 # Calculate interest rate
 monthly_rate = npf.rate(nper, pmt, pv, 0)
 annual_rate = monthly_rate * 12
+effective_annual_rate = (1 + monthly_rate) ** 12 - 1
 
 print(f"Loan Amount: ${pv:,.2f}")
 print(f"Monthly Payment: ${abs(pmt):,.2f}")
 print(f"Number of Payments: {nper}")
 print(f"Monthly Interest Rate: {monthly_rate * 100:.4f}%")
-print(f"Annual Interest Rate: {annual_rate * 100:.2f}%")
+print(f"Nominal Annual Rate: {annual_rate * 100:.2f}%")
+print(f"Effective Annual Rate: {effective_annual_rate * 100:.2f}%")
 
 # ============================================================================
 # 7. NPER - Number of Periods
@@ -180,4 +181,3 @@ for month in range(1, 7):
 print("\n" + "=" * 60)
 print("Examples completed!")
 print("=" * 60)
-
