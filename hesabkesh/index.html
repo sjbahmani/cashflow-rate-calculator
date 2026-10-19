@@ -213,10 +213,12 @@
   header p { color: var(--muted); font-size: 0.94rem; line-height: 1.9; max-width: 680px; }
   /* Tabs */
   .tabs {
+    position: sticky; top: 8px; z-index: 20;
     display: flex; gap: 8px; margin-bottom: 24px;
-    background: rgba(255,255,255,0.05); backdrop-filter: blur(12px);
+    background: rgba(17,19,21,0.96); backdrop-filter: blur(12px);
     border-radius: var(--radius); padding: 6px; border: 1px solid var(--border);
   }
+  #article-effective-rate { scroll-margin-top: 84px; }
   .tab-btn {
     flex: 1; padding: 10px 4px; border: none; background: transparent;
     border-radius: 8px; font-family: inherit; font-size: 0.85rem; font-weight: 500;
