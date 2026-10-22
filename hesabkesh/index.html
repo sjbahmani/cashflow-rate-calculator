@@ -6,9 +6,9 @@
 <title>محاسبه سود واقعی وام و خرید قسطی | حساب‌کش</title>
 <meta name="description" content="محاسبه قسط، اضافه‌پرداخت و نرخ مؤثر سالانه وام و خرید اقساطی؛ با پیش‌پرداخت، اقساط متغیر و دوره تنفس. همراه راهنمای نرخ مؤثر، فرمول‌ها و اثر تورم.">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#111315">
+<meta name="theme-color" content="#f7f3eb">
 <meta name="application-name" content="حساب‌کش">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.svg?v=warm-percent" type="image/svg+xml">
 <link rel="canonical" href="https://hesabkesh.ir/">
 <link rel="preload" href="/fonts/vazirmatn-arabic.woff2" as="font" type="font/woff2" crossorigin>
 <meta property="og:type" content="website">
@@ -100,7 +100,7 @@
 
   (function loadGoogleAnalytics() {
     const id = window.GA_MEASUREMENT_ID;
-    if (!id || id === 'G-XXXXXXXXXX') return;
+    if (['localhost', '127.0.0.1'].includes(location.hostname) || !id || id === 'G-XXXXXXXXXX') return;
 
     const script = document.createElement('script');
     script.async = true;
@@ -638,37 +638,49 @@
     .tab-btn { font-size: 0.78rem; }
   }
 </style>
+<link rel="stylesheet" href="./warm.css">
 </head>
 <body>
+<a class="skip-link" href="#main-content">پرش به محتوای اصلی</a>
 <div class="container">
 
-  <header>
-    <div class="brand-line">
-      <div><span class="brand">حساب‌کش</span> / واقعیت‌سنج قسط و وام</div>
-      <a class="trust-pill" href="#ref-box">راهنما</a>
-    </div>
-    <h1><span class="hero-question">قسطی می‌خری یا وام می‌گیری؟</span> <span class="hero-answer">اول ببین واقعاً چند درصد گرون‌تر تموم می‌شه!</span></h1>
-    <p>شرایط معامله را وارد کن؛ حساب‌کش اضافه‌پرداخت واقعی، نرخ مؤثر سالانه و برچسب گرانی را محاسبه می‌کند.</p>
+  <header class="site-header">
+    <a class="wordmark" href="./"><strong>حساب‌کش</strong><span>واقعیت‌سنج قسط و وام</span></a>
+    <nav class="tabs" aria-label="بخش‌های حساب‌کش">
+      <button class="tab-btn active" type="button" data-tab="installment" aria-pressed="true" aria-controls="panel-installment panel-loan" onclick="returnToCalculator()">محاسبه‌گر</button>
+      <button class="tab-btn" type="button" data-tab="articles" aria-pressed="false" aria-controls="panel-articles" onclick="switchTab('articles')">مقالات</button>
+      <a href="#article-rate-guide" onclick="openRateGuideArticle()">راهنما</a>
+    </nav>
   </header>
-
-  <div class="tabs" role="group" aria-label="بخش‌های حساب‌کش">
-    <button class="tab-btn active" type="button" data-tab="installment" aria-pressed="true" aria-controls="panel-installment" onclick="switchTab('installment')">خرید قسطی / وام</button>
-    <button class="tab-btn" type="button" data-tab="loan" aria-pressed="false" aria-controls="panel-loan" onclick="switchTab('loan')">وام بانکی با نرخ سود</button>
-    <button class="tab-btn" type="button" data-tab="articles" aria-pressed="false" aria-controls="panel-articles" onclick="switchTab('articles')">مقالات</button>
+  <main id="main-content" tabindex="-1">
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-copy"><h1 id="hero-heading">قسطی می‌خری یا وام می‌گیری؟</h1><p class="hero-subtitle">اول ببین سود پرداختی واقعی چقدره!</p><p class="hero-description">شرایط معامله را وارد کن؛ حساب‌کش اضافه‌پرداخت واقعی، نرخ مؤثر سالانه و برچسب گرانی را محاسبه می‌کند.</p></div>
+    <div class="hero-art" aria-hidden="true">
+      <svg class="art-plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="currentColor" focusable="false">
+        <rect x="8" y="32" width="64" height="16" rx="4"/>
+        <rect x="32" y="8" width="16" height="64" rx="4"/>
+      </svg>
+      <svg class="art-divide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor" focusable="false">
+        <rect x="10" y="43" width="80" height="14" rx="4"/>
+        <circle cx="50" cy="19" r="10"/><circle cx="50" cy="81" r="10"/>
+      </svg>
+      <svg class="art-percent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 220" fill="currentColor" focusable="false">
+        <circle cx="39" cy="44" r="21"/><circle cx="141" cy="176" r="21"/>
+        <rect x="75" y="9" width="30" height="202" rx="6" transform="rotate(30 90 110)"/>
+      </svg>
+    </div>
+  </section>
+  <div class="calculator-workspace">
+  <div class="calculator-modes choice-group" role="group" aria-label="نوع محاسبه">
+    <button class="choice-btn active" type="button" id="inst-kind-purchase" aria-pressed="true" onclick="setInstallmentKind('purchase')">خرید قسطی</button>
+    <button class="choice-btn" type="button" id="inst-kind-loan" aria-pressed="false" onclick="setInstallmentKind('loan')">وام با قسط معلوم</button>
+    <button class="choice-btn" type="button" id="calculator-bank" aria-pressed="false" onclick="switchTab('loan')">وام بانکی</button>
   </div>
-
   <!-- ===== PANEL 1: Installment / Credit ===== -->
-  <div id="panel-installment" class="panel active">
-    <div class="card">
-      <div class="input-choice">
-        <label id="inst-kind-label">چی رو می‌خوای حساب کنی؟</label>
-        <div class="choice-group" role="group" aria-labelledby="inst-kind-label">
-          <button class="choice-btn active" type="button" id="inst-kind-purchase" aria-pressed="true" onclick="setInstallmentKind('purchase')">خرید قسطی کالا</button>
-          <button class="choice-btn" type="button" id="inst-kind-loan" aria-pressed="false" onclick="setInstallmentKind('loan')">وامی که قسطش را می‌دانم</button>
-        </div>
-        <p class="choice-help" id="inst-kind-help">خرید اعتباری از فروشگاه، بانک یا اپ‌ها، یا خرید با چک.</p>
-      </div>
-      <div class="preset-label">مثال‌ها</div>
+  <div id="panel-installment" class="panel calculator-panel active">
+    <div class="card form-card" aria-describedby="inst-kind-help"><div class="form-heading"><h2>شرایط خرید</h2><span>همهٔ مبلغ‌ها به تومان</span></div>
+      <p class="choice-help" id="inst-kind-help">خرید اعتباری از فروشگاه، بانک یا اپ‌ها، یا خرید با چک.</p>
+      <details class="example-picker"><summary>یک مثال آماده را امتحان کن</summary>
       <div class="presets" id="inst-presets-purchase" aria-label="نمونه‌های آماده خرید قسطی">
         <button class="preset-btn" type="button" onclick="loadStorePreset(18000000, 0, 3600000, 4, 'extra', true)">
           <strong>تبلت</strong>
@@ -697,23 +709,24 @@
           <span>۳۰۰ وام، ۴۵ امتیاز، ۶۰ قسط ۵٫۵</span>
         </button>
       </div>
-      <hr class="preset-separator">
+      </details>
+
       <div class="field">
-        <label for="inst-cash"><span id="inst-cash-text">قیمت نقدی کالا یا خدمات</span> <span class="hint">(تومان)</span></label>
+        <label for="inst-cash"><span id="inst-cash-text">قیمت نقدی</span> <span class="hint">(تومان)</span></label>
         <input type="text" inputmode="numeric" id="inst-cash" data-fmt="money" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰">
       </div>
 
       <div class="input-choice">
         <label id="inst-entry-label">کدام عدد را می‌دانی؟</label>
-        <div class="choice-group choice-stack" role="group" aria-labelledby="inst-entry-label">
+        <div class="choice-group choice-stack" role="group" aria-labelledby="inst-entry-label" aria-describedby="inst-entry-help">
           <button class="choice-btn choice-example active" type="button" id="inst-entry-payment" aria-pressed="true" onclick="selectInstallmentEntry('payment')">
             <strong>مبلغ هر قسط</strong><span id="inst-entry-payment-ex">مثلاً «ماهی ۵ میلیون، ۱۲ قسط»</span>
           </button>
           <button class="choice-btn choice-example" type="button" id="inst-entry-extra" aria-pressed="false" onclick="selectInstallmentEntry('extra')">
-            <strong id="inst-entry-extra-title">سود یا اضافه‌پرداخت کل</strong><span id="inst-entry-extra-ex">مثلاً «۳٫۶ میلیون روی قیمت اضافه می‌شود»</span>
+            <strong id="inst-entry-extra-title">سود کل</strong><span id="inst-entry-extra-ex">مثلاً «۳٫۶ میلیون روی قیمت اضافه می‌شود»</span>
           </button>
           <button class="choice-btn choice-example" type="button" id="inst-entry-total" aria-pressed="false" onclick="selectInstallmentEntry('total')">
-            <strong id="inst-entry-total-title">جمع کل پرداخت</strong><span id="inst-entry-total-ex">مثلاً «در مجموع ۳۸ میلیون پرداخت می‌کنی»</span>
+            <strong id="inst-entry-total-title">جمع پرداخت</strong><span id="inst-entry-total-ex">مثلاً «در مجموع ۳۸ میلیون پرداخت می‌کنی»</span>
           </button>
         </div>
         <p class="choice-help" id="inst-entry-help" style="display:none"></p>
@@ -737,22 +750,22 @@
         <!-- Variable installments -->
         <div id="inst-variable-fields" style="display:none">
           <div class="field">
-            <label>مبلغ اقساط <span class="hint">— هر ماه در یک خط، به تومان</span></label>
+            <label>مبلغ اقساط <span class="hint">— هر ماه یک خط؛ ماه بدون پرداخت را صفر بنویس</span></label>
             <textarea id="inst-payments-var" rows="6" placeholder="مثال:&#10;۵٬۰۰۰٬۰۰۰&#10;۵٬۵۰۰٬۰۰۰&#10;۶٬۰۰۰٬۰۰۰&#10;..."></textarea>
-            <div class="var-counter" id="inst-var-counter">۰ قسط وارد شده</div>
+            <div class="var-counter" id="inst-var-counter">۰ ماه، ۰ پرداخت</div>
           </div>
         </div>
 
-        <div class="grace-toggle" onclick="toggleVariable()" id="inst-var-toggle">
-          حالت پیشرفته: اقساط نامساوی دارم
-        </div>
+        <button type="button" class="grace-toggle" onclick="toggleVariable()" id="inst-var-toggle" aria-expanded="false" aria-controls="inst-variable-fields">
+          اقساط نامساوی دارم
+        </button>
       </div>
 
       <div id="inst-store-source-fields" style="display:none">
         <input type="hidden" id="inst-store-kind" value="extra">
         <div class="row-2">
           <div class="field">
-            <label for="inst-store-value"><span id="inst-store-value-text">سود یا اضافه‌پرداخت کل</span> <span class="hint">(تومان)</span></label>
+            <label for="inst-store-value"><span id="inst-store-value-text">سود کل</span> <span class="hint">(تومان)</span></label>
             <input type="text" inputmode="numeric" id="inst-store-value" data-fmt="money" placeholder="مثلاً ۳٬۶۰۰٬۰۰۰">
           </div>
           <div class="field">
@@ -765,7 +778,7 @@
 
       <div class="input-choice">
         <label>قسط اول چه زمانی پرداخت می‌شود؟</label>
-        <div class="choice-group" role="group" aria-label="زمان پرداخت قسط اول">
+        <div class="choice-group" role="group" aria-label="زمان پرداخت قسط اول" aria-describedby="inst-first-help">
           <button class="choice-btn" type="button" id="inst-first-now" aria-pressed="false" onclick="setFirstPaymentTiming(true)">همین امروز</button>
           <button class="choice-btn active" type="button" id="inst-first-next" aria-pressed="true" onclick="setFirstPaymentTiming(false)">یک ماه بعد</button>
         </div>
@@ -774,22 +787,23 @@
 
       <button class="grace-toggle optional-toggle" type="button" id="inst-down-toggle"
               aria-expanded="false" aria-controls="inst-down-panel"
-              onclick="toggleInstallmentDown()">پیش‌پرداخت جداگانه دارم</button>
+              onclick="toggleInstallmentDown()">پیش‌پرداخت دارم</button>
       <div class="grace-panel" id="inst-down-panel">
         <div class="field">
           <label for="inst-down"><span id="inst-down-text">مبلغ پیش‌پرداخت جدا از اقساط</span> <span class="hint">(تومان)</span></label>
-          <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰" value="۰">
+          <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰">
           <p class="choice-help" id="inst-down-help" style="display:none">اگر امتیاز وام را خریده‌ای، قیمت امتیاز را هم همین‌جا بنویس. سپرده‌ای که آخر کار پس می‌گیری را اینجا ننویس.</p>
         </div>
       </div>
-      <div class="form-error" id="inst-error"></div>
+      <div class="form-error" id="inst-error" role="alert"></div>
       <button class="btn" onclick="calcInstallment()">واقعی حساب کن</button>
       <button class="reset-btn" type="button" onclick="resetInstallmentForm()">پاک کردن فرم و شروع از اول</button>
     </div>
 
+    <div class="receipt-column">
     <div class="result-placeholder" id="inst-placeholder">
       <strong>نتیجه اینجا نمایش داده می‌شود.</strong><br>
-      حساب‌کش اول برچسب گرانی می‌دهد، بعد عددها را نشان می‌دهد: اضافه‌پرداخت، نرخ ماهانه، نرخ مؤثر سالانه و متن قابل اشتراک.
+      حساب‌کش اول برچسب گرانی می‌دهد، بعد عددها را نشان می‌دهد: مجموع پرداخت، اضافه‌پرداخت، نرخ ماهانه و نرخ مؤثر سالانه.
     </div>
 
     <div class="result-card" id="inst-result">
@@ -817,30 +831,32 @@
       <strong><a class="ear-article-link" href="#article-effective-rate" onclick="openEffectiveRateArticle()">نرخ مؤثر سالانه چیست؟</a></strong><br>
       نرخ مؤثر سالانه از مبلغ اعتبار و زمان‌بندی بازپرداخت‌ها به دست می‌آید و هزینه اعتبار را با اثر مرکب در مقیاس یک سال نشان می‌دهد. این عدد با درصد اضافه‌پرداخت کل فرق دارد و تورم از آن کسر نشده است. برای مقایسه پیشنهادها، آن را کنار مجموع اضافه‌پرداخت و توان پرداخت قسط ببینید.
     </div>
+    </div><!-- /receipt-column -->
   </div>
 
   <!-- ===== PANEL 2: Bank Loan ===== -->
-  <div id="panel-loan" class="panel">
-    <div class="card">
+  <div id="panel-loan" class="panel calculator-panel">
+    <div class="card form-card"><div class="form-heading"><h2>شرایط وام</h2><span>همهٔ مبلغ‌ها به تومان</span></div>
       <p class="panel-switch">نرخ سود را نمی‌دانی ولی مبلغ قسط را داری؟
         <button type="button" class="link-btn" onclick="openLoanByPayment()">با مبلغ قسط حساب کن</button>
       </p>
-      <div class="preset-label">مثال‌ها</div>
+      <details class="example-picker"><summary>یک مثال آماده را امتحان کن</summary>
       <div class="presets" aria-label="نمونه‌های آماده وام">
         <button class="preset-btn" type="button" onclick="loadLoanPreset(150000000, 18, 24, 'on-principal')">
-          <strong>وام یک</strong>
+          <strong>۱۸٪ روی اصل، ۲۴ ماه</strong>
           <span>۱۵۰ میلیون، ۱۸٪، ۲۴ ماه، سود روی اصل</span>
         </button>
         <button class="preset-btn" type="button" onclick="loadLoanPreset(500000000, 23, 60, 'on-principal')">
-          <strong>وام دو</strong>
+          <strong>۲۳٪ روی اصل، ۶۰ ماه</strong>
           <span>۵۰۰ میلیون، ۲۳٪، ۶۰ ماه، سود روی اصل</span>
         </button>
         <button class="preset-btn" type="button" onclick="loadLoanPreset(120000000, 18, 24, 'on-balance')">
-          <strong>وام سه</strong>
+          <strong>۱۸٪ روی مانده، ۲۴ ماه</strong>
           <span>۱۲۰ میلیون، ۱۸٪، ۲۴ ماه، سود روی مانده</span>
         </button>
       </div>
-      <hr class="preset-separator">
+      </details>
+
       <div class="field">
         <label>مبلغ وام <span class="hint">(تومان)</span></label>
         <input type="text" inputmode="numeric" id="loan-amount" data-fmt="money" placeholder="مثلاً ۲۰۰٬۰۰۰٬۰۰۰">
@@ -851,13 +867,13 @@
           <input type="text" inputmode="decimal" id="loan-rate" data-fmt="rate" placeholder="مثلاً ۲۳">
         </div>
         <div class="field">
-          <label>مدت وام <span class="hint">(ماه)</span></label>
+          <label>مدت کل وام <span class="hint">(ماه، با احتساب دورهٔ تنفس)</span></label>
           <input type="text" inputmode="numeric" id="loan-n" data-fmt="count" placeholder="مثلاً ۳۶">
         </div>
       </div>
       <div class="field">
         <label id="loan-type-label">بانک سود را چطور حساب می‌کند؟</label>
-        <div class="choice-group choice-stack" role="group" aria-labelledby="loan-type-label">
+        <div class="choice-group choice-stack" role="group" aria-labelledby="loan-type-label" aria-describedby="loan-method-help">
           <button class="choice-btn choice-example active" type="button" id="loan-type-principal" aria-pressed="true" onclick="setLoanType('on-principal')">
             <strong>سود روی اصل وام</strong><span>رایج در بانک‌های ایران؛ سود کل دوره از اول روی همه مبلغ وام حساب می‌شود</span>
           </button>
@@ -865,12 +881,12 @@
             <strong>سود روی مانده بدهی</strong><span>روش رایج جهانی؛ با هر قسط بدهی کم می‌شود و سود ماه بعد هم کمتر است</span>
           </button>
         </div>
-        <p class="choice-help">اگر مطمئن نیستی، «سود روی اصل وام» را بگذار.</p>
+        <p class="choice-help" id="loan-method-help">اگر مطمئن نیستی، «سود روی اصل وام» را بگذار.</p>
         <input type="hidden" id="loan-type" value="on-principal">
       </div>
-      <div class="grace-toggle" onclick="toggleGrace()">
+      <button type="button" class="grace-toggle" onclick="toggleGrace()" id="loan-grace-toggle" aria-expanded="false" aria-controls="grace-panel">
         <span id="grace-toggle-label">حالت پیشرفته: افزودن دوره تنفس</span>
-      </div>
+      </button>
       <div class="grace-panel" id="grace-panel">
         <div class="row-2">
           <div class="field">
@@ -886,14 +902,15 @@
           </div>
         </div>
       </div>
-      <div class="form-error" id="loan-error"></div>
+      <div class="form-error" id="loan-error" role="alert"></div>
       <button class="btn" onclick="calcLoan()">واقعی حساب کن</button>
       <button class="reset-btn" type="button" onclick="resetLoanForm()">پاک کردن فرم و شروع از اول</button>
     </div>
 
+    <div class="receipt-column">
     <div class="result-placeholder" id="loan-placeholder">
-      <strong>نتیجه وام اینجا می‌آید.</strong><br>
-      حساب‌کش تفاوت نرخ اعلام‌شده و هزینه واقعی را نشان می‌دهد؛ مخصوصاً وقتی بانک سود را روی اصل وام حساب می‌کند.
+      <strong>نتیجه اینجا نمایش داده می‌شود.</strong><br>
+      حساب‌کش اول برچسب گرانی می‌دهد، بعد عددها را نشان می‌دهد: مجموع پرداخت، اضافه‌پرداخت، نرخ ماهانه و نرخ مؤثر سالانه.
     </div>
 
     <div class="result-card" id="loan-result">
@@ -919,249 +936,23 @@
       در روش <strong>سود روی اصل وام</strong> (که بسیاری از وام‌ها با همین منطق توضیح داده می‌شوند) سود روی کل مبلغ اولیه حساب می‌شود، حتی اگر بخشی از آن را بازپرداخت کرده باشید. نرخ مؤثر سالانه این روش می‌تواند بسیار بالاتر از نرخ اعلامی باشد.
       در روش <strong>سود روی مانده بدهی</strong> سود فقط روی بدهی باقی‌مانده حساب می‌شود.
     </div>
+    </div><!-- /receipt-column -->
   </div>
+
+  </div><!-- /calculator-workspace -->
 
   <!-- Articles: duplicate an article-card below for each new entry. Keep IDs unique. -->
   <section id="panel-articles" class="panel" aria-labelledby="articles-title">
-    <h2 id="articles-title">مقالات</h2>
+    <span class="eyebrow">برای تصمیم‌های روشن‌تر</span><h1 id="articles-title">خواندنی‌های حساب‌کش</h1>
     <p class="articles-intro">خواندنی‌های کوتاه درباره هزینه واقعی قسط و وام.</p>
 
-    <article class="card article-card" id="article-effective-rate" aria-labelledby="article-effective-rate-title">
-      <h3 id="article-effective-rate-title" tabindex="-1">نرخ مؤثر سالانه چیست و چرا هزینه واقعی قسط را بهتر نشان می‌دهد؟</h3>
-      <p>
-        «فقط ۲۰ درصد گران‌تر» همه داستان خرید قسطی نیست؛ مهم است چقدر پول واقعاً در اختیار شما می‌ماند و چقدر زود آن را پس می‌دهید.
-        نرخ مؤثر سالانه مبلغ و زمان پرداخت‌ها را به یک نرخ قابل مقایسه تبدیل می‌کند تا پشت قسط‌های کوچک و درصدهای تبلیغاتی، هزینه اعتبار را ببینید.
-        برای مقایسه گرانی وام‌ها این عدد بسیار راهگشاست؛ برای فهم فشار روی زندگی، باید مبلغ قسط و توان پرداخت را هم کنارش گذاشت.
-      </p>
+    <article class="card article-card" id="article-rate-guide" aria-labelledby="article-rate-guide-title">
+      <h2 id="article-rate-guide-title" tabindex="-1">راهنمای تفسیر نرخ مؤثر سالانه و اثر تورم</h2>
+      <p class="article-meta">نوشتهٔ حساب‌کش — همراه با منابع نرخ بانکی و آمار تورم</p>
+      <p>برچسب گرانی نتیجه را چطور بخوانیم؟ این راهنما مبنای مقایسهٔ نرخ‌ها را توضیح می‌دهد و نشان می‌دهد چرا اثر تورم را باید جدا از هزینهٔ اعتبار و توان پرداخت قسط سنجید.</p>
       <details class="article-details">
-        <summary><span class="article-read-more">خواندن مقاله کامل و فرمول‌ها</span><span class="article-read-less">بستن متن کامل</span></summary>
-        <div class="article-full">
-          <h4>چرا درصد اضافه‌پرداخت کافی نیست؟</h4>
-          <p>
-            فرض کنید ۱۰۰ میلیون تومان می‌گیرید و یک سال بعد، یکجا ۱۲۰ میلیون پس می‌دهید. هزینه اعتبار در این حالت ۲۰٪ سالانه است.
-            حالا همان ۱۰۰ میلیون را بگیرید و از پایان ماه اول، دوازده قسط ۱۰ میلیونی بدهید. باز هم جمع پرداخت ۱۲۰ میلیون است،
-            اما از همان ماه اول بخشی از پول را پس داده‌اید؛ تمام ۱۰۰ میلیون یک سال در اختیارتان نبوده است.
-            نرخ مؤثر سالانه حالت دوم حدود ۴۱٫۳٪ است. این تفاوت، هزینه زمان و کاهش تدریجی بدهی را نشان می‌دهد.
-          </p>
-          <h4>این عدد دقیقاً چه می‌گوید؟</h4>
-          <p>
-            نرخ مؤثر سالانه، یا <bdi lang="en">EAR</bdi>، هزینه اعتبار را با در نظر گرفتن اثر مرکب در مقیاس یک سال بیان می‌کند.
-            ابتدا از پول دریافتی و برنامه بازپرداخت، نرخ هر دوره را پیدا می‌کنیم؛ سپس آن را به نرخ سالانه تبدیل می‌کنیم.
-            به همین دلیل، پیشنهادهایی با پیش‌پرداخت، مدت و قسط متفاوت را می‌توان با یک مقیاس مشترک سنجید.
-            در اینجا «واقعی» یعنی هزینه‌ای که از جریان پرداخت‌ها به دست می‌آید؛ این نرخ هنوز از تورم تعدیل نشده است.
-          </p>
-          <p>
-            نرخ مؤثر ۴۱٫۳٪ در مثال بالا به معنی پرداخت ۴۱٫۳ میلیون سود نیست؛ اضافه‌پرداخت همان ۲۰ میلیون است.
-            سالانه‌سازی یک معیار مقایسه می‌سازد و به این معنی نیست که قرارداد شما حتماً سود روی سود می‌گیرد یا یک سال دیگر تمدید می‌شود.
-            همچنین <bdi lang="en">APR</bdi> درج‌شده در بعضی قراردادها الزاماً همان <bdi lang="en">EAR</bdi> نیست؛ روش سالانه‌سازی و هزینه‌های منظورشده را باید بررسی کرد.
-          </p>
-          <h4>قدم اول: چقدر اعتبار واقعاً دریافت کرده‌اید؟</h4>
-          <p>
-            در خرید قسطی، قیمت نقدی همان کالا را منهای پیش‌پرداخت کنید. در وام، مبلغ دریافتی را پس از کسر هزینه‌های اجباری ابتدای قرارداد در نظر بگیرید.
-            این مبلغ را <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="P"><mi>P</mi></math> می‌نامیم. اگر قسط اول را همان روز می‌دهید، آن هم یک پرداخت امروز است؛ نباید مثل قسط پایان ماه محاسبه شود.
-            سپرده‌ای که بعداً برمی‌گردد هزینه قطعی نیست و باید بازگشت آن هم در جریان نقدی ثبت شود.
-          </p>
-          <h4>راهنمای نمادها؛ هر حرف نماینده چه چیزی است؟</h4>
-          <p>حروف فرمول فقط نام کوتاه عددهای مسئله‌اند. در مثال ۱۰۰ میلیون تومان و دوازده قسط ۱۰ میلیونی، این‌طور خوانده می‌شوند:</p>
-          <dl class="article-symbols">
-            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="P"><mi>P</mi></math> — اعتبار اولیه</dt><dd>پولی که امروز واقعاً تأمین مالی شده است؛ در مثال ما ۱۰۰ میلیون تومان. در خرید کالای ۱۰۰ میلیونی با پیش‌پرداخت ۲۰ میلیونی، این عدد ۸۰ میلیون تومان است.</dd>
-            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="A"><mi>A</mi></math> — مبلغ ثابت هر قسط</dt><dd>وقتی همه قسط‌ها برابرند، مبلغ هر قسط را با این حرف نشان می‌دهیم؛ اینجا ۱۰ میلیون تومان، نه مجموع پرداخت‌ها.</dd>
-            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="n"><mi>n</mi></math> — تعداد دوره‌های ماهانه</dt><dd>در مثالِ بدون تنفس، ۱۲ ماه و ۱۲ قسط داریم. در معادله عمومی ماهانه، ماه‌های بدون پرداخت هم جزو دوره‌ها هستند؛ پس تعداد دوره‌ها همیشه برابر تعداد پرداخت‌های غیرصفر نیست.</dd>
-            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="t"><mi>t</mi></math> — شماره ماه پرداخت</dt><dd>فاصله پرداخت از امروز به ماه: امروز صفر، پایان ماه اول ۱، پایان ماه دوم ۲ و همین‌طور تا آخر برنامه.</dd>
-            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="سی زیرنویس تی؛ مبلغ پرداخت ماه تی"><msub><mi>C</mi><mi>t</mi></msub></math> — مبلغ پرداخت در ماه مشخص</dt><dd>«سی زیرنویس تی» یعنی مبلغی که در ماه تی می‌پردازیم؛ زیرنویس، شماره ماه است و نشانه ضرب نیست. مثلاً پرداخت ماه سوم می‌تواند ۱۰ میلیون و پرداخت ماه چهارم ۱۵ میلیون باشد. اگر آن ماه قسط نداریم، مبلغ صفر است.</dd>
-            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="r"><mi>r</mi></math> — نرخ ماهانه مجهول</dt><dd>عددی که محاسبه‌گر باید پیدا کند. در فرمول به صورت اعشاری نوشته می‌شود: نرخ ۲٪ یعنی ۰٫۰۲. نرخ به تومان نیست و با مبلغ قسط فرق دارد.</dd>
-            <dt><bdi lang="en">EAR</bdi> — نرخ مؤثر سالانه</dt><dd>نرخ ماهانه پس از تبدیل به مقیاس یک سال با اثر مرکب. نتیجه ۰٫۴۱۳ در فرمول یعنی حدود ۴۱٫۳٪ در نمایش درصدی.</dd>
-          </dl>
-          <p>
-            در فرمول‌های بعدی، <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="j"><mi>j</mi></math> نرخ اسمی سالانه و <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="m"><mi>m</mi></math> تعداد دوره‌های ترکیب در یک سال است؛ برای دوره ماهانه، این تعداد ۱۲ است.
-            <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="i"><mi>i</mi></math> نرخ مؤثر سالانه در معادله زمان‌بندی عمومی است. زمان در آن معادله به سال نوشته می‌شود؛ با شماره ماه در معادله ماهانه اشتباه نگیرید.
-          </p>
-          <h4>قدم دوم: نرخ ماهانه را از قسط‌ها پیدا کنید</h4>
-          <p>
-            برای <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="n"><mi>n</mi></math> قسط مساوی ماهانه به مبلغ <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="A"><mi>A</mi></math>، با اولین قسط در پایان ماه اول، نرخ ماهانه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="r"><mi>r</mi></math> باید این رابطه را برقرار کند:
-          </p>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="اصل اعتبار برابر مجموع ارزش امروز اقساط است"><mrow><mi>P</mi><mo>=</mo><mfrac><mi>A</mi><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow></mfrac><mo>+</mo><mfrac><mi>A</mi><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mn>2</mn></msup></mfrac><mo>+</mo><mo>⋯</mo><mo>+</mo><mfrac><mi>A</mi><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>n</mi></msup></mfrac></mrow></math></div>
-          <p>
-            کسر اول مربوط به قسط ماه اول است و کسر دوم به قسط ماه دوم. هرچه پرداخت دورتر باشد، توان مخرج بزرگ‌تر می‌شود.
-            «ارزش امروز» یعنی چه مبلغی در زمان حاضر، با نرخ فرض‌شده، معادل آن پرداخت آینده است.
-            مثلاً با نرخ ماهانه ۲٪، پرداخت ۱۰٫۲ میلیون تومان در پایان ماه اول، ارزش امروزیِ ۱۰ میلیون تومان دارد؛ چون ۱۰٫۲ را بر ۱٫۰۲ تقسیم می‌کنیم.
-            برای پیدا کردن نرخ قرارداد، همین کار را برای تمام قسط‌ها انجام می‌دهیم و مجموع را با اعتبار اولیه می‌سنجیم.
-          </p>
-          <p>شکل کوتاه همان رابطه برای قسط‌های مساوی و نرخ غیرصفر:</p>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="فرمول ارزش فعلی اقساط مساوی"><mrow><mi>P</mi><mo>=</mo><mi>A</mi><mo>×</mo><mfrac><mrow><mn>1</mn><mo>−</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mrow><mo>−</mo><mi>n</mi></mrow></msup></mrow><mi>r</mi></mfrac></mrow></math></div>
-          <p>
-            تقسیم هر قسط بر توان متناظرِ <bdi class="inline-code" dir="ltr">1+r</bdi>، ارزش آن پرداخت آینده را به امروز برمی‌گرداند.
-            نرخ درست نرخی است که مجموع این ارزش‌ها دقیقاً برابر اعتبار دریافتی شود.
-            معمولاً <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="r"><mi>r</mi></math> را با روش عددی و آزمودن نرخ‌ها پیدا می‌کنیم؛ تقسیم سود کل بر اصل وام و تعداد ماه‌ها جای این محاسبه را نمی‌گیرد.
-            اگر نرخ صفر باشد، رابطه ساده می‌شود: <bdi class="inline-code" dir="ltr">P = n × A</bdi>.
-          </p>
-          <h4>قدم سوم: نرخ ماهانه را سالانه کنید</h4>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="نرخ مؤثر سالانه برابر یک به علاوه نرخ ماهانه به توان دوازده منهای یک است"><mrow><mi mathvariant="normal">EAR</mi><mo>=</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mn>12</mn></msup><mo>−</mo><mn>1</mn></mrow></math></div>
-          <p>
-            نرخ‌ها در فرمول اعشاری‌اند؛ برای نمایش درصد، نتیجه را در ۱۰۰ ضرب کنید.
-            نرخ ماهانه ۲٪ یعنی <bdi class="inline-code" dir="ltr">r = 0.02</bdi> و نرخ مؤثر سالانه‌اش حدود ۲۶٫۸٪ است، نه ۲۴٪.
-            در مثال ۱۰۰ میلیون و دوازده قسط ۱۰ میلیونی، حل معادله نرخ ماهانه حدود ۲٫۹۲٪ و نرخ مؤثر سالانه حدود ۴۱٫۳٪ می‌دهد.
-          </p>
-          <p>
-            اگر نرخ اسمی سالانه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="j"><mi>j</mi></math> با <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="m"><mi>m</mi></math> دوره ترکیب در سال داده شده باشد، تبدیل آن چنین است:
-          </p>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="تبدیل نرخ اسمی به نرخ مؤثر سالانه"><mrow><mi mathvariant="normal">EAR</mi><mo>=</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mfrac><mi>j</mi><mi>m</mi></mfrac><mo>)</mo></mrow><mi>m</mi></msup><mo>−</mo><mn>1</mn></mrow></math></div>
-          <p>
-            این تبدیل به‌تنهایی هزینه‌های جانبی را وارد نمی‌کند. برای قرارداد دارای کارمزد، باید نرخ را از مبلغ خالص دریافتی و همه پرداخت‌های مربوط به اعتبار استخراج کرد.
-          </p>
-          <h4>اگر مبلغ یا زمان قسط‌ها متفاوت باشد چه؟</h4>
-          <p>
-            برای هر پرداخت <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="مبلغ پرداخت شماره کا"><msub><mi>C</mi><mi>k</mi></msub></math>، زمان آن از امروز را به سال با <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="زمان پرداخت شماره کا بر حسب سال"><msub><mi>t</mi><mi>k</mi></msub></math> بنویسید. نرخ سالانه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="i"><mi>i</mi></math> از رابطه عمومی زیر به دست می‌آید:
-          </p>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="اعتبار دریافتی برابر مجموع پرداخت‌های تنزیل‌شده با نرخ سالانه است"><mrow><mi>P</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><msub><mi>C</mi><mi>k</mi></msub><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>i</mi><mo>)</mo></mrow><msub><mi>t</mi><mi>k</mi></msub></msup></mfrac></mrow></math></div>
-          <p>
-            برای پرداخت ماه سوم، <bdi class="inline-code" dir="ltr">tₖ = 3/12</bdi> است؛ برای پرداخت امروز، زمان صفر است و مبلغ بدون تنزیل حساب می‌شود.
-            در برنامه مبتنی بر تاریخ دقیق، فاصله روزها و قرارداد شمارش روز هم اهمیت دارند.
-            حساب‌کش اقساط را بر مبنای دوره‌های ماهانه محاسبه می‌کند؛ گزینه اقساط متغیر برای مبلغ‌های متفاوت در همین دوره‌هاست، نه تاریخ‌های دلخواه.
-          </p>
-          <h4>پشت دکمه محاسبه، دقیقاً چه معادله‌ای حل می‌شود؟</h4>
-          <p>
-            مجهول ما نرخ ماهانه است، نه مبلغ سود کل. مبلغ دریافتی و قسط‌ها را می‌دانیم و دنبال نرخی می‌گردیم که ارزش امروز پرداخت‌های آینده را با پولی که امروز گرفته‌ایم برابر کند.
-            اگر مبلغ قسط ماه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="t"><mi>t</mi></math> را <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="سی زیرنویس تی؛ مبلغ پرداخت ماه تی"><msub><mi>C</mi><mi>t</mi></msub></math> بنامیم و اولین پرداخت پایان ماه اول باشد، مسئله به پیدا کردن ریشه تابع زیر تبدیل می‌شود:
-          </p>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="معادله ارزش فعلی خالص؛ مجموع ارزش امروز پرداخت‌ها منهای اعتبار برابر صفر"><mrow><mi>f</mi><mo>(</mo><mi>r</mi><mo>)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><msub><mi>C</mi><mi>t</mi></msub><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>t</mi></msup></mfrac><mo>−</mo><mi>P</mi><mo>=</mo><mn>0</mn></mrow></math></div>
-          <p>
-            تابع <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="f"><mi>f</mi></math> اختلاف میان ارزش امروز قسط‌ها و اعتبار دریافتی است. اگر مثبت باشد، نرخ آزمایشی پایین است و باید آن را بیشتر کنیم؛
-            اگر منفی باشد، بیش از اندازه تنزیل کرده‌ایم و باید نرخ را پایین بیاوریم. در نقطه صفر، دو طرف معامله از نظر ارزش زمانی پول برابر می‌شوند.
-            این همان ایده نرخ بازده داخلی یا IRR است: برای وام‌گیرنده دریافت اولیه مثبت و بازپرداخت‌ها منفی‌اند؛ عوض کردن علامت همه جریان‌ها، ریشه را تغییر نمی‌دهد.
-          </p>
-          <p>
-            در این فرمول <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="سی زیرنویس تی؛ مبلغ پرداخت ماه تی"><msub><mi>C</mi><mi>t</mi></msub></math> مقدار مثبتِ بازپرداخت است. ماه بدون پرداخت با مقدار صفر وارد می‌شود و زمان قسط‌های بعدی را جلو نمی‌کشد.
-            برای قسط روز دریافت، یک جمله با توان صفر اضافه می‌شود. همه مبلغ‌ها باید واحد یکسان داشته باشند؛ تومان یا ریال بودن، اگر برای همه یکسان باشد، نرخ را عوض نمی‌کند.
-          </p>
-          <h4>چرا جواب را با یک تقسیم ساده پیدا نمی‌کنیم؟</h4>
-          <p>
-            نرخ در مخرج چندین جمله و با توان‌های متفاوت ظاهر می‌شود. برای یک برنامه عمومی پرداخت، فرمول ساده‌ای که نرخ را مستقیم از مبلغ‌ها جدا کند نداریم؛
-            به‌جای آن، رایانه نرخ‌های آزمایشی را با یک قاعده مشخص اصلاح می‌کند تا خطای معادله کوچک شود.
-            برای یک دریافت اولیه و بازپرداخت‌های مثبت آینده، ارزش فعلی با افزایش نرخ کاهش می‌یابد؛ بنابراین اگر ریشه‌ای در بازه وجود داشته باشد، یکتا است.
-            در جریان‌های پیچیده با چند دریافت و پرداخت متناوب، این تضمین برقرار نیست و ممکن است چند نرخ یا هیچ نرخ قابل استفاده‌ای به دست آید.
-          </p>
-          <h4>روش نصف‌کردن بازه؛ مسیر محاسبه خرید قسطی</h4>
-          <p>
-            ابتدا دو نرخ پیدا می‌کنیم که <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="f"><mi>f</mi></math> در یکی مثبت و در دیگری منفی باشد. نرخ وسط بازه را امتحان می‌کنیم؛
-            با توجه به علامت جواب، نیمه‌ای را نگه می‌داریم که ریشه در آن است. با هر مرحله، عرض بازه نصف می‌شود.
-            این روش مشتق نمی‌خواهد و برای تابع پیوسته با دو سرِ دارای علامت مخالف، ریشه را در بازه نگه می‌دارد.
-          </p>
-          <p>
-            در مثال ۱۰۰ میلیون و دوازده قسط ۱۰ میلیونی، ارزش امروز اقساط با نرخ ماهانه ۱٪ حدود ۱۱۲٫۵۵ میلیون است و از اعتبار بیشتر می‌شود؛
-            نرخ درست باید بالاتر باشد. محاسبه به حدود ۲٫۹۲۲۸۵۴٪ ماهانه می‌رسد و پس از سالانه‌سازی، ۴۱٫۳٪ به دست می‌آید.
-            در بخش «خرید قسطی / وام» حساب‌کش، چه قسط‌ها مساوی باشند و چه متغیر، همین روش نصف‌کردن بازه به کار می‌رود.
-          </p>
-          <h4>نیوتن–رافسون چیست و چطور حدس را بهتر می‌کند؟</h4>
-          <p>
-            نیوتن–رافسون علاوه بر مقدار خطا، از شیب تابع هم استفاده می‌کند. از یک نرخ اولیه شروع می‌کنیم، خط مماس تابع را در آن نقطه در نظر می‌گیریم
-            و محل برخورد آن با محور صفر را حدس بعدی قرار می‌دهیم. رابطه هر گام چنین است؛ <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="k"><mi>k</mi></math> شماره تکرار است، نه ماه پرداخت:
-          </p>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="گام نیوتن رافسون؛ نرخ جدید برابر نرخ قبلی منهای تابع تقسیم بر مشتق"><mrow><msub><mi>r</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>r</mi><mi>k</mi></msub><mo>−</mo><mfrac><mrow><mi>f</mi><mo>(</mo><msub><mi>r</mi><mi>k</mi></msub><mo>)</mo></mrow><mrow><msup><mi>f</mi><mo>′</mo></msup><mo>(</mo><msub><mi>r</mi><mi>k</mi></msub><mo>)</mo></mrow></mfrac></mrow></math></div>
-          <p>
-            در این رابطه، <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="حدس نرخ در تکرار کا"><msub><mi>r</mi><mi>k</mi></msub></math> نرخ حدس‌زده‌شده در مرحله فعلی و <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="حدس نرخ در تکرار بعدی"><msub><mi>r</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub></math> حدس بعدی است.
-            مقدار تابع، خطای پولیِ حدس فعلی را نشان می‌دهد؛ مشتق، سرعت تغییر این خطا با تغییر نرخ را بیان می‌کند.
-            تقسیم خطا بر شیب به ما می‌گوید نرخ را تقریباً چقدر جابه‌جا کنیم. در مثال ما، حدس ۱٪ ارزش اقساط را زیاد نشان می‌دهد؛ گام نیوتن نرخ را بالاتر می‌برد تا این اختلاف کمتر شود.
-          </p>
-          <p>برای تابع ارزش فعلی بالا، مشتق نسبت به نرخ ماهانه برابر است با:</p>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="مشتق تابع ارزش فعلی نسبت به نرخ ماهانه"><mrow><msup><mi>f</mi><mo>′</mo></msup><mo>(</mo><mi>r</mi><mo>)</mo><mo>=</mo><mo>−</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mrow><mi>t</mi><mo>×</mo><msub><mi>C</mi><mi>t</mi></msub></mrow><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msup></mfrac></mrow></math></div>
-          <p>
-            نماد ∑ یعنی جمله را برای تک‌تک ماه‌ها حساب کن و جواب‌ها را جمع بزن.
-            عدد زیر نماد جمع، ماه شروع و عدد بالای آن، ماه پایان است. علامت پریم کنار نام تابع، مشتق را نشان می‌دهد، نه یک مبلغ یا نرخ تازه.
-            توانِ «شماره ماه به‌علاوه یک» در مخرج از مشتق گرفتن به دست می‌آید؛ زمان واقعی پرداخت یک ماه بیشتر نشده است.
-          </p>
-          <p>
-            منفی بودن مشتق برای پرداخت‌های مثبت آینده، همان کاهش ارزش فعلی با افزایش نرخ را بیان می‌کند.
-            در مثال مقاله، شروع از نرخ ماهانه ۱٪، به‌ترتیب حدس‌های حدود ۲٫۷۶۴۹۱۵٪، ۲٫۹۲۱۷۵۶٪ و ۲٫۹۲۲۸۵۴٪ را می‌دهد.
-            این دنباله نمونه آموزشیِ نیوتن روی معادله ارزش فعلی است؛ مسیر خرید قسطی سایت همان نصف‌کردن بازه است.
-          </p>
-          <p>
-            نیوتن در نزدیکی یک ریشه مناسب می‌تواند بسیار سریع باشد، ولی هر حدس اولیه‌ای الزاماً به جواب نمی‌رسد.
-            مشتق نزدیک صفر، جهش به نرخ نامعتبر یا رسیدن به سقف تکرار می‌تواند مشکل ایجاد کند.
-            کوچک شدن تغییر نرخ به‌تنهایی کافی نیست؛ برای ارزیابی جواب باید مبلغ‌ها را با نرخ پیدا‌شده دوباره در معادله گذاشت و خطای باقی‌مانده را هم سنجید.
-          </p>
-          <h4>در کد حساب‌کش کدام روش استفاده شده است؟</h4>
-          <ul>
-            <li><strong>خرید قسطی و وام با قسط معلوم:</strong> تابع <bdi class="inline-code" dir="ltr">solveAnnualEffectiveVariable</bdi> معادله ارزش فعلی را با نصف‌کردن بازه حل می‌کند؛ پرداخت امروز را هم با توان صفر لحاظ می‌کند.</li>
-            <li><strong>وام بانکی بدون تنفس:</strong> تابع <bdi class="inline-code" dir="ltr">solveRate</bdi> از تکرار نیوتنی برای معادله مبلغ قسط زیر استفاده می‌کند. برای نرخ غیرصفر، ریشه این معادله با معادله ارزش فعلی اقساط مساوی یکسان است.</li>
-          </ul>
-          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="معادله مبلغ قسط در حلگر اقساط مساوی"><mrow><mi>g</mi><mo>(</mo><mi>r</mi><mo>)</mo><mo>=</mo><mfrac><mrow><mi>P</mi><mo>×</mo><mi>r</mi><mo>×</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>n</mi></msup></mrow><mrow><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>n</mi></msup><mo>−</mo><mn>1</mn></mrow></mfrac><mo>−</mo><mi>A</mi><mo>=</mo><mn>0</mn></mrow></math></div>
-          <p>
-            در وام دارای دوره تنفس، تابع <bdi class="inline-code" dir="ltr">solveAnnualEffectiveWithGrace</bdi> ارزش فعلی پرداخت‌های زمان تنفس و اقساط پس از آن را با هم جمع می‌کند
-            و با نیوتن–رافسون به دنبال برابر کردن این مجموع با مبلغ اولیه وام می‌گردد.
-            اگر در زمان تنفس فقط سود پرداخت شود، آن پرداخت‌ها نیز وارد معادله می‌شوند؛ اگر پرداختی نباشد، مقدار آن ماه‌ها صفر است.
-            کد ابتدا طبق روش قرارداد، مبلغ اقساط را می‌سازد و سپس نرخ مؤثر همین برنامه پرداخت را استخراج می‌کند.
-          </p>
-          <p>
-            نمونه‌های پایتون لینک‌شده از تابع <bdi class="inline-code" dir="ltr">numpy_financial.irr</bdi> استفاده می‌کنند؛ فراخوانی IRR به‌خودی‌خود به معنی استفاده از نیوتن نیست.
-            IRR نام نرخ مورد جست‌وجو است، در حالی که نیوتن و نصف‌کردن بازه روش‌های حل معادله‌اند.
-            جزئیات پیاده‌سازی سایت را می‌توانید در <a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/hesabkesh/calc.js" target="_blank" rel="noopener noreferrer">کد محاسبات حساب‌کش</a> ببینید.
-          </p>
-          <p class="article-meta">
-            توضیح روش‌های عددی در مستندات SciPy:
-            <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.newton.html" target="_blank" rel="noopener noreferrer">نیوتن–رافسون</a> و
-            <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.bisect.html" target="_blank" rel="noopener noreferrer">نصف‌کردن بازه</a>.
-          </p>
-          <h4>بهترین معیار برای گرانی اعتبار؛ همراه با دو عدد دیگر برای فشار مالی</h4>
-          <p>
-            نرخ مؤثر سالانه برای مقایسه هزینه نسبی اعتبار، از درصد اضافه‌پرداخت یا مبلغ قسط به‌تنهایی دقیق‌تر است؛
-            چون هم مبلغ اعتبار و هم مدت استفاده از آن را در نظر می‌گیرد. اما وام بزرگ با نرخ پایین هم می‌تواند قسطی فراتر از توان شما داشته باشد.
-            برای تصمیم نهایی، این سه عدد را کنار هم بخوانید:
-          </p>
-          <ul>
-            <li><strong>نرخ مؤثر سالانه:</strong> اعتبار نسبت به مبلغ و زمان استفاده چقدر گران است؟</li>
-            <li><strong>مجموع اضافه‌پرداخت:</strong> در کل چند تومان بیشتر می‌پردازید؟</li>
-            <li><strong>مجموع قسط‌های ماهانه:</strong> پس از مخارج ضروری، چقدر از درآمدتان برای پرداخت و هزینه‌های پیش‌بینی‌نشده باقی می‌ماند؟</li>
-          </ul>
-          <p>
-            تورم بالا ممکن است هزینه تعدیل‌شده اعتبار را کاهش دهد، اما مبلغ قرارداد را کم نمی‌کند و افزایش درآمد شما را تضمین نمی‌کند.
-            پایین‌تر بودن نرخ وام از تورم، به‌تنهایی برای مناسب بودن خرید کافی نیست.
-          </p>
-          <h4>کدهای محاسبه را ببینید و اجرا کنید</h4>
-          <p>
-            کدهای این پروژه در <a href="https://github.com/sjbahmani/cashflow-rate-calculator" target="_blank" rel="noopener noreferrer">مخزن گیت‌هاب حساب‌کش</a>
-            در دسترس‌اند. برای بررسی همین مثال ۱۰۰ میلیون تومان و دوازده قسط ۱۰ میلیونی،
-            <a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/test2.py" target="_blank" rel="noopener noreferrer">نمونه پایتون محاسبه نرخ مؤثر از جریان نقدی</a>
-            را ببینید؛ نرخ ماهانه با تابع <bdi lang="en">numpy_financial.irr</bdi> محاسبه و سپس سالانه می‌شود.
-          </p>
-          <ul>
-            <li><a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/test3.py" target="_blank" rel="noopener noreferrer">نمونه پایتون با ماه‌های بدون پرداخت و بازپرداخت اصل وام در پایان</a></li>
-            <li><a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/sample_numpy_financial.py" target="_blank" rel="noopener noreferrer">مثال‌های پایتون برای قسط، ارزش فعلی و نرخ بازده داخلی</a></li>
-          </ul>
-          <p class="article-meta">
-            منابع برای مطالعه بیشتر:
-            <a href="https://support.microsoft.com/en-us/excel/functions/effect-function" target="_blank" rel="noopener noreferrer">تبدیل نرخ اسمی به مؤثر در مستندات مایکروسافت</a>؛
-            <a href="https://www.consumerfinance.gov/ask-cfpb/how-do-i-compare-auto-loan-offers-what-should-i-look-at-besides-the-monthly-payment-en-753/" target="_blank" rel="noopener noreferrer">راهنمای مقایسه وام و هزینه کل از اداره حمایت مالی مصرف‌کننده آمریکا</a>.
-          </p>
-        </div>
-      </details>
-    </article>
-
-    <article class="card article-card" id="article-installment-impact" aria-labelledby="article-installment-impact-title">
-      <h3 id="article-installment-impact-title">خرید قسطی؛ آسودگی امروز، فشار فردا؟</h3>
-      <p>
-        خرید قسطی کمک می‌کند هزینه یک خرید بزرگ را در چند ماه بپردازیم، اما راحتی امروز ممکن است فشار مالی ماه‌های بعد را پنهان کند.
-        نوشدارو در این مقاله توضیح می‌دهد که چطور میل به خرید فوری و حفظ سطح زندگی، ما را به پذیرفتن بدهی‌هایی ترغیب می‌کند که بازپرداختشان را دست‌کم می‌گیریم.
-      </p>
-      <p>
-        مبلغ قسط هم به‌تنهایی نشان نمی‌دهد یک پیشنهاد چقدر گران است. دو خرید با مجموع پرداخت یکسان، بسته به پیش‌پرداخت و زمان‌بندی اقساط،
-        می‌توانند نرخ مؤثر سالانه متفاوتی داشته باشند. قسط کمتر، اگر با پیش‌پرداخت بیشتر همراه باشد، لزوماً معامله بهتری نیست.
-      </p>
-      <p>
-        پیش از خرید، باید علاوه بر قیمت نقدی و مبلغ اقساط، کارمزدها، جریمه دیرکرد و شرایط تسویه زودتر از موعد را هم بررسی کنیم.
-        مجموع قسط‌های فعلی و خرید تازه را کنار درآمد و مخارج ضروری امروزمان بگذاریم تا ببینیم هر ماه چقدر برای هزینه‌های دیگر باقی می‌ماند.
-        چند قسط کوچک می‌توانند روی هم بخش بزرگی از درآمد را بگیرند و برای ماه‌های بعد جای کمی برای هزینه‌های پیش‌بینی‌نشده بگذارند.
-        اگر بازپرداخت فقط با افزایش حقوق یا بهتر شدن اوضاع اقتصادی ممکن باشد، تعهدی پذیرفته‌ایم که از توان فعلی‌مان بیشتر است.
-        حتی احتمال گران‌تر شدن کالا هم به‌تنهایی دلیل کافی برای خرید قسطی نیست؛ فشار اقساط ممکن است از هزینه صبر کردن بیشتر باشد.
-      </p>
-      <a href="https://nooshdaroo.ir/secure-online-shopping/installment-buying-financial-impact/" target="_blank" rel="noopener noreferrer">خواندن مقاله کامل در نوشدارو</a>
-    </article>
-  </section>
-
-  <!-- Reference box -->
-  <details class="ref-box" id="ref-box">
-    <summary>راهنمای تفسیر نرخ مؤثر سالانه، تورم و منابع</summary>
-    <div class="ref-body">
+        <summary><span class="article-read-more">خواندن راهنمای کامل و منابع</span><span class="article-read-less">بستن متن کامل</span></summary>
+        <div class="article-full rate-guide-body">
       <div class="ref-baseline">
         آخرین بررسی منابع: <strong>۲۸ مهر ۱۴۰۵</strong>
         <span>— تازه‌ترین آمار تورم یافت‌شده: شهریور ۱۴۰۵</span>
@@ -1210,11 +1001,258 @@
         <a href="https://www.didbaniran.ir/بخش-اقتصادی-4/389413-تورم-شهریور-به-درصد-رسید" target="_blank" rel="noopener noreferrer">گزارش تورم شهریور ۱۴۰۵ به نقل از مرکز آمار</a>.
         دسترسی مستقیم به صفحات بانک مرکزی و مرکز آمار در این بررسی ممکن نشد؛ ارقام از گزارش‌های بازنشرشده بررسی شدند.
       </p>
+
+        </div>
+      </details>
+    </article>
+
+    <article class="card article-card" id="article-effective-rate" aria-labelledby="article-effective-rate-title">
+      <h2 id="article-effective-rate-title" tabindex="-1">نرخ مؤثر سالانه چیست و چرا هزینه واقعی قسط را بهتر نشان می‌دهد؟</h2>
+      <p>
+        «فقط ۲۰ درصد گران‌تر» همه داستان خرید قسطی نیست؛ مهم است چقدر پول واقعاً در اختیار شما می‌ماند و چقدر زود آن را پس می‌دهید.
+        نرخ مؤثر سالانه مبلغ و زمان پرداخت‌ها را به یک نرخ قابل مقایسه تبدیل می‌کند تا پشت قسط‌های کوچک و درصدهای تبلیغاتی، هزینه اعتبار را ببینید.
+        برای مقایسه گرانی وام‌ها این عدد بسیار راهگشاست؛ برای فهم فشار روی زندگی، باید مبلغ قسط و توان پرداخت را هم کنارش گذاشت.
+      </p>
+      <details class="article-details">
+        <summary><span class="article-read-more">خواندن مقاله کامل و فرمول‌ها</span><span class="article-read-less">بستن متن کامل</span></summary>
+        <div class="article-full">
+          <h3>چرا درصد اضافه‌پرداخت کافی نیست؟</h3>
+          <p>
+            فرض کنید ۱۰۰ میلیون تومان می‌گیرید و یک سال بعد، یکجا ۱۲۰ میلیون پس می‌دهید. هزینه اعتبار در این حالت ۲۰٪ سالانه است.
+            حالا همان ۱۰۰ میلیون را بگیرید و از پایان ماه اول، دوازده قسط ۱۰ میلیونی بدهید. باز هم جمع پرداخت ۱۲۰ میلیون است،
+            اما از همان ماه اول بخشی از پول را پس داده‌اید؛ تمام ۱۰۰ میلیون یک سال در اختیارتان نبوده است.
+            نرخ مؤثر سالانه حالت دوم حدود ۴۱٫۳٪ است. این تفاوت، هزینه زمان و کاهش تدریجی بدهی را نشان می‌دهد.
+          </p>
+          <h3>این عدد دقیقاً چه می‌گوید؟</h3>
+          <p>
+            نرخ مؤثر سالانه، یا <bdi lang="en">EAR</bdi>، هزینه اعتبار را با در نظر گرفتن اثر مرکب در مقیاس یک سال بیان می‌کند.
+            ابتدا از پول دریافتی و برنامه بازپرداخت، نرخ هر دوره را پیدا می‌کنیم؛ سپس آن را به نرخ سالانه تبدیل می‌کنیم.
+            به همین دلیل، پیشنهادهایی با پیش‌پرداخت، مدت و قسط متفاوت را می‌توان با یک مقیاس مشترک سنجید.
+            در اینجا «واقعی» یعنی هزینه‌ای که از جریان پرداخت‌ها به دست می‌آید؛ این نرخ هنوز از تورم تعدیل نشده است.
+          </p>
+          <p>
+            نرخ مؤثر ۴۱٫۳٪ در مثال بالا به معنی پرداخت ۴۱٫۳ میلیون سود نیست؛ اضافه‌پرداخت همان ۲۰ میلیون است.
+            سالانه‌سازی یک معیار مقایسه می‌سازد و به این معنی نیست که قرارداد شما حتماً سود روی سود می‌گیرد یا یک سال دیگر تمدید می‌شود.
+            همچنین <bdi lang="en">APR</bdi> درج‌شده در بعضی قراردادها الزاماً همان <bdi lang="en">EAR</bdi> نیست؛ روش سالانه‌سازی و هزینه‌های منظورشده را باید بررسی کرد.
+          </p>
+          <h3>قدم اول: چقدر اعتبار واقعاً دریافت کرده‌اید؟</h3>
+          <p>
+            در خرید قسطی، قیمت نقدی همان کالا را منهای پیش‌پرداخت کنید. در وام، مبلغ دریافتی را پس از کسر هزینه‌های اجباری ابتدای قرارداد در نظر بگیرید.
+            این مبلغ را <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="P"><mi>P</mi></math> می‌نامیم. اگر قسط اول را همان روز می‌دهید، آن هم یک پرداخت امروز است؛ نباید مثل قسط پایان ماه محاسبه شود.
+            سپرده‌ای که بعداً برمی‌گردد هزینه قطعی نیست و باید بازگشت آن هم در جریان نقدی ثبت شود.
+          </p>
+          <h3>راهنمای نمادها؛ هر حرف نماینده چه چیزی است؟</h3>
+          <p>حروف فرمول فقط نام کوتاه عددهای مسئله‌اند. در مثال ۱۰۰ میلیون تومان و دوازده قسط ۱۰ میلیونی، این‌طور خوانده می‌شوند:</p>
+          <dl class="article-symbols">
+            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="P"><mi>P</mi></math> — اعتبار اولیه</dt><dd>پولی که امروز واقعاً تأمین مالی شده است؛ در مثال ما ۱۰۰ میلیون تومان. در خرید کالای ۱۰۰ میلیونی با پیش‌پرداخت ۲۰ میلیونی، این عدد ۸۰ میلیون تومان است.</dd>
+            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="A"><mi>A</mi></math> — مبلغ ثابت هر قسط</dt><dd>وقتی همه قسط‌ها برابرند، مبلغ هر قسط را با این حرف نشان می‌دهیم؛ اینجا ۱۰ میلیون تومان، نه مجموع پرداخت‌ها.</dd>
+            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="n"><mi>n</mi></math> — تعداد دوره‌های ماهانه</dt><dd>در مثالِ بدون تنفس، ۱۲ ماه و ۱۲ قسط داریم. در معادله عمومی ماهانه، ماه‌های بدون پرداخت هم جزو دوره‌ها هستند؛ پس تعداد دوره‌ها همیشه برابر تعداد پرداخت‌های غیرصفر نیست.</dd>
+            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="t"><mi>t</mi></math> — شماره ماه پرداخت</dt><dd>فاصله پرداخت از امروز به ماه: امروز صفر، پایان ماه اول ۱، پایان ماه دوم ۲ و همین‌طور تا آخر برنامه.</dd>
+            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="سی زیرنویس تی؛ مبلغ پرداخت ماه تی"><msub><mi>C</mi><mi>t</mi></msub></math> — مبلغ پرداخت در ماه مشخص</dt><dd>«سی زیرنویس تی» یعنی مبلغی که در ماه تی می‌پردازیم؛ زیرنویس، شماره ماه است و نشانه ضرب نیست. مثلاً پرداخت ماه سوم می‌تواند ۱۰ میلیون و پرداخت ماه چهارم ۱۵ میلیون باشد. اگر آن ماه قسط نداریم، مبلغ صفر است.</dd>
+            <dt><math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="r"><mi>r</mi></math> — نرخ ماهانه مجهول</dt><dd>عددی که محاسبه‌گر باید پیدا کند. در فرمول به صورت اعشاری نوشته می‌شود: نرخ ۲٪ یعنی ۰٫۰۲. نرخ به تومان نیست و با مبلغ قسط فرق دارد.</dd>
+            <dt><bdi lang="en">EAR</bdi> — نرخ مؤثر سالانه</dt><dd>نرخ ماهانه پس از تبدیل به مقیاس یک سال با اثر مرکب. نتیجه ۰٫۴۱۳ در فرمول یعنی حدود ۴۱٫۳٪ در نمایش درصدی.</dd>
+          </dl>
+          <p>
+            در فرمول‌های بعدی، <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="j"><mi>j</mi></math> نرخ اسمی سالانه و <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="m"><mi>m</mi></math> تعداد دوره‌های ترکیب در یک سال است؛ برای دوره ماهانه، این تعداد ۱۲ است.
+            <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="i"><mi>i</mi></math> نرخ مؤثر سالانه در معادله زمان‌بندی عمومی است. زمان در آن معادله به سال نوشته می‌شود؛ با شماره ماه در معادله ماهانه اشتباه نگیرید.
+          </p>
+          <h3>قدم دوم: نرخ ماهانه را از قسط‌ها پیدا کنید</h3>
+          <p>
+            برای <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="n"><mi>n</mi></math> قسط مساوی ماهانه به مبلغ <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="A"><mi>A</mi></math>، با اولین قسط در پایان ماه اول، نرخ ماهانه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="r"><mi>r</mi></math> باید این رابطه را برقرار کند:
+          </p>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="اصل اعتبار برابر مجموع ارزش امروز اقساط است"><mrow><mi>P</mi><mo>=</mo><mfrac><mi>A</mi><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow></mfrac><mo>+</mo><mfrac><mi>A</mi><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mn>2</mn></msup></mfrac><mo>+</mo><mo>⋯</mo><mo>+</mo><mfrac><mi>A</mi><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>n</mi></msup></mfrac></mrow></math></div>
+          <p>
+            کسر اول مربوط به قسط ماه اول است و کسر دوم به قسط ماه دوم. هرچه پرداخت دورتر باشد، توان مخرج بزرگ‌تر می‌شود.
+            «ارزش امروز» یعنی چه مبلغی در زمان حاضر، با نرخ فرض‌شده، معادل آن پرداخت آینده است.
+            مثلاً با نرخ ماهانه ۲٪، پرداخت ۱۰٫۲ میلیون تومان در پایان ماه اول، ارزش امروزیِ ۱۰ میلیون تومان دارد؛ چون ۱۰٫۲ را بر ۱٫۰۲ تقسیم می‌کنیم.
+            برای پیدا کردن نرخ قرارداد، همین کار را برای تمام قسط‌ها انجام می‌دهیم و مجموع را با اعتبار اولیه می‌سنجیم.
+          </p>
+          <p>شکل کوتاه همان رابطه برای قسط‌های مساوی و نرخ غیرصفر:</p>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="فرمول ارزش فعلی اقساط مساوی"><mrow><mi>P</mi><mo>=</mo><mi>A</mi><mo>×</mo><mfrac><mrow><mn>1</mn><mo>−</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mrow><mo>−</mo><mi>n</mi></mrow></msup></mrow><mi>r</mi></mfrac></mrow></math></div>
+          <p>
+            تقسیم هر قسط بر توان متناظرِ <bdi class="inline-code" dir="ltr">1+r</bdi>، ارزش آن پرداخت آینده را به امروز برمی‌گرداند.
+            نرخ درست نرخی است که مجموع این ارزش‌ها دقیقاً برابر اعتبار دریافتی شود.
+            معمولاً <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="r"><mi>r</mi></math> را با روش عددی و آزمودن نرخ‌ها پیدا می‌کنیم؛ تقسیم سود کل بر اصل وام و تعداد ماه‌ها جای این محاسبه را نمی‌گیرد.
+            اگر نرخ صفر باشد، رابطه ساده می‌شود: <bdi class="inline-code" dir="ltr">P = n × A</bdi>.
+          </p>
+          <h3>قدم سوم: نرخ ماهانه را سالانه کنید</h3>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="نرخ مؤثر سالانه برابر یک به علاوه نرخ ماهانه به توان دوازده منهای یک است"><mrow><mi mathvariant="normal">EAR</mi><mo>=</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mn>12</mn></msup><mo>−</mo><mn>1</mn></mrow></math></div>
+          <p>
+            نرخ‌ها در فرمول اعشاری‌اند؛ برای نمایش درصد، نتیجه را در ۱۰۰ ضرب کنید.
+            نرخ ماهانه ۲٪ یعنی <bdi class="inline-code" dir="ltr">r = 0.02</bdi> و نرخ مؤثر سالانه‌اش حدود ۲۶٫۸٪ است، نه ۲۴٪.
+            در مثال ۱۰۰ میلیون و دوازده قسط ۱۰ میلیونی، حل معادله نرخ ماهانه حدود ۲٫۹۲٪ و نرخ مؤثر سالانه حدود ۴۱٫۳٪ می‌دهد.
+          </p>
+          <p>
+            اگر نرخ اسمی سالانه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="j"><mi>j</mi></math> با <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="m"><mi>m</mi></math> دوره ترکیب در سال داده شده باشد، تبدیل آن چنین است:
+          </p>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="تبدیل نرخ اسمی به نرخ مؤثر سالانه"><mrow><mi mathvariant="normal">EAR</mi><mo>=</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mfrac><mi>j</mi><mi>m</mi></mfrac><mo>)</mo></mrow><mi>m</mi></msup><mo>−</mo><mn>1</mn></mrow></math></div>
+          <p>
+            این تبدیل به‌تنهایی هزینه‌های جانبی را وارد نمی‌کند. برای قرارداد دارای کارمزد، باید نرخ را از مبلغ خالص دریافتی و همه پرداخت‌های مربوط به اعتبار استخراج کرد.
+          </p>
+          <h3>اگر مبلغ یا زمان قسط‌ها متفاوت باشد چه؟</h3>
+          <p>
+            برای هر پرداخت <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="مبلغ پرداخت شماره کا"><msub><mi>C</mi><mi>k</mi></msub></math>، زمان آن از امروز را به سال با <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="زمان پرداخت شماره کا بر حسب سال"><msub><mi>t</mi><mi>k</mi></msub></math> بنویسید. نرخ سالانه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="i"><mi>i</mi></math> از رابطه عمومی زیر به دست می‌آید:
+          </p>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول؛ برای پیمایش افقی از کلیدهای جهت استفاده کنید"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="اعتبار دریافتی برابر مجموع پرداخت‌های تنزیل‌شده با نرخ سالانه است"><mrow><mi>P</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><msub><mi>C</mi><mi>k</mi></msub><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>i</mi><mo>)</mo></mrow><msub><mi>t</mi><mi>k</mi></msub></msup></mfrac></mrow></math></div>
+          <p>
+            برای پرداخت ماه سوم، <bdi class="inline-code" dir="ltr">tₖ = 3/12</bdi> است؛ برای پرداخت امروز، زمان صفر است و مبلغ بدون تنزیل حساب می‌شود.
+            در برنامه مبتنی بر تاریخ دقیق، فاصله روزها و قرارداد شمارش روز هم اهمیت دارند.
+            حساب‌کش اقساط را بر مبنای دوره‌های ماهانه محاسبه می‌کند؛ گزینه اقساط متغیر برای مبلغ‌های متفاوت در همین دوره‌هاست، نه تاریخ‌های دلخواه.
+          </p>
+          <h3>پشت دکمه محاسبه، دقیقاً چه معادله‌ای حل می‌شود؟</h3>
+          <p>
+            مجهول ما نرخ ماهانه است، نه مبلغ سود کل. مبلغ دریافتی و قسط‌ها را می‌دانیم و دنبال نرخی می‌گردیم که ارزش امروز پرداخت‌های آینده را با پولی که امروز گرفته‌ایم برابر کند.
+            اگر مبلغ قسط ماه <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="t"><mi>t</mi></math> را <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="سی زیرنویس تی؛ مبلغ پرداخت ماه تی"><msub><mi>C</mi><mi>t</mi></msub></math> بنامیم و اولین پرداخت پایان ماه اول باشد، مسئله به پیدا کردن ریشه تابع زیر تبدیل می‌شود:
+          </p>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="معادله ارزش فعلی خالص؛ مجموع ارزش امروز پرداخت‌ها منهای اعتبار برابر صفر"><mrow><mi>f</mi><mo>(</mo><mi>r</mi><mo>)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><msub><mi>C</mi><mi>t</mi></msub><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>t</mi></msup></mfrac><mo>−</mo><mi>P</mi><mo>=</mo><mn>0</mn></mrow></math></div>
+          <p>
+            تابع <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="f"><mi>f</mi></math> اختلاف میان ارزش امروز قسط‌ها و اعتبار دریافتی است. اگر مثبت باشد، نرخ آزمایشی پایین است و باید آن را بیشتر کنیم؛
+            اگر منفی باشد، بیش از اندازه تنزیل کرده‌ایم و باید نرخ را پایین بیاوریم. در نقطه صفر، دو طرف معامله از نظر ارزش زمانی پول برابر می‌شوند.
+            این همان ایده نرخ بازده داخلی یا IRR است: برای وام‌گیرنده دریافت اولیه مثبت و بازپرداخت‌ها منفی‌اند؛ عوض کردن علامت همه جریان‌ها، ریشه را تغییر نمی‌دهد.
+          </p>
+          <p>
+            در این فرمول <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="سی زیرنویس تی؛ مبلغ پرداخت ماه تی"><msub><mi>C</mi><mi>t</mi></msub></math> مقدار مثبتِ بازپرداخت است. ماه بدون پرداخت با مقدار صفر وارد می‌شود و زمان قسط‌های بعدی را جلو نمی‌کشد.
+            برای قسط روز دریافت، یک جمله با توان صفر اضافه می‌شود. همه مبلغ‌ها باید واحد یکسان داشته باشند؛ تومان یا ریال بودن، اگر برای همه یکسان باشد، نرخ را عوض نمی‌کند.
+          </p>
+          <h3>چرا جواب را با یک تقسیم ساده پیدا نمی‌کنیم؟</h3>
+          <p>
+            نرخ در مخرج چندین جمله و با توان‌های متفاوت ظاهر می‌شود. برای یک برنامه عمومی پرداخت، فرمول ساده‌ای که نرخ را مستقیم از مبلغ‌ها جدا کند نداریم؛
+            به‌جای آن، رایانه نرخ‌های آزمایشی را با یک قاعده مشخص اصلاح می‌کند تا خطای معادله کوچک شود.
+            برای یک دریافت اولیه و بازپرداخت‌های مثبت آینده، ارزش فعلی با افزایش نرخ کاهش می‌یابد؛ بنابراین اگر ریشه‌ای در بازه وجود داشته باشد، یکتا است.
+            در جریان‌های پیچیده با چند دریافت و پرداخت متناوب، این تضمین برقرار نیست و ممکن است چند نرخ یا هیچ نرخ قابل استفاده‌ای به دست آید.
+          </p>
+          <h3>روش نصف‌کردن بازه؛ مسیر محاسبه خرید قسطی</h3>
+          <p>
+            ابتدا دو نرخ پیدا می‌کنیم که <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="f"><mi>f</mi></math> در یکی مثبت و در دیگری منفی باشد. نرخ وسط بازه را امتحان می‌کنیم؛
+            با توجه به علامت جواب، نیمه‌ای را نگه می‌داریم که ریشه در آن است. با هر مرحله، عرض بازه نصف می‌شود.
+            این روش مشتق نمی‌خواهد و برای تابع پیوسته با دو سرِ دارای علامت مخالف، ریشه را در بازه نگه می‌دارد.
+          </p>
+          <p>
+            در مثال ۱۰۰ میلیون و دوازده قسط ۱۰ میلیونی، ارزش امروز اقساط با نرخ ماهانه ۱٪ حدود ۱۱۲٫۵۵ میلیون است و از اعتبار بیشتر می‌شود؛
+            نرخ درست باید بالاتر باشد. محاسبه به حدود ۲٫۹۲۲۸۵۴٪ ماهانه می‌رسد و پس از سالانه‌سازی، ۴۱٫۳٪ به دست می‌آید.
+            در بخش «خرید قسطی / وام» حساب‌کش، چه قسط‌ها مساوی باشند و چه متغیر، همین روش نصف‌کردن بازه به کار می‌رود.
+          </p>
+          <h3>نیوتن–رافسون چیست و چطور حدس را بهتر می‌کند؟</h3>
+          <p>
+            نیوتن–رافسون علاوه بر مقدار خطا، از شیب تابع هم استفاده می‌کند. از یک نرخ اولیه شروع می‌کنیم، خط مماس تابع را در آن نقطه در نظر می‌گیریم
+            و محل برخورد آن با محور صفر را حدس بعدی قرار می‌دهیم. رابطه هر گام چنین است؛ <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="k"><mi>k</mi></math> شماره تکرار است، نه ماه پرداخت:
+          </p>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="گام نیوتن رافسون؛ نرخ جدید برابر نرخ قبلی منهای تابع تقسیم بر مشتق"><mrow><msub><mi>r</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>r</mi><mi>k</mi></msub><mo>−</mo><mfrac><mrow><mi>f</mi><mo>(</mo><msub><mi>r</mi><mi>k</mi></msub><mo>)</mo></mrow><mrow><msup><mi>f</mi><mo>′</mo></msup><mo>(</mo><msub><mi>r</mi><mi>k</mi></msub><mo>)</mo></mrow></mfrac></mrow></math></div>
+          <p>
+            در این رابطه، <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="حدس نرخ در تکرار کا"><msub><mi>r</mi><mi>k</mi></msub></math> نرخ حدس‌زده‌شده در مرحله فعلی و <math class="inline-math" xmlns="http://www.w3.org/1998/Math/MathML" dir="ltr" aria-label="حدس نرخ در تکرار بعدی"><msub><mi>r</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub></math> حدس بعدی است.
+            مقدار تابع، خطای پولیِ حدس فعلی را نشان می‌دهد؛ مشتق، سرعت تغییر این خطا با تغییر نرخ را بیان می‌کند.
+            تقسیم خطا بر شیب به ما می‌گوید نرخ را تقریباً چقدر جابه‌جا کنیم. در مثال ما، حدس ۱٪ ارزش اقساط را زیاد نشان می‌دهد؛ گام نیوتن نرخ را بالاتر می‌برد تا این اختلاف کمتر شود.
+          </p>
+          <p>برای تابع ارزش فعلی بالا، مشتق نسبت به نرخ ماهانه برابر است با:</p>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="مشتق تابع ارزش فعلی نسبت به نرخ ماهانه"><mrow><msup><mi>f</mi><mo>′</mo></msup><mo>(</mo><mi>r</mi><mo>)</mo><mo>=</mo><mo>−</mo><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mrow><mi>t</mi><mo>×</mo><msub><mi>C</mi><mi>t</mi></msub></mrow><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msup></mfrac></mrow></math></div>
+          <p>
+            نماد ∑ یعنی جمله را برای تک‌تک ماه‌ها حساب کن و جواب‌ها را جمع بزن.
+            عدد زیر نماد جمع، ماه شروع و عدد بالای آن، ماه پایان است. علامت پریم کنار نام تابع، مشتق را نشان می‌دهد، نه یک مبلغ یا نرخ تازه.
+            توانِ «شماره ماه به‌علاوه یک» در مخرج از مشتق گرفتن به دست می‌آید؛ زمان واقعی پرداخت یک ماه بیشتر نشده است.
+          </p>
+          <p>
+            منفی بودن مشتق برای پرداخت‌های مثبت آینده، همان کاهش ارزش فعلی با افزایش نرخ را بیان می‌کند.
+            در مثال مقاله، شروع از نرخ ماهانه ۱٪، به‌ترتیب حدس‌های حدود ۲٫۷۶۴۹۱۵٪، ۲٫۹۲۱۷۵۶٪ و ۲٫۹۲۲۸۵۴٪ را می‌دهد.
+            این دنباله نمونه آموزشیِ نیوتن روی معادله ارزش فعلی است؛ مسیر خرید قسطی سایت همان نصف‌کردن بازه است.
+          </p>
+          <p>
+            نیوتن در نزدیکی یک ریشه مناسب می‌تواند بسیار سریع باشد، ولی هر حدس اولیه‌ای الزاماً به جواب نمی‌رسد.
+            مشتق نزدیک صفر، جهش به نرخ نامعتبر یا رسیدن به سقف تکرار می‌تواند مشکل ایجاد کند.
+            کوچک شدن تغییر نرخ به‌تنهایی کافی نیست؛ برای ارزیابی جواب باید مبلغ‌ها را با نرخ پیدا‌شده دوباره در معادله گذاشت و خطای باقی‌مانده را هم سنجید.
+          </p>
+          <h3>در کد حساب‌کش کدام روش استفاده شده است؟</h3>
+          <ul>
+            <li><strong>خرید قسطی و وام با قسط معلوم:</strong> تابع <bdi class="inline-code" dir="ltr">solveAnnualEffectiveVariable</bdi> معادله ارزش فعلی را با نصف‌کردن بازه حل می‌کند؛ پرداخت امروز را هم با توان صفر لحاظ می‌کند.</li>
+            <li><strong>وام بانکی بدون تنفس:</strong> تابع <bdi class="inline-code" dir="ltr">solveRate</bdi> از تکرار نیوتنی برای معادله مبلغ قسط زیر استفاده می‌کند. برای نرخ غیرصفر، ریشه این معادله با معادله ارزش فعلی اقساط مساوی یکسان است.</li>
+          </ul>
+          <div class="article-formula" dir="ltr" tabindex="0" role="group" aria-label="فرمول"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block" dir="ltr" aria-label="معادله مبلغ قسط در حلگر اقساط مساوی"><mrow><mi>g</mi><mo>(</mo><mi>r</mi><mo>)</mo><mo>=</mo><mfrac><mrow><mi>P</mi><mo>×</mo><mi>r</mi><mo>×</mo><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>n</mi></msup></mrow><mrow><msup><mrow><mo>(</mo><mn>1</mn><mo>+</mo><mi>r</mi><mo>)</mo></mrow><mi>n</mi></msup><mo>−</mo><mn>1</mn></mrow></mfrac><mo>−</mo><mi>A</mi><mo>=</mo><mn>0</mn></mrow></math></div>
+          <p>
+            در وام دارای دوره تنفس، تابع <bdi class="inline-code" dir="ltr">solveAnnualEffectiveWithGrace</bdi> ارزش فعلی پرداخت‌های زمان تنفس و اقساط پس از آن را با هم جمع می‌کند
+            و با نیوتن–رافسون به دنبال برابر کردن این مجموع با مبلغ اولیه وام می‌گردد.
+            اگر در زمان تنفس فقط سود پرداخت شود، آن پرداخت‌ها نیز وارد معادله می‌شوند؛ اگر پرداختی نباشد، مقدار آن ماه‌ها صفر است.
+            کد ابتدا طبق روش قرارداد، مبلغ اقساط را می‌سازد و سپس نرخ مؤثر همین برنامه پرداخت را استخراج می‌کند.
+          </p>
+          <p>
+            نمونه‌های پایتون لینک‌شده از تابع <bdi class="inline-code" dir="ltr">numpy_financial.irr</bdi> استفاده می‌کنند؛ فراخوانی IRR به‌خودی‌خود به معنی استفاده از نیوتن نیست.
+            IRR نام نرخ مورد جست‌وجو است، در حالی که نیوتن و نصف‌کردن بازه روش‌های حل معادله‌اند.
+            جزئیات پیاده‌سازی سایت را می‌توانید در <a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/hesabkesh/calc.js" target="_blank" rel="noopener noreferrer">کد محاسبات حساب‌کش</a> ببینید.
+          </p>
+          <p class="article-meta">
+            توضیح روش‌های عددی در مستندات SciPy:
+            <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.newton.html" target="_blank" rel="noopener noreferrer">نیوتن–رافسون</a> و
+            <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.bisect.html" target="_blank" rel="noopener noreferrer">نصف‌کردن بازه</a>.
+          </p>
+          <h3>بهترین معیار برای گرانی اعتبار؛ همراه با دو عدد دیگر برای فشار مالی</h3>
+          <p>
+            نرخ مؤثر سالانه برای مقایسه هزینه نسبی اعتبار، از درصد اضافه‌پرداخت یا مبلغ قسط به‌تنهایی دقیق‌تر است؛
+            چون هم مبلغ اعتبار و هم مدت استفاده از آن را در نظر می‌گیرد. اما وام بزرگ با نرخ پایین هم می‌تواند قسطی فراتر از توان شما داشته باشد.
+            برای تصمیم نهایی، این سه عدد را کنار هم بخوانید:
+          </p>
+          <ul>
+            <li><strong>نرخ مؤثر سالانه:</strong> اعتبار نسبت به مبلغ و زمان استفاده چقدر گران است؟</li>
+            <li><strong>مجموع اضافه‌پرداخت:</strong> در کل چند تومان بیشتر می‌پردازید؟</li>
+            <li><strong>مجموع قسط‌های ماهانه:</strong> پس از مخارج ضروری، چقدر از درآمدتان برای پرداخت و هزینه‌های پیش‌بینی‌نشده باقی می‌ماند؟</li>
+          </ul>
+          <p>
+            تورم بالا ممکن است هزینه تعدیل‌شده اعتبار را کاهش دهد، اما مبلغ قرارداد را کم نمی‌کند و افزایش درآمد شما را تضمین نمی‌کند.
+            پایین‌تر بودن نرخ وام از تورم، به‌تنهایی برای مناسب بودن خرید کافی نیست.
+          </p>
+          <h3>کدهای محاسبه را ببینید و اجرا کنید</h3>
+          <p>
+            کدهای این پروژه در <a href="https://github.com/sjbahmani/cashflow-rate-calculator" target="_blank" rel="noopener noreferrer">مخزن گیت‌هاب حساب‌کش</a>
+            در دسترس‌اند. برای بررسی همین مثال ۱۰۰ میلیون تومان و دوازده قسط ۱۰ میلیونی،
+            <a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/test2.py" target="_blank" rel="noopener noreferrer">نمونه پایتون محاسبه نرخ مؤثر از جریان نقدی</a>
+            را ببینید؛ نرخ ماهانه با تابع <bdi lang="en">numpy_financial.irr</bdi> محاسبه و سپس سالانه می‌شود.
+          </p>
+          <ul>
+            <li><a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/test3.py" target="_blank" rel="noopener noreferrer">نمونه پایتون با ماه‌های بدون پرداخت و بازپرداخت اصل وام در پایان</a></li>
+            <li><a href="https://github.com/sjbahmani/cashflow-rate-calculator/blob/master/sample_numpy_financial.py" target="_blank" rel="noopener noreferrer">مثال‌های پایتون برای قسط، ارزش فعلی و نرخ بازده داخلی</a></li>
+          </ul>
+          <p class="article-meta">
+            منابع برای مطالعه بیشتر:
+            <a href="https://support.microsoft.com/en-us/excel/functions/effect-function" target="_blank" rel="noopener noreferrer">تبدیل نرخ اسمی به مؤثر در مستندات مایکروسافت</a>؛
+            <a href="https://www.consumerfinance.gov/ask-cfpb/how-do-i-compare-auto-loan-offers-what-should-i-look-at-besides-the-monthly-payment-en-753/" target="_blank" rel="noopener noreferrer">راهنمای مقایسه وام و هزینه کل از اداره حمایت مالی مصرف‌کننده آمریکا</a>.
+          </p>
+        </div>
+      </details>
+    </article>
+
+    <article class="card article-card" id="article-installment-impact" aria-labelledby="article-installment-impact-title">
+      <h2 id="article-installment-impact-title">خرید قسطی؛ آسودگی امروز، فشار فردا؟</h2>
+      <p>
+        خرید قسطی کمک می‌کند هزینه یک خرید بزرگ را در چند ماه بپردازیم، اما راحتی امروز ممکن است فشار مالی ماه‌های بعد را پنهان کند.
+        نوشدارو در این مقاله توضیح می‌دهد که چطور میل به خرید فوری و حفظ سطح زندگی، ما را به پذیرفتن بدهی‌هایی ترغیب می‌کند که بازپرداختشان را دست‌کم می‌گیریم.
+      </p>
+      <details class="article-details"><summary><span class="article-read-more">خواندن ادامه و منبع</span><span class="article-read-less">بستن متن کامل</span></summary><div class="article-full">
+      <p>
+        مبلغ قسط هم به‌تنهایی نشان نمی‌دهد یک پیشنهاد چقدر گران است. دو خرید با مجموع پرداخت یکسان، بسته به پیش‌پرداخت و زمان‌بندی اقساط،
+        می‌توانند نرخ مؤثر سالانه متفاوتی داشته باشند. قسط کمتر، اگر با پیش‌پرداخت بیشتر همراه باشد، لزوماً معامله بهتری نیست.
+      </p>
+      <p>
+        پیش از خرید، باید علاوه بر قیمت نقدی و مبلغ اقساط، کارمزدها، جریمه دیرکرد و شرایط تسویه زودتر از موعد را هم بررسی کنیم.
+        مجموع قسط‌های فعلی و خرید تازه را کنار درآمد و مخارج ضروری امروزمان بگذاریم تا ببینیم هر ماه چقدر برای هزینه‌های دیگر باقی می‌ماند.
+        چند قسط کوچک می‌توانند روی هم بخش بزرگی از درآمد را بگیرند و برای ماه‌های بعد جای کمی برای هزینه‌های پیش‌بینی‌نشده بگذارند.
+        اگر بازپرداخت فقط با افزایش حقوق یا بهتر شدن اوضاع اقتصادی ممکن باشد، تعهدی پذیرفته‌ایم که از توان فعلی‌مان بیشتر است.
+        حتی احتمال گران‌تر شدن کالا هم به‌تنهایی دلیل کافی برای خرید قسطی نیست؛ فشار اقساط ممکن است از هزینه صبر کردن بیشتر باشد.
+      </p>
+      <a href="https://nooshdaroo.ir/secure-online-shopping/installment-buying-financial-impact/" target="_blank" rel="noopener noreferrer">خواندن مقاله کامل در نوشدارو</a>
+
+      </div></details>
+    </article>
+  </section>
+
+  <section class="learning" id="learning" aria-labelledby="learning-title">
+    <div class="learning-heading"><h2 id="learning-title">خواندنی‌های حساب‌کش</h2><a href="?tab=articles" onclick="switchTab('articles'); return false">همهٔ مقالات ←</a></div>
+    <div class="learning-grid">
+      <a href="#article-effective-rate" onclick="openEffectiveRateArticle()"><h3>نرخ مؤثر سالانه چیست؟ <span aria-hidden="true">↗</span></h3></a>
+      <a href="#article-rate-guide" onclick="openRateGuideArticle()"><h3>برچسب گرانی و اثر تورم <span aria-hidden="true">↗</span></h3></a>
     </div>
-  </details>
+  </section>
 
   <section class="seo-content" aria-labelledby="seo-title">
-    <h2 id="seo-title">محاسبه سود واقعی وام و خرید قسطی</h2>
+    <details class="footer-disclosure about-calculator">
+      <summary>دربارهٔ محاسبه‌گر</summary>
+      <h2 id="seo-title">محاسبه سود واقعی وام و خرید قسطی</h2>
     <p>
       این محاسبه‌گر کمک می‌کند قبل از گرفتن وام، خرید اعتباری یا انتخاب یک طرح اقساطی، هزینه واقعی تصمیم خود را ببینید.
       با وارد کردن قیمت نقدی، مبلغ قسط، تعداد اقساط و پیش‌پرداخت، می‌توانید اضافه‌پرداخت، نرخ بهره ماهانه و نرخ مؤثر سالانه را محاسبه کنید.
@@ -1251,7 +1289,10 @@
       </article>
     </div>
 
-    <h2>سوالات متداول</h2>
+    </details>
+
+    <details class="footer-disclosure">
+      <summary>سوالات متداول</summary>
     <div class="faq-list">
       <details>
         <summary>نرخ مؤثر سالانه چیست؟</summary>
@@ -1283,7 +1324,10 @@
       </details>
     </div>
 
-    <h2>محاسبه‌گرهای حساب‌کش</h2>
+    </details>
+
+    <details class="footer-disclosure">
+      <summary>محاسبه‌گرهای حساب‌کش</summary>
     <ul class="page-links">
       <li><a href="/">واقعیت‌سنج خرید قسطی و وام</a></li>
       <li><a href="/installment-purchase">محاسبه سود خرید قسطی</a></li>
@@ -1292,7 +1336,10 @@
       <li><a href="/marriage-loan">محاسبه اقساط وام ازدواج</a></li>
       <li><a href="/loan-installments">محاسبه سود وام از روی مبلغ قسط</a></li>
     </ul>
+    </details>
   </section>
+
+  </main>
 
   <footer class="site-footer">
     حساب‌کش، ۱۴۰۵ — یک ابزار کوچک <span class="footer-free">رایگان</span> برای تصمیم‌های مالی شفاف‌تر.
@@ -1395,6 +1442,9 @@ function renderSummary(prefix, apr, lead) {
 }
 
 // ── Installment input modes ───────────────────────────────────────────────
+const receiptStates = { inst: null, loan: null };
+let lastCalculatorTab = 'installment';
+let restoringState = false;
 let instKind = 'purchase';
 let instEntryMode = 'payment';
 let instFirstPaymentNow = false;
@@ -1412,10 +1462,10 @@ function setChoice(ids, activeId) {
 const INST_KIND_TEXT = {
   'inst-kind-help':            ['خرید اعتباری از فروشگاه، بانک یا اپ‌ها، یا خرید با چک.',
                                 'وام صندوق، اپ‌های وام، وام محل کار یا خرید امتیاز وام؛ هر وامی که مبلغ قسطش را می‌دانی.'],
-  'inst-cash-text':            ['قیمت نقدی کالا یا خدمات', 'مبلغ وام'],
-  'inst-entry-extra-title':    ['سود یا اضافه‌پرداخت کل', 'سود کل وام'],
+  'inst-cash-text':            ['قیمت نقدی', 'مبلغ وام'],
+  'inst-entry-extra-title':    ['سود کل', 'سود کل وام'],
   'inst-entry-extra-ex':       ['مثلاً «۳٫۶ میلیون روی قیمت اضافه می‌شود»', 'مثلاً «سود کل ۴۰ میلیون»'],
-  'inst-entry-total-title':    ['جمع کل پرداخت', 'جمع کل بازپرداخت'],
+  'inst-entry-total-title':    ['جمع پرداخت', 'جمع کل بازپرداخت'],
   'inst-entry-total-ex':       ['مثلاً «در مجموع ۳۸ میلیون پرداخت می‌کنی»', 'مثلاً «در مجموع ۱۴۰ میلیون پس می‌دهی»'],
   'inst-first-help':           ['اگر اولین قسط موقع ثبت سفارش کم می‌شود، «همین امروز» را بزن.',
                                 'قسط اول بیشتر وام‌ها یک ماه بعد از دریافت است.'],
@@ -1427,8 +1477,15 @@ const INST_KIND_TEXT = {
 };
 
 function setInstallmentKind(kind) {
-  instKind = kind === 'loan' ? 'loan' : 'purchase';
+  switchTab('installment');
+  const nextKind = kind === 'loan' ? 'loan' : 'purchase';
+  if (nextKind !== instKind) {
+    installmentDrafts[instKind] = captureInstallmentDraft();
+    instKind = nextKind;
+    restoreInstallmentDraft(installmentDrafts[nextKind]);
+  }
   const i = instKind === 'loan' ? 1 : 0;
+  document.querySelector('#panel-installment .form-heading h2').textContent = i ? 'شرایط وام' : 'شرایط خرید';
   Object.keys(INST_KIND_TEXT).forEach(id => {
     document.getElementById(id).textContent = INST_KIND_TEXT[id][i];
   });
@@ -1442,6 +1499,7 @@ function setInstallmentKind(kind) {
   updateDownToggleText();
   updateStoreDerived();
   resetInstallmentResult();
+  refreshAccessibility();
 }
 
 // The three entry options map onto entry mode ('payment' | 'store') plus store kind ('extra' | 'total').
@@ -1470,6 +1528,7 @@ function updateEntryChoice() {
   help.style.display = choice === 'payment' ? 'none' : '';
   document.getElementById('inst-store-value-text').textContent =
     document.getElementById(`inst-entry-${storeKind}-title`).textContent;
+  refreshAccessibility();
 }
 
 function updateDownToggleText() {
@@ -1477,11 +1536,12 @@ function updateDownToggleText() {
   const loan = instKind === 'loan';
   document.getElementById('inst-down-toggle').textContent = open
     ? (loan ? 'حذف کارمزد' : 'حذف پیش‌پرداخت جداگانه')
-    : (loan ? 'کارمزد یا هزینه اول کار دارم' : 'پیش‌پرداخت جداگانه دارم');
+    : (loan ? 'کارمزد یا هزینه اول کار دارم' : 'پیش‌پرداخت دارم');
 }
 
 function resetInstallmentResult() {
   clearFormError('inst-error');
+  receiptStates.inst = null;
   document.getElementById('inst-result').classList.remove('show');
   document.getElementById('inst-placeholder').style.display = '';
 }
@@ -1519,6 +1579,7 @@ function setInstallmentEntryMode(mode) {
 
   updateStoreDerived();
   resetInstallmentResult();
+  refreshAccessibility();
 }
 
 function setFirstPaymentTiming(firstPaymentNow) {
@@ -1534,7 +1595,7 @@ function setInstallmentDownVisibility(open) {
   toggle.setAttribute('aria-expanded', open);
   updateDownToggleText();
 
-  if (!open) setFmtValue('inst-down', 0, 'money');
+  if (!open) document.getElementById('inst-down').value = '';
   updateStoreDerived();
   resetInstallmentResult();
 }
@@ -1586,21 +1647,25 @@ function toggleVariable() {
   document.getElementById('inst-equal-fields').style.display  = instVariableMode ? 'none' : '';
   document.getElementById('inst-variable-fields').style.display = instVariableMode ? '' : 'none';
   document.getElementById('inst-var-toggle').textContent =
-    instVariableMode ? 'برگشت به اقساط مساوی' : 'حالت پیشرفته: اقساط نامساوی دارم';
+    instVariableMode ? 'برگشت به اقساط مساوی' : 'اقساط نامساوی دارم';
+  document.getElementById('inst-var-toggle').setAttribute('aria-expanded', String(instVariableMode));
   resetInstallmentResult();
+  refreshAccessibility();
 }
 
 function parseVarPayments() {
   const raw = document.getElementById('inst-payments-var').value;
-  const lines = raw.split(/[\n,،]+/).map(l => l.trim()).filter(l => l.length > 0);
-  return lines.map(l => parseFloat(toEn(l).replace(/[^0-9.]/g, '')) || 0);
+  return raw.split(/\n/).map(line => line.trim()).filter(line => line !== '').map(line => {
+    const number = toEn(line).replace(/،/g, '');
+    return /^\d+(\.\d+)?$/.test(number) ? Number(number) : NaN;
+  });
 }
 
 function updateVarCounter() {
   const pmts = parseVarPayments();
-  const valid = pmts.filter(p => p > 0).length;
+  const valid = pmts.filter(p => isFinite(p) && p > 0).length;
   const el = document.getElementById('inst-var-counter');
-  el.textContent = toPersian(valid) + ' قسط وارد شده';
+  el.textContent = toPersian(pmts.length) + ' ماه، ' + toPersian(valid) + ' پرداخت';
   el.classList.toggle('has-entries', valid > 0);
 }
 
@@ -1610,7 +1675,9 @@ function toggleGrace() {
   const label = document.getElementById('grace-toggle-label');
   const open  = panel.classList.toggle('open');
   label.textContent = open ? 'حذف دوره تنفس' : 'حالت پیشرفته: افزودن دوره تنفس';
+  document.getElementById('loan-grace-toggle').setAttribute('aria-expanded', String(open));
   if (!open) document.getElementById('loan-grace').value = '';
+  resetLoanResult();
 }
 
 function setLoanType(value) {
@@ -1623,6 +1690,7 @@ function setLoanType(value) {
 
 function resetLoanResult() {
   clearFormError('loan-error');
+  receiptStates.loan = null;
   document.getElementById('loan-result').classList.remove('show');
   document.getElementById('loan-placeholder').style.display = '';
 }
@@ -1647,25 +1715,39 @@ function openEffectiveRateArticle() {
   article.scrollIntoView({ block: 'start' });
 }
 
+function openRateGuideArticle() {
+  switchTab('articles');
+  const article = document.getElementById('article-rate-guide');
+  article.querySelector('details').open = true;
+  document.getElementById('article-rate-guide-title').focus({ preventScroll: true });
+  article.scrollIntoView({ block: 'start' });
+}
+
 function restoreArticleFromHash() {
   if (location.hash === '#article-effective-rate') openEffectiveRateArticle();
+  else if (location.hash === '#article-rate-guide') openRateGuideArticle();
 }
 window.addEventListener('hashchange', restoreArticleFromHash);
 
 // ── Tab switcher ──────────────────────────────────────────────────────────
 function switchTab(name) {
-  if (name !== 'articles' && location.hash === '#article-effective-rate') {
+  if (!document.getElementById('panel-' + name)) return;
+  if (name !== 'articles' && ['#article-effective-rate', '#article-rate-guide'].includes(location.hash)) {
     history.replaceState(null, '', location.pathname + location.search);
   }
-  if (!document.getElementById('panel-' + name)) return;
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    const active = b.dataset.tab === name;
-    b.classList.toggle('active', active);
-    b.setAttribute('aria-pressed', String(active));
+  if (name !== 'articles') lastCalculatorTab = name;
+  document.body.classList.toggle('articles-view', name === 'articles');
+  document.querySelectorAll('.tab-btn').forEach(button => {
+    const active = button.dataset.tab === (name === 'articles' ? 'articles' : 'installment');
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
   });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
+  setChoice(['inst-kind-purchase', 'inst-kind-loan', 'calculator-bank'], name === 'loan' ? 'calculator-bank' : 'inst-kind-' + instKind);
+  if (window.refreshMobileAction) refreshMobileAction();
   trackEvent('calculator_tab_change', { tab_name: name });
+  refreshAccessibility();
 }
 
 function announcePresetResult(prefix) {
@@ -1683,7 +1765,7 @@ function announcePresetResult(prefix) {
   if (!isBelowFold && !isMobile) return;
 
   const targetY = window.scrollY + rect.top - 24;
-  window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+  window.scrollTo({ top: Math.max(0, targetY), behavior: preferredScrollBehavior() });
 }
 
 function loadInstallmentPreset(cash, down, payment, n, kind = 'purchase') {
@@ -1722,7 +1804,7 @@ function openLoanByPayment() {
   setInstallmentKind('loan');
   setInstallmentEntryMode('payment');
   if (amount) setFmtValue('inst-cash', amount, 'money');
-  document.getElementById('panel-installment').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('panel-installment').scrollIntoView({ behavior: preferredScrollBehavior(), block: 'start' });
   document.getElementById(rawNum('inst-cash') ? 'inst-payment' : 'inst-cash').focus({ preventScroll: true });
 }
 
@@ -1741,15 +1823,34 @@ function loadLoanPreset(amount, rate, n, type) {
 function showFormError(id, msg) {
   const el = document.getElementById(id);
   el.textContent = msg; el.classList.add('show');
+  const fieldId = errorField(id === 'inst-error' ? 'inst' : 'loan');
+  const input = document.getElementById(fieldId);
+  if (!input) return;
+  input.classList.add('invalid'); input.setAttribute('aria-invalid', 'true');
+  const error = document.createElement('p'); error.className = 'inline-field-error';
+  error.id = fieldId + '-field-error'; error.textContent = msg;
+  input.after(error);
+  input.setAttribute('aria-describedby', [input.getAttribute('aria-describedby'), error.id].filter(Boolean).join(' '));
+  if (!restoringState) { input.focus({ preventScroll: true }); input.scrollIntoView({ block: 'center', behavior: preferredScrollBehavior() }); }
 }
 function clearFormError(id) {
   const el = document.getElementById(id);
   el.textContent = ''; el.classList.remove('show');
+  const panel = document.getElementById(id === 'inst-error' ? 'panel-installment' : 'panel-loan');
+  panel.querySelectorAll('.inline-field-error').forEach(error => error.remove());
+  panel.querySelectorAll('[aria-invalid="true"]').forEach(input => {
+    input.classList.remove('invalid'); input.removeAttribute('aria-invalid');
+    const descriptions = (input.getAttribute('aria-describedby') || '').split(' ').filter(value => value && !value.endsWith('-field-error'));
+    if (descriptions.length) input.setAttribute('aria-describedby', descriptions.join(' '));
+    else input.removeAttribute('aria-describedby');
+  });
 }
 
 // ── Panel 1: Installment ─────────────────────────────────────────────────
 function calcInstallment() {
+  resetInstallmentResult();
   clearFormError('inst-error');
+  if (!validateRequired('inst')) return;
   const cash = v('inst-cash');
   const down = v('inst-down');
   const res = calc.installment({
@@ -1792,6 +1893,9 @@ function calcInstallment() {
   }
   document.getElementById('inst-verdict').innerHTML = verdict;
   document.getElementById('inst-result').classList.add('show');
+  receiptStates.inst = buildStateParams('inst').toString();
+  if (window.updateReceipt) updateReceipt('inst');
+  if (window.revealCalculatedResult) revealCalculatedResult('inst');
   trackEvent('calculator_result', {
     calculator_type: instEntryMode === 'store'
       ? 'installment_store_summary'
@@ -1805,7 +1909,9 @@ function calcInstallment() {
 
 // ── Panel 2: Bank Loan ───────────────────────────────────────────────────
 function calcLoan() {
+  resetLoanResult();
   clearFormError('loan-error');
+  if (!validateRequired('loan')) return;
   const amount     = v('loan-amount');
   const rateAnn    = v('loan-rate');
   const graceOpen  = document.getElementById('grace-panel').classList.contains('open');
@@ -1850,6 +1956,9 @@ function calcLoan() {
   renderSummary('loan', ear, summaryLead);
   document.getElementById('loan-verdict').innerHTML     = verdictText(ear);
   document.getElementById('loan-result').classList.add('show');
+  receiptStates.loan = buildStateParams('loan').toString();
+  if (window.updateReceipt) updateReceipt('loan');
+  if (window.revealCalculatedResult) revealCalculatedResult('loan');
   trackEvent('calculator_result', {
     calculator_type: 'loan',
     loan_type: loanType,
@@ -1868,41 +1977,38 @@ function setSelectIfValid(id, value) {
   if ([...el.options].some(o => o.value === value)) el.value = value;
 }
 
-function buildStateParams() {
+function buildStateParams(prefix) {
   const p = new URLSearchParams();
   const landingPage = new URLSearchParams(location.search).get('page');
-  if (landingPage && document.body.dataset.rendered !== 'server') p.set('page', landingPage);
-  const setIf = (key, value) => { if (value) p.set(key, value); };
-
-  const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-  if (activeTab !== 'installment') p.set('tab', activeTab);
-
-  if (instKind === 'loan') p.set('inst', 'loan');
-  if (instEntryMode === 'store') p.set('mode', 'store');
-  else if (instVariableMode) p.set('mode', 'variable');
-  if (instFirstPaymentNow) p.set('first', 'now');
-  setIf('cash', rawNum('inst-cash'));
-  setIf('pmt', rawNum('inst-payment'));
-  setIf('n', rawNum('inst-n'));
-  setIf('var', parseVarPayments().filter(x => x > 0).join(','));
-  const storeKind = document.getElementById('inst-store-kind').value;
-  if (storeKind !== 'extra') p.set('kind', storeKind);
-  setIf('sv', rawNum('inst-store-value'));
-  setIf('sn', rawNum('inst-store-n'));
-  if (document.getElementById('inst-down-panel').classList.contains('open')) {
-    p.set('down', rawNum('inst-down') || '0');
+  if (landingPage) p.set('page', landingPage);
+  const active = document.querySelector('.panel.active');
+  const isArticles = !prefix && active && active.id === 'panel-articles';
+  prefix = prefix || (lastCalculatorTab === 'loan' ? 'loan' : 'inst');
+  const put = (key, value) => { if (value !== '') p.set(key, value); };
+  if (prefix === 'loan') {
+    p.set('tab', 'loan');
+    put('amount', rawNum('loan-amount')); put('rate', rawNum('loan-rate')); put('term', rawNum('loan-n'));
+    p.set('type', document.getElementById('loan-type').value);
+    if (document.getElementById('grace-panel').classList.contains('open')) {
+      put('grace', rawNum('loan-grace')); p.set('gtype', document.getElementById('loan-grace-type').value);
+    }
+  } else {
+    if (instKind === 'loan') p.set('inst', 'loan');
+    put('cash', rawNum('inst-cash'));
+    if (instEntryMode === 'store') {
+      p.set('mode', 'store'); p.set('kind', document.getElementById('inst-store-kind').value);
+      put('sv', rawNum('inst-store-value')); put('sn', rawNum('inst-store-n'));
+    } else if (instVariableMode) {
+      p.set('mode', 'variable');
+      const payments = parseVarPayments();
+      if (payments.length && payments.every(value => isFinite(value))) p.set('var', payments.join(','));
+    } else {
+      put('pmt', rawNum('inst-payment')); put('n', rawNum('inst-n'));
+    }
+    if (instFirstPaymentNow) p.set('first', 'now');
+    if (document.getElementById('inst-down-panel').classList.contains('open')) put('down', rawNum('inst-down') || '0');
   }
-
-  setIf('amount', rawNum('loan-amount'));
-  setIf('rate', rawNum('loan-rate'));
-  setIf('term', rawNum('loan-n'));
-  const loanType = document.getElementById('loan-type').value;
-  if (loanType !== 'on-principal') p.set('type', loanType);
-  if (document.getElementById('grace-panel').classList.contains('open')) {
-    p.set('grace', rawNum('loan-grace'));
-    const graceType = document.getElementById('loan-grace-type').value;
-    if (graceType !== 'accumulate') p.set('gtype', graceType);
-  }
+  if (isArticles) { if (prefix === 'loan') p.set('calc', 'loan'); p.set('tab', 'articles'); }
   return p;
 }
 
@@ -1915,22 +2021,18 @@ function syncUrl() {
 }
 
 function restoreFromUrl() {
-  // Landing pages carry their example numbers in data-preset.
   const p = new URLSearchParams(location.search);
-  // Navigation/tracking parameters alone should not suppress the landing example.
-  const stateKeys = ['tab', 'inst', 'mode', 'first', 'cash', 'pmt', 'n', 'var', 'kind', 'sv', 'sn', 'down', 'amount', 'rate', 'term', 'type', 'grace', 'gtype'];
-  if (!stateKeys.some(key => p.has(key))) {
-    new URLSearchParams(document.body.dataset.preset || '').forEach((value, key) => p.set(key, value));
-  }
   if (!p.toString()) return;
-  const fill = (key, id, fmtType) => { if (p.get(key)) setFmtValue(id, p.get(key), fmtType); };
+  restoringState = true;
+  const restoreValues = p.get('shared') === '1';
+  const fill = (key, id, fmtType) => { if (restoreValues && p.get(key)) setFmtValue(id, p.get(key), fmtType); };
 
   setInstallmentKind(p.get('inst'));
-  const mode = p.get('mode');
+  const mode = restoreValues ? p.get('mode') : null;
   setInstallmentEntryMode(mode === 'store' ? 'store' : 'payment');
   if (mode === 'variable') toggleVariable();
-  setFirstPaymentTiming(p.get('first') === 'now');
-  setInstallmentDownVisibility(p.has('down'));
+  setFirstPaymentTiming(restoreValues && p.get('first') === 'now');
+  setInstallmentDownVisibility(restoreValues && p.has('down'));
   if (p.get('kind')) setStoreKind(p.get('kind'));
   fill('cash', 'inst-cash', 'money');
   fill('down', 'inst-down', 'money');
@@ -1938,7 +2040,7 @@ function restoreFromUrl() {
   fill('n', 'inst-n', 'count');
   fill('sv', 'inst-store-value', 'money');
   fill('sn', 'inst-store-n', 'count');
-  if (p.get('var')) {
+  if (restoreValues && p.get('var')) {
     document.getElementById('inst-payments-var').value = p.get('var').split(',')
       .map(x => (parseFloat(x) || 0).toLocaleString('fa-IR')).join('\n');
     updateVarCounter();
@@ -1949,27 +2051,36 @@ function restoreFromUrl() {
   fill('rate', 'loan-rate', 'rate');
   fill('term', 'loan-n', 'count');
   if (p.get('type')) setLoanType(p.get('type'));
-  if (p.has('grace')) {
+  if (restoreValues && p.has('grace')) {
     if (!document.getElementById('grace-panel').classList.contains('open')) toggleGrace();
     fill('grace', 'loan-grace', 'count');
     setSelectIfValid('loan-grace-type', p.get('gtype'));
   }
 
-  if (location.hash !== '#article-effective-rate' && (p.get('tab') === 'loan' || p.get('tab') === 'articles')) switchTab(p.get('tab'));
+  if (p.get('calc') === 'loan') lastCalculatorTab = 'loan';
+  if (p.get('tab') === 'loan' || p.get('tab') === 'articles') switchTab(p.get('tab'));
+  if (!p.has('tab') && !p.has('cash')) {
+    const example = new URLSearchParams(document.body.dataset.preset || '');
+    if (example.get('tab') === 'loan') switchTab('loan');
+    else if (example.get('inst') === 'loan') setInstallmentKind('loan');
+  }
 
   // Show results for shared links, but don't greet the visitor with validation errors.
-  if (p.get('cash')) { calcInstallment(); clearFormError('inst-error'); }
-  if (p.get('amount')) { calcLoan(); clearFormError('loan-error'); }
+  if (p.get('shared') === '1' && p.get('cash') && p.get('tab') !== 'loan') calcInstallment();
+  if (p.get('shared') === '1' && p.get('amount') && p.get('tab') === 'loan') calcLoan();
+  restoringState = false;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const articleRequested = location.hash === '#article-effective-rate';
+  const articleRequested = ['#article-effective-rate', '#article-rate-guide'].includes(location.hash);
   restoreFromUrl();
-  if (articleRequested) openEffectiveRateArticle();
+  if (articleRequested) restoreArticleFromHash();
   // Inline onclick handlers run before these bubble up, so the URL sees the updated state.
   ['input', 'change', 'click'].forEach(type => document.addEventListener(type, syncUrl));
 });
 
 </script>
+<script src="./experience.js"></script>
+<script src="./warm.js"></script>
 </body>
 </html>

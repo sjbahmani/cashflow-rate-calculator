@@ -17,9 +17,9 @@ export default function prepareStaticPages() {
   if (!Object.prototype.hasOwnProperty.call(pages, path)) return;
   const landing = pages[path];
   document.title = landing.title;
-  document.querySelector('.hero-question').textContent = landing.question;
-  document.querySelector('.hero-answer').textContent = landing.answer;
-  document.querySelector('header > p').textContent = landing.intro;
+  document.getElementById('hero-heading').textContent = landing.question;
+  document.querySelector('.hero-subtitle').textContent = landing.answer;
+  document.querySelector('.hero-description').textContent = landing.intro;
   document.body.dataset.preset = landing.preset;
   const heading = document.getElementById('seo-title');
   const grid = document.querySelector('.seo-grid');
