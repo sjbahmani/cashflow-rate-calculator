@@ -199,3 +199,17 @@ button:focus-visible, a:focus-visible, summary:focus-visible,
   .wordmark { gap:10px; }
   .wordmark span { font-size:11px; }
 }
+
+/* Give the guide link the same vertical geometry as the navigation buttons. */
+.tabs > .tab-btn, .tabs > a {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:9px 0;
+  line-height:1.5;
+  border-bottom:2px solid transparent;
+  box-sizing:border-box;
+}
+.tabs > a { font-weight:500; }
+.tabs > .tab-btn.active { border-bottom-color:var(--primary); }
