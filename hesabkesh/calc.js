@@ -69,6 +69,7 @@ function verdictProfile(apr) {
 
 // Solver for variable installment schedules.
 function solveAnnualEffectiveVariable(pv, payments, firstPaymentNow) {
+  if (Math.abs(payments.reduce((sum, value) => sum + value, 0) - pv) < 0.000001) return 0;
   const offset = firstPaymentNow ? 0 : 1;
   const npv = rate => payments.reduce((sum, pmt, idx) => {
     return sum + pmt / Math.pow(1 + rate, idx + offset);
@@ -121,7 +122,7 @@ function solveAnnualEffectiveWithGrace(pv, gracePmt, graceN, payment, repayN) {
 // kind ('purchase' | 'loan'). For a loan, cash is the loan amount and down is the upfront fee,
 // which the lender's stated interest or total repayment does not include.
 const INST_WORDS = {
-  purchase: { cash: 'قیمت نقدی', down: 'پیش‌پرداخت', extra: 'مجموع اضافه‌پرداخت', total: 'مجموع کل پرداخت', offer: 'پیشنهاد', note: 'در خرید اقساطی همیشه بیشتر از قیمت نقدی پرداخت می‌شود.' },
+  purchase: { cash: 'قیمت نقدی', down: 'پیش‌پرداخت', extra: 'مجموع اضافه‌پرداخت', total: 'مجموع کل پرداخت', offer: 'پیشنهاد', note: 'برای خرید بدون سود، مجموع پرداخت‌ها باید برابر قیمت نقدی باشد.' },
   loan:     { cash: 'مبلغ وام', down: 'کارمزد', extra: 'سود کل', total: 'مجموع بازپرداخت', offer: 'وام', note: 'وامی که هزینه‌ای ندارد نرخ سودی هم ندارد.' }
 };
 
@@ -143,24 +144,27 @@ function installment(inp) {
 
   if (inp.mode === 'store') {
     n = inp.storeN;
-    if (!inp.storeValue || !n) {
+    if (!isFinite(inp.storeValue) || inp.storeValue < 0 || !n) {
       return { error: `لطفاً ${w.extra} یا ${w.total} و تعداد اقساط را وارد کنید.` };
     }
-    if (n < 1 || n > 360) {
+    if (n < 1 || n > 360 || Math.floor(n) !== n) {
       return { error: 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.' };
     }
     const totalPaidFromStore = inp.storeKind === 'extra' ? cash + inp.storeValue : inp.storeValue;
-    if (totalPaidFromStore <= cash) {
+    if (totalPaidFromStore < cash) {
       return { error: inp.storeKind === 'extra'
-        ? `${w.extra} باید بیشتر از صفر باشد.`
-        : `${w.total} باید بیشتر از ${w.cash} باشد.` };
+        ? `${w.extra} نمی‌تواند منفی باشد.`
+        : `${w.total} نباید کمتر از ${w.cash} باشد.` };
     }
     totalInstallments = isLoan ? totalPaidFromStore : totalPaidFromStore - down;
     payment = totalInstallments / n;
     payments = new Array(Math.round(n)).fill(payment);
     n = payments.length;
   } else if (inp.mode === 'variable') {
-    payments = inp.varPayments.filter(p => p > 0);
+    payments = inp.varPayments.slice();
+    if (payments.some(p => !isFinite(p) || p < 0)) {
+      return { error: 'برای هر ماه یک مبلغ معتبر بنویسید؛ ماه بدون پرداخت را صفر وارد کنید.' };
+    }
     n = payments.length;
     if (n < 1) {
       return { error: 'لطفاً حداقل یک مبلغ قسط وارد کنید.' };
@@ -169,8 +173,8 @@ function installment(inp) {
       return { error: 'تعداد اقساط نمی‌تواند بیشتر از ۳۶۰ باشد.' };
     }
     totalInstallments = payments.reduce((s, p) => s + p, 0);
-    if (down + totalInstallments <= cash) {
-      return { error: `مجموع اقساط از ${w.cash} کمتر یا مساوی است — ${w.note}` };
+    if (down + totalInstallments < cash) {
+      return { error: `مجموع اقساط از ${w.cash} کمتر است — ${w.note}` };
     }
   } else {
     payment = inp.payment;
@@ -178,12 +182,12 @@ function installment(inp) {
     if (!payment || !n) {
       return { error: 'لطفاً مبلغ قسط و تعداد اقساط را وارد کنید.' };
     }
-    if (n < 1 || n > 360) {
+    if (n < 1 || n > 360 || Math.floor(n) !== n) {
       return { error: 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.' };
     }
     totalInstallments = payment * n;
-    if (down + totalInstallments <= cash) {
-      return { error: `مجموع اقساط (${w.down} + قسط × تعداد) از ${w.cash} کمتر یا مساوی است — ${w.note}` };
+    if (down + totalInstallments < cash) {
+      return { error: `مجموع اقساط (${w.down} + قسط × تعداد) از ${w.cash} کمتر است — ${w.note}` };
     }
     payments = new Array(Math.round(n)).fill(payment);
     n = payments.length;
@@ -218,19 +222,23 @@ function loan(inp) {
   const grace = inp.grace;
   const graceType = inp.graceType;
 
-  if (!amount || !rateAnn || !n) {
+  if (!amount || !isFinite(rateAnn) || !n) {
     return { error: 'لطفاً مبلغ وام، نرخ سود، و مدت وام را وارد کنید.' };
   }
-  if (rateAnn <= 0 || rateAnn > 300) {
-    return { error: 'نرخ سود باید عددی مثبت و منطقی باشد (مثلاً ۲۳).' };
+  if (rateAnn < 0 || rateAnn > 300) {
+    return { error: 'نرخ سود باید از صفر تا ۳۰۰ درصد باشد.' };
   }
-  if (n < 1 || n > 360) {
+  if (n < 1 || n > 360 || Math.floor(n) !== n) {
     return { error: 'مدت وام باید بین ۱ تا ۳۶۰ ماه باشد.' };
   }
-  if (grace < 0 || grace >= n) {
+  if (grace < 0 || grace >= n || Math.floor(grace) !== grace) {
     return { error: 'دوره تنفس باید کمتر از مدت کل وام باشد.' };
   }
 
+  if (rateAnn === 0) {
+    return { payment: amount / (n - grace), gracePmt: 0, ear: 0, totalPaid: amount, extra: 0,
+      summaryLead: 'این وام با ورودی‌های فعلی سود و اضافه‌پرداخت ندارد.' };
+  }
   const rMonthly = (rateAnn / 100) / 12;
   let payment, totalPaid, extra, ear;
   let gracePmt = 0;       // what's paid each month during grace

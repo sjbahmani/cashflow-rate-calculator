@@ -331,3 +331,21 @@ uv sync
 ## Credits
 
 This project has been iterated with AI assistance from Claude and OpenAI Codex.
+
+
+## Local preview and UI checks
+
+Run the static site without a build step:
+
+```sh
+python3 -m http.server 8000 --bind 127.0.0.1 --directory hesabkesh
+```
+
+Open http://127.0.0.1:8000/. Production landing pages and link previews still use nginx with njs.
+
+Run the calculation and accessibility regression checks with Node.js:
+
+```sh
+node tests/calculators.mjs
+node tests/accessibility.mjs
+```
