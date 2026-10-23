@@ -36,7 +36,7 @@ html{background:var(--bg);color-scheme:light;scroll-padding-top:25px}body{backgr
 .footer-disclosure > h2 { margin-top: 12px; font-size: 18px; }
 .footer-disclosure > .page-links { padding: 8px 0 20px; }
 .footer-disclosure > .faq-list { margin: 0 0 20px; }
-.site-footer { margin-top: 0; padding-top: 19px; }
+.site-footer { margin-top: 0; padding-top: 19px; text-align: center; }
 .art-plus, .art-divide { position: absolute; font-family: 'Vazirmatn', sans-serif; font-weight: 700; line-height: 1; }
 .art-plus { color: #858568; font-size: 100px; left: 205px; right: auto; top: 15px; transform: rotate(9deg); }
 .art-divide { color: #c4b79d; font-size: 140px; left: 185px; right: auto; bottom: 0; transform: rotate(-12deg); }
