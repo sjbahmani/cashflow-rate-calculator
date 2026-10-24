@@ -2031,15 +2031,14 @@ function restoreFromUrl() {
   const p = new URLSearchParams(location.search);
   if (!p.toString()) return;
   restoringState = true;
-  const restoreValues = p.get('shared') === '1';
-  const fill = (key, id, fmtType) => { if (restoreValues && p.get(key)) setFmtValue(id, p.get(key), fmtType); };
+  const fill = (key, id, fmtType) => { if (p.get(key)) setFmtValue(id, p.get(key), fmtType); };
 
   setInstallmentKind(p.get('inst'));
-  const mode = restoreValues ? p.get('mode') : null;
+  const mode = p.get('mode');
   setInstallmentEntryMode(mode === 'store' ? 'store' : 'payment');
   if (mode === 'variable') toggleVariable();
-  setFirstPaymentTiming(restoreValues && p.get('first') === 'now');
-  setInstallmentDownVisibility(restoreValues && p.has('down'));
+  setFirstPaymentTiming(p.get('first') === 'now');
+  setInstallmentDownVisibility(p.has('down'));
   if (p.get('kind')) setStoreKind(p.get('kind'));
   fill('cash', 'inst-cash', 'money');
   fill('down', 'inst-down', 'money');
@@ -2047,7 +2046,7 @@ function restoreFromUrl() {
   fill('n', 'inst-n', 'count');
   fill('sv', 'inst-store-value', 'money');
   fill('sn', 'inst-store-n', 'count');
-  if (restoreValues && p.get('var')) {
+  if (p.get('var')) {
     document.getElementById('inst-payments-var').value = p.get('var').split(',')
       .map(x => (parseFloat(x) || 0).toLocaleString('fa-IR')).join('\n');
     updateVarCounter();
@@ -2058,7 +2057,7 @@ function restoreFromUrl() {
   fill('rate', 'loan-rate', 'rate');
   fill('term', 'loan-n', 'count');
   if (p.get('type')) setLoanType(p.get('type'));
-  if (restoreValues && p.has('grace')) {
+  if (p.has('grace')) {
     if (!document.getElementById('grace-panel').classList.contains('open')) toggleGrace();
     fill('grace', 'loan-grace', 'count');
     setSelectIfValid('loan-grace-type', p.get('gtype'));
