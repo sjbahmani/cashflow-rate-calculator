@@ -769,12 +769,13 @@
 
       <div id="inst-store-source-fields" style="display:none">
         <input type="hidden" id="inst-store-kind" value="extra">
-        <div class="field" id="inst-profit-unit-field">
-          <label for="inst-profit-unit">سود کل را چطور وارد می‌کنی؟</label>
-          <select id="inst-profit-unit" onchange="setProfitUnit(this.value)">
-            <option value="amount">مبلغ به تومان</option>
-            <option value="percent">درصد برای کل دوره</option>
-          </select>
+        <div class="input-choice" id="inst-profit-unit-field">
+          <input type="hidden" id="inst-profit-unit" value="amount">
+          <label id="inst-profit-unit-label">سود کل را چطور وارد می‌کنی؟</label>
+          <div class="choice-group" role="group" aria-labelledby="inst-profit-unit-label">
+            <button class="choice-btn active" type="button" id="inst-profit-amount" aria-pressed="true" onclick="setProfitUnit('amount')">مبلغ به تومان</button>
+            <button class="choice-btn" type="button" id="inst-profit-percent" aria-pressed="false" onclick="setProfitUnit('percent')">درصد برای کل دوره</button>
+          </div>
         </div>
         <div class="field" id="inst-profit-rate-field" style="display:none">
           <label for="inst-profit-rate">درصد سود کل <span class="hint">(٪)</span></label>
@@ -1560,6 +1561,8 @@ function updateEntryChoice() {
   document.getElementById('inst-store-value-text').textContent =
     document.getElementById(`inst-entry-${storeKind}-title`).textContent;
   const percent = profitIsPercent();
+  setChoice(['inst-profit-amount', 'inst-profit-percent'],
+    document.getElementById('inst-profit-unit').value === 'percent' ? 'inst-profit-percent' : 'inst-profit-amount');
   document.getElementById('inst-profit-unit-field').style.display = storeKind === 'extra' ? '' : 'none';
   document.getElementById('inst-profit-rate-field').style.display = percent ? '' : 'none';
   document.getElementById('inst-store-amount-field').style.display = percent ? 'none' : '';
