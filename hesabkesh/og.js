@@ -7,8 +7,16 @@ const SITE = 'https://hesabkesh.ir';
 
 const TONE_MARK = { good: '🟢', ok: '🟡', warn: '🟠', high: '🔴', bad: '⛔' };
 
+function numericText(value) {
+  return String(value)
+    .replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776)
+    .replace(/[٠-٩]/g, d => d.charCodeAt(0) - 1632)
+    .replace(/[\s\u200e\u200f\u061c٬,]/g, '')
+    .replace(/٫/g, '.');
+}
+
 function num(args, key) {
-  return parseFloat(args[key]) || 0;
+  return parseFloat(numericText(args[key])) || 0;
 }
 
 // Mirrors restoreFromUrl() in index.html.
@@ -35,7 +43,7 @@ function resultFromQuery(args) {
       storeValue: num(args, 'sv'),
       storeUnit: args.su === 'percent' ? 'percent' : 'amount',
       storeN: num(args, 'sn'),
-      varPayments: (args['var'] || '').split(',').map(x => parseFloat(x) || 0),
+      varPayments: (args['var'] || '').split(',').map(x => parseFloat(numericText(x)) || 0),
       firstPaymentNow: args.first === 'now',
       kind: args.inst === 'loan' ? 'loan' : 'purchase'
     });

@@ -719,7 +719,7 @@
 
       <div class="field">
         <label for="inst-cash"><span id="inst-cash-text">قیمت نقدی</span> <span class="hint">(تومان)</span></label>
-        <input type="text" inputmode="numeric" id="inst-cash" data-fmt="money" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰">
+        <input type="text" inputmode="numeric" id="inst-cash" data-fmt="money" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰" autocomplete="off">
       </div>
 
       <div class="input-choice">
@@ -744,11 +744,11 @@
           <div class="row-2">
             <div class="field">
               <label>مبلغ هر قسط <span class="hint">(تومان)</span></label>
-              <input type="text" inputmode="numeric" id="inst-payment" data-fmt="money" placeholder="مثلاً ۵٬۵۰۰٬۰۰۰">
+              <input type="text" inputmode="numeric" id="inst-payment" data-fmt="money" placeholder="مثلاً ۵٬۵۰۰٬۰۰۰" autocomplete="off">
             </div>
             <div class="field">
               <label>تعداد اقساط <span class="hint">(ماه)</span></label>
-              <input type="text" inputmode="numeric" id="inst-n" data-fmt="count" placeholder="مثلاً ۱۲">
+              <input type="text" inputmode="numeric" id="inst-n" data-fmt="count" placeholder="مثلاً ۱۲" autocomplete="off">
             </div>
           </div>
         </div>
@@ -757,7 +757,7 @@
         <div id="inst-variable-fields" style="display:none">
           <div class="field">
             <label>مبلغ اقساط <span class="hint">— هر ماه یک خط؛ ماه بدون پرداخت را صفر بنویس</span></label>
-            <textarea id="inst-payments-var" rows="6" placeholder="مثال:&#10;۵٬۰۰۰٬۰۰۰&#10;۵٬۵۰۰٬۰۰۰&#10;۶٬۰۰۰٬۰۰۰&#10;..."></textarea>
+            <textarea id="inst-payments-var" rows="6" placeholder="مثال:&#10;۵٬۰۰۰٬۰۰۰&#10;۵٬۵۰۰٬۰۰۰&#10;۶٬۰۰۰٬۰۰۰&#10;..." autocomplete="off"></textarea>
             <div class="var-counter" id="inst-var-counter">۰ ماه، ۰ پرداخت</div>
           </div>
         </div>
@@ -779,17 +779,17 @@
         </div>
         <div class="field" id="inst-profit-rate-field" style="display:none">
           <label for="inst-profit-rate">درصد سود کل <span class="hint">(٪)</span></label>
-          <input type="text" inputmode="decimal" id="inst-profit-rate" data-fmt="rate" placeholder="مثلاً ۲۳">
+          <input type="text" inputmode="decimal" id="inst-profit-rate" data-fmt="rate" placeholder="مثلاً ۲۳" autocomplete="off">
           <p class="choice-help" id="inst-profit-rate-help"></p>
         </div>
         <div class="row-2">
           <div class="field" id="inst-store-amount-field">
             <label for="inst-store-value"><span id="inst-store-value-text">سود کل</span> <span class="hint">(تومان)</span></label>
-            <input type="text" inputmode="numeric" id="inst-store-value" data-fmt="money" placeholder="مثلاً ۳٬۶۰۰٬۰۰۰">
+            <input type="text" inputmode="numeric" id="inst-store-value" data-fmt="money" placeholder="مثلاً ۳٬۶۰۰٬۰۰۰" autocomplete="off">
           </div>
           <div class="field">
             <label>تعداد اقساط <span class="hint">(ماه)</span></label>
-            <input type="text" inputmode="numeric" id="inst-store-n" data-fmt="count" placeholder="مثلاً ۴">
+            <input type="text" inputmode="numeric" id="inst-store-n" data-fmt="count" placeholder="مثلاً ۴" autocomplete="off">
           </div>
         </div>
         <div class="derived-note" id="inst-store-derived" aria-live="polite"></div>
@@ -810,7 +810,7 @@
       <div class="grace-panel" id="inst-down-panel">
         <div class="field">
           <label for="inst-down"><span id="inst-down-text">مبلغ پیش‌پرداخت جدا از اقساط</span> <span class="hint">(تومان)</span></label>
-          <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰">
+          <input type="text" inputmode="numeric" id="inst-down" data-fmt="money" placeholder="مثلاً ۱۰٬۰۰۰٬۰۰۰" autocomplete="off">
           <p class="choice-help" id="inst-down-help" style="display:none">اگر امتیاز وام را خریده‌ای، قیمت امتیاز را هم همین‌جا بنویس. سپرده‌ای که آخر کار پس می‌گیری را اینجا ننویس.</p>
         </div>
       </div>
@@ -878,16 +878,16 @@
 
       <div class="field">
         <label>مبلغ وام <span class="hint">(تومان)</span></label>
-        <input type="text" inputmode="numeric" id="loan-amount" data-fmt="money" placeholder="مثلاً ۲۰۰٬۰۰۰٬۰۰۰">
+        <input type="text" inputmode="numeric" id="loan-amount" data-fmt="money" placeholder="مثلاً ۲۰۰٬۰۰۰٬۰۰۰" autocomplete="off">
       </div>
       <div class="row-2">
         <div class="field">
           <label>نرخ سود اعلام‌شده <span class="hint">(%  سالانه)</span></label>
-          <input type="text" inputmode="decimal" id="loan-rate" data-fmt="rate" placeholder="مثلاً ۲۳">
+          <input type="text" inputmode="decimal" id="loan-rate" data-fmt="rate" placeholder="مثلاً ۲۳" autocomplete="off">
         </div>
         <div class="field">
           <label>مدت کل وام <span class="hint">(ماه، با احتساب دورهٔ تنفس)</span></label>
-          <input type="text" inputmode="numeric" id="loan-n" data-fmt="count" placeholder="مثلاً ۳۶">
+          <input type="text" inputmode="numeric" id="loan-n" data-fmt="count" placeholder="مثلاً ۳۶" autocomplete="off">
         </div>
       </div>
       <div class="field">
@@ -910,7 +910,7 @@
         <div class="row-2">
           <div class="field">
             <label>طول دوره تنفس <span class="hint">(ماه)</span></label>
-            <input type="text" inputmode="numeric" id="loan-grace" data-fmt="count" placeholder="مثلاً ۶" value="">
+            <input type="text" inputmode="numeric" id="loan-grace" data-fmt="count" placeholder="مثلاً ۶" value="" autocomplete="off">
           </div>
           <div class="field">
             <label>نوع دوره تنفس</label>
@@ -1386,6 +1386,8 @@ function trackEvent(eventName, params = {}) {
 function toEn(s) {
   return String(s)
     .replace(/[۰-۹]/g, d => d.charCodeAt(0) - 1776)
+    .replace(/[٠-٩]/g, d => d.charCodeAt(0) - 1632)
+    .replace(/[\s\u200e\u200f\u061c]/g, '')
     .replace(/٬/g, '')   // Arabic thousands separator
     .replace(/,/g, '')   // Latin thousands separator
     .replace(/٫/g, '.'); // Arabic decimal separator
@@ -1402,7 +1404,7 @@ function setFmtValue(id, value, fmtType) {
 // ── Input live formatting ────────────────────────────────────────────────────
 function applyMoneyFmt(el) {
   const raw = toEn(el.value).replace(/[^0-9]/g, '');
-  if (!raw) return;
+  if (!raw) { el.value = ''; return; }
   // Use fa-IR locale for Persian digits + ٬ separators
   el.value = parseInt(raw, 10).toLocaleString('fa-IR');
 }
@@ -2106,7 +2108,7 @@ function restoreFromUrl() {
   fill('sn', 'inst-store-n', 'count');
   if (p.get('var')) {
     document.getElementById('inst-payments-var').value = p.get('var').split(',')
-      .map(x => (parseFloat(x) || 0).toLocaleString('fa-IR')).join('\n');
+      .map(x => (parseFloat(toEn(x)) || 0).toLocaleString('fa-IR')).join('\n');
     updateVarCounter();
   }
   updateStoreDerived();

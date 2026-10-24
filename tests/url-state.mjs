@@ -23,7 +23,7 @@ function restore(search) {
     'setSelectIfValid', 'switchTab', 'calcInstallment', 'calcLoan']) {
     context[name] = (...args) => { calls[name] = args; };
   }
-  vm.runInNewContext(source + '\nrestoreFromUrl();', context);
+  vm.runInNewContext(html.match(/function toEn\(s\) \{[\s\S]*?\n\}/)[0] + '\n' + source + '\nrestoreFromUrl();', context);
   assert.equal(context.restoringState, false);
   return { fields, calls };
 }
