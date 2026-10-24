@@ -1755,7 +1755,7 @@ window.addEventListener('hashchange', restoreArticleFromHash);
 // ── Tab switcher ──────────────────────────────────────────────────────────
 function switchTab(name) {
   if (!document.getElementById('panel-' + name)) return;
-  if (name !== 'articles' && articleFromHash()) {
+  if (!restoringState && name !== 'articles' && articleFromHash()) {
     const params = new URLSearchParams(location.search);
     params.delete('article');
     history.replaceState(null, '', location.pathname + (params.size ? '?' + params : ''));
@@ -2099,7 +2099,7 @@ function restoreFromUrl() {
 document.addEventListener('DOMContentLoaded', () => {
   const articleRequested = articleFromHash();
   restoreFromUrl();
-  if (articleRequested) restoreArticleFromHash();
+  if (articleRequested) openArticle(articleRequested);
   // Inline onclick handlers run before these bubble up, so the URL sees the updated state.
   ['input', 'change', 'click'].forEach(type => document.addEventListener(type, syncUrl));
 });

@@ -52,3 +52,50 @@ for (const [, attrs, code] of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>
   assert.equal(check.status, 0, check.stderr);
 }
 console.log('Passed: article previews, calculator-preview precedence, invalid IDs, query-only navigation, legacy fragments, and inline syntax.');
+
+// Exercise the real restoration and tab-switch code together: initialization
+// calls setInstallmentKind(), which switches to the installment calculator.
+const restoreSource = html.match(/function restoreFromUrl\(\) \{[\s\S]*?\n\}/)[0];
+const switchSource = html.match(/function switchTab\(name\) \{[\s\S]*?\n\}/)[0];
+const kindSource = html.match(/function setInstallmentKind\(kind\) \{[\s\S]*?\n\}/)[0];
+for (const suffix of ['#article-installment-impact', '']) {
+  const url = new URL('https://hesabkesh.ir/?article=article-installment-impact&tab=articles' + suffix);
+  const classes = { toggle() {}, remove() {}, add() {}, contains() { return false; } };
+  const fields = {};
+  let focused = false, scrolled = false;
+  const details = { open: false };
+  const article = {
+    id: 'article-installment-impact', matches: () => true,
+    querySelector: selector => selector === 'details' ? details : { focus() { focused = true; } },
+    scrollIntoView() { scrolled = true; },
+  };
+  const state = {
+    URLSearchParams, location: url, restoringState: false, instKind: 'purchase',
+    window: {}, INST_KIND_TEXT: {}, lastCalculatorTab: 'installment',
+    document: {
+      body: { classList: classes, dataset: {} },
+      getElementById(id) {
+        if (id === article.id) return article;
+        return fields[id] ||= { classList: classes, style: {}, value: '', setAttribute() {}, options: [] };
+      },
+      querySelectorAll() { return []; },
+      querySelector() { return {}; },
+    },
+    history: { replaceState(a, b, path) { url.href = new URL(path, url).href; } },
+  };
+  for (const name of ['setChoice', 'trackEvent', 'refreshAccessibility',
+    'setInstallmentEntryMode', 'setFirstPaymentTiming', 'setInstallmentDownVisibility',
+    'updateEntryChoice', 'updateDownToggleText', 'updateStoreDerived', 'resetInstallmentResult', 'setFmtValue']) state[name] = () => {};
+  const startup = vm.createContext(state);
+  vm.runInContext(navigation + '\n' + switchSource + '\n' + kindSource + '\n' + restoreSource, startup);
+  const requested = startup.articleFromHash();
+  startup.restoreFromUrl();
+  assert.equal(url.searchParams.get('article'), article.id, 'initialization must preserve article ID');
+  assert.equal(url.hash, suffix, 'initialization must preserve fragment');
+  startup.openArticle(requested);
+  assert.ok(details.open && focused && scrolled, 'startup expands and focuses the article');
+  startup.switchTab('installment');
+  assert.equal(url.searchParams.has('article'), false, 'explicit calculator navigation clears article');
+  assert.equal(url.hash, '');
+}
+console.log('Passed: full URL restoration preserves article targets, expands and focuses, then clears targets on calculator navigation.');
