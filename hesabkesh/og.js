@@ -75,6 +75,18 @@ function applyLanding(html, path, lp) {
   return html.replace('<body>', () => '<body data-preset="' + escapeAttr(lp.preset) + '">');
 }
 
+// Read titles and introductions from the same static cards visitors see.
+function articlePreview(html, id) {
+  if (typeof id !== 'string' || !/^article-[a-z-]+$/.test(id)) return null;
+  const card = html.match(new RegExp('<article class="card article-card" id="' + id + '"[^>]*>([\\s\\S]*?)</article>'));
+  if (!card) return null;
+  const title = card[1].match(/<h2[^>]*>([\s\S]*?)<\/h2>/);
+  const intro = card[1].match(/<p>([\s\S]*?)<\/p>/);
+  if (!title || !intro) return null;
+  const plain = value => value.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  return { title: plain(title[1]), description: plain(intro[1]) };
+}
+
 function page(r) {
   const landing = Object.prototype.hasOwnProperty.call(pages, r.uri) ? pages[r.uri] : null;
   if (r.uri !== '/' && !landing) {
@@ -85,6 +97,18 @@ function page(r) {
   let html = fs.readFileSync(r.variables.document_root + '/index.html', 'utf8');
   if (landing) html = applyLanding(html, r.uri, landing);
   html = html.replace(/<body(?=[ >])/, '<body data-rendered="server"');
+
+  const article = articlePreview(html, r.args.article);
+  if (article) {
+    const url = SITE + '/?tab=articles&article=' + r.args.article;
+    html = fill(html, /(<title>)[^<]*(<\/title>)/, escapeAttr(article.title));
+    html = setMeta(html, 'name', 'description', article.description);
+    html = setPreview(html, article.title, article.description, url);
+    html = setMeta(html, 'property', 'og:type', 'article');
+    r.headersOut['Content-Type'] = 'text/html';
+    r.return(200, html);
+    return;
+  }
 
   let res = null;
   try {
