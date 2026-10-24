@@ -24,3 +24,15 @@ assert.equal(result.ear,0);assert.equal(result.totalPaid,120000000);assert.equal
 result=calc.loan({amount:120000000,rateAnn:18,n:24,grace:0,graceType:'accumulate',loanType:'on-balance'});
 assert.ok(Math.abs(result.ear-((1.015 ** 12 - 1) * 100))<1e-4);
 console.log('Passed: zero-cost purchases in all modes, payment timing, zero months, invalid schedules, and bank loans.');
+for (const kind of ['purchase', 'loan']) {
+  for (const rate of [0, 23, 23.5]) {
+    const base = {cash:100000000,down:5000000,mode:'store',storeKind:'extra',storeN:24,kind,firstPaymentNow:false};
+    const percent = calc.installment({...base,storeUnit:'percent',storeValue:rate});
+    const amount = calc.installment({...base,storeValue:100000000*rate/100});
+    assert.deepEqual(percent, amount);
+    assert.equal(percent.financedAmount,95000000);
+    assert.equal(percent.totalPaid,(100000000+100000000*rate/100)+(kind==='loan'?5000000:0));
+  }
+}
+assert.ok(calc.installment({...purchase,mode:'store',storeKind:'extra',storeUnit:'percent',storeValue:-1,storeN:12}).error);
+console.log('Passed: whole-term percentages equal profit amounts for purchases and loans, including fees, down payments, zero and decimal rates.');

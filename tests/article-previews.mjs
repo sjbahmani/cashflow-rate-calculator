@@ -70,7 +70,7 @@ for (const suffix of ['#article-installment-impact', '']) {
     scrollIntoView() { scrolled = true; },
   };
   const state = {
-    URLSearchParams, location: url, restoringState: false, instKind: 'purchase',
+    profitIsPercent: () => false, URLSearchParams, location: url, restoringState: false, instKind: 'purchase',
     window: {}, INST_KIND_TEXT: {}, lastCalculatorTab: 'installment',
     document: {
       body: { classList: classes, dataset: {} },
@@ -84,7 +84,7 @@ for (const suffix of ['#article-installment-impact', '']) {
     history: { replaceState(a, b, path) { url.href = new URL(path, url).href; } },
   };
   for (const name of ['setChoice', 'trackEvent', 'refreshAccessibility',
-    'setInstallmentEntryMode', 'setFirstPaymentTiming', 'setInstallmentDownVisibility',
+    'setProfitUnit', 'setInstallmentEntryMode', 'setFirstPaymentTiming', 'setInstallmentDownVisibility',
     'updateEntryChoice', 'updateDownToggleText', 'updateStoreDerived', 'resetInstallmentResult', 'setFmtValue']) state[name] = () => {};
   const startup = vm.createContext(state);
   vm.runInContext(navigation + '\n' + switchSource + '\n' + kindSource + '\n' + restoreSource, startup);
@@ -99,3 +99,7 @@ for (const suffix of ['#article-installment-impact', '']) {
   assert.equal(url.hash, '');
 }
 console.log('Passed: full URL restoration preserves article targets, expands and focuses, then clears targets on calculator navigation.');
+const previewPercent = context.resultFromQuery({inst:'loan',cash:'100000000',down:'5000000',mode:'store',kind:'extra',su:'percent',sv:'23',sn:'24'});
+assert.equal(previewPercent.totalPaid,128000000);
+assert.equal(previewPercent.financedAmount,95000000);
+console.log('Passed: shared-link preview includes percentage profit and upfront fee.');

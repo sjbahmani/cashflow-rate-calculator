@@ -33,6 +33,7 @@ function resultFromQuery(args) {
       n: num(args, 'n'),
       storeKind: args.kind === 'total' ? 'total' : 'extra',
       storeValue: num(args, 'sv'),
+      storeUnit: args.su === 'percent' ? 'percent' : 'amount',
       storeN: num(args, 'sn'),
       varPayments: (args['var'] || '').split(',').map(x => parseFloat(x) || 0),
       firstPaymentNow: args.first === 'now',

@@ -8,7 +8,7 @@ function restore(search) {
   const fields = {};
   const calls = {};
   const context = {
-    URLSearchParams, location: { search }, restoringState: false,
+    profitIsPercent: () => new URLSearchParams(search).get('su') === 'percent', URLSearchParams, location: { search }, restoringState: false,
     document: {
       body: { dataset: {} },
       getElementById(id) {
@@ -17,7 +17,7 @@ function restore(search) {
     },
     setFmtValue(id, value) { context.document.getElementById(id).value = value; },
   };
-  for (const name of ['setInstallmentKind', 'setInstallmentEntryMode', 'toggleVariable',
+  for (const name of ['setInstallmentKind', 'setProfitUnit', 'setInstallmentEntryMode', 'toggleVariable',
     'setFirstPaymentTiming', 'setInstallmentDownVisibility', 'setStoreKind',
     'updateVarCounter', 'updateStoreDerived', 'setLoanType', 'toggleGrace',
     'setSelectIfValid', 'switchTab', 'calcInstallment', 'calcLoan']) {
@@ -56,3 +56,8 @@ assert.ok(restore('?tab=loan&amount=120000000&rate=0&term=24&shared=1').calls.ca
 assert.deepEqual(restore('?inst=loan').fields, {});
 assert.deepEqual(restore('').fields, {});
 console.log('Passed: URL fields and modes restore without shared=1; shared links still calculate.');
+result = restore('?inst=loan&cash=100000000&mode=store&kind=extra&su=percent&sv=23.5&sn=24&down=5000000');
+assert.deepEqual(result.calls.setProfitUnit,['percent']);
+assert.equal(result.fields['inst-profit-rate'].value,'23.5');
+assert.equal(result.fields['inst-down'].value,'5000000');
+console.log('Passed: percentage profit and upfront fee restore from a shared URL.');

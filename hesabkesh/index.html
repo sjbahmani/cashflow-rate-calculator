@@ -769,8 +769,20 @@
 
       <div id="inst-store-source-fields" style="display:none">
         <input type="hidden" id="inst-store-kind" value="extra">
+        <div class="field" id="inst-profit-unit-field">
+          <label for="inst-profit-unit">سود کل را چطور وارد می‌کنی؟</label>
+          <select id="inst-profit-unit" onchange="setProfitUnit(this.value)">
+            <option value="amount">مبلغ به تومان</option>
+            <option value="percent">درصد برای کل دوره</option>
+          </select>
+        </div>
+        <div class="field" id="inst-profit-rate-field" style="display:none">
+          <label for="inst-profit-rate">درصد سود کل <span class="hint">(٪)</span></label>
+          <input type="text" inputmode="decimal" id="inst-profit-rate" data-fmt="rate" placeholder="مثلاً ۲۳">
+          <p class="choice-help" id="inst-profit-rate-help"></p>
+        </div>
         <div class="row-2">
-          <div class="field">
+          <div class="field" id="inst-store-amount-field">
             <label for="inst-store-value"><span id="inst-store-value-text">سود کل</span> <span class="hint">(تومان)</span></label>
             <input type="text" inputmode="numeric" id="inst-store-value" data-fmt="money" placeholder="مثلاً ۳٬۶۰۰٬۰۰۰">
           </div>
@@ -1428,7 +1440,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  ['inst-cash', 'inst-down', 'inst-store-value', 'inst-store-n'].forEach(id => {
+  ['inst-cash', 'inst-down', 'inst-store-value', 'inst-store-n', 'inst-profit-rate'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateStoreDerived);
   });
 });
@@ -1526,6 +1538,18 @@ function selectInstallmentEntry(choice) {
   }
 }
 
+function profitIsPercent() {
+  return document.getElementById('inst-store-kind').value === 'extra' &&
+    document.getElementById('inst-profit-unit').value === 'percent';
+}
+
+function setProfitUnit(unit) {
+  document.getElementById('inst-profit-unit').value = unit === 'percent' ? 'percent' : 'amount';
+  updateEntryChoice();
+  updateStoreDerived();
+  resetInstallmentResult();
+}
+
 function updateEntryChoice() {
   const storeKind = document.getElementById('inst-store-kind').value;
   const choice = instEntryMode === 'store' ? storeKind : 'payment';
@@ -1535,6 +1559,13 @@ function updateEntryChoice() {
   help.style.display = choice === 'payment' ? 'none' : '';
   document.getElementById('inst-store-value-text').textContent =
     document.getElementById(`inst-entry-${storeKind}-title`).textContent;
+  const percent = profitIsPercent();
+  document.getElementById('inst-profit-unit-field').style.display = storeKind === 'extra' ? '' : 'none';
+  document.getElementById('inst-profit-rate-field').style.display = percent ? '' : 'none';
+  document.getElementById('inst-store-amount-field').style.display = percent ? 'none' : '';
+  document.getElementById('inst-profit-rate-help').textContent = instKind === 'loan'
+    ? 'درصد روی اصل مبلغ وام برای کل دوره است، نه نرخ سالانه؛ کارمزد اولیه جدا حساب می‌شود.'
+    : 'درصد روی قیمت نقدی برای کل دوره است، نه نرخ سالانه؛ پیش‌پرداخت از مجموع پرداخت‌ها کم می‌شود تا اقساط به دست بیاید.';
   refreshAccessibility();
 }
 
@@ -1556,10 +1587,11 @@ function resetInstallmentResult() {
 function resetInstallmentForm() {
   if (instVariableMode) toggleVariable();
 
-  ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-store-n']
+  ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-store-n', 'inst-profit-rate']
     .forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('inst-payments-var').value = '';
   setStoreKind('extra');
+  setProfitUnit('amount');
   updateVarCounter();
   setInstallmentEntryMode('payment');
   setFirstPaymentTiming(false);
@@ -1623,14 +1655,14 @@ function updateStoreDerived() {
 
   const cash = v('inst-cash');
   const down = v('inst-down');
-  const storeValue = v('inst-store-value');
+  const storeValue = profitIsPercent() ? cash * v('inst-profit-rate') / 100 : v('inst-store-value');
   const n = v('inst-store-n');
   const loan = instKind === 'loan';
   const statedTotal = kind === 'extra' ? cash + storeValue : storeValue;
   // A lender's stated interest or total covers the installments only; the fee comes on top.
   const installmentTotal = loan ? statedTotal : statedTotal - down;
 
-  if (instEntryMode !== 'store' || !cash || !storeValue || !n || installmentTotal <= 0) {
+  if (instEntryMode !== 'store' || !cash || (profitIsPercent() ? !document.getElementById('inst-profit-rate').value.trim() : !valueInput.value.trim()) || !n || installmentTotal <= 0) {
     note.classList.remove('show');
     note.textContent = '';
     return;
@@ -1815,6 +1847,7 @@ function loadStorePreset(cash, down, storeValue, n, storeKind, firstPaymentNow, 
   setStoreKind(storeKind);
   setFmtValue('inst-cash', cash, 'money');
   setFmtValue('inst-down', down, 'money');
+  setProfitUnit('amount');
   setFmtValue('inst-store-value', storeValue, 'money');
   setFmtValue('inst-store-n', n, 'count');
   updateStoreDerived();
@@ -1885,7 +1918,8 @@ function calcInstallment() {
     payment: v('inst-payment'),
     n: v('inst-n'),
     storeKind: document.getElementById('inst-store-kind').value,
-    storeValue: v('inst-store-value'),
+    storeUnit: profitIsPercent() ? 'percent' : 'amount',
+    storeValue: v(profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value'),
     storeN: v('inst-store-n'),
     varPayments: parseVarPayments(),
     firstPaymentNow: instFirstPaymentNow,
@@ -2022,7 +2056,8 @@ function buildStateParams(prefix) {
     put('cash', rawNum('inst-cash'));
     if (instEntryMode === 'store') {
       p.set('mode', 'store'); p.set('kind', document.getElementById('inst-store-kind').value);
-      put('sv', rawNum('inst-store-value')); put('sn', rawNum('inst-store-n'));
+      if (profitIsPercent()) p.set('su', 'percent');
+      put('sv', rawNum(profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value')); put('sn', rawNum('inst-store-n'));
     } else if (instVariableMode) {
       p.set('mode', 'variable');
       const payments = parseVarPayments();
@@ -2063,7 +2098,8 @@ function restoreFromUrl() {
   fill('down', 'inst-down', 'money');
   fill('pmt', 'inst-payment', 'money');
   fill('n', 'inst-n', 'count');
-  fill('sv', 'inst-store-value', 'money');
+  setProfitUnit(p.get('su'));
+  fill('sv', profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value', profitIsPercent() ? 'rate' : 'money');
   fill('sn', 'inst-store-n', 'count');
   if (p.get('var')) {
     document.getElementById('inst-payments-var').value = p.get('var').split(',')

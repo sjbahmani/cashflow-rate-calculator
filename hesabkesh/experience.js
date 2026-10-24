@@ -1,12 +1,13 @@
 /* Calculator interaction and validation; financial formulas live in calc.js. */
 // Keep purchases and known-payment loans independent on their first visit.
 const installmentDrafts = { purchase: null, loan: null };
-const installmentInputIds = ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-store-n', 'inst-down', 'inst-payments-var'];
+const installmentInputIds = ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-store-n', 'inst-profit-rate', 'inst-down', 'inst-payments-var'];
 function captureInstallmentDraft() {
   return {
     values: Object.fromEntries(installmentInputIds.map(id => [id, document.getElementById(id).value])),
     entry: instEntryMode,
     variable: instVariableMode,
+    profitUnit: document.getElementById('inst-profit-unit').value,
     storeKind: document.getElementById('inst-store-kind').value,
     firstNow: instFirstPaymentNow,
     downOpen: document.getElementById('inst-down-panel').classList.contains('open')
@@ -16,6 +17,7 @@ function restoreInstallmentDraft(draft) {
   resetInstallmentForm();
   if (!draft) return;
   setStoreKind(draft.storeKind);
+  setProfitUnit(draft.profitUnit);
   setInstallmentEntryMode(draft.entry);
   if (draft.variable !== instVariableMode) toggleVariable();
   setFirstPaymentTiming(draft.firstNow);
@@ -33,6 +35,7 @@ function refreshAccessibility() {
     'inst-cash': 'inst-kind-help',
     'inst-payment': 'inst-entry-help',
     'inst-store-value': 'inst-entry-help',
+    'inst-profit-rate': 'inst-profit-rate-help',
     'inst-store-n': 'inst-entry-help',
     'inst-payments-var': 'inst-var-counter',
     'inst-first-now': 'inst-first-help',
@@ -50,7 +53,7 @@ function refreshAccessibility() {
   const downIds = new Set((down.getAttribute('aria-describedby') || '').split(' ').filter(Boolean));
   if (instKind === 'loan') downIds.add('inst-down-help'); else downIds.delete('inst-down-help');
   if (downIds.size) down.setAttribute('aria-describedby', [...downIds].join(' ')); else down.removeAttribute('aria-describedby');
-  const required = ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-store-n', 'inst-payments-var', 'loan-amount', 'loan-rate', 'loan-n'];
+  const required = ['inst-cash', 'inst-payment', 'inst-n', 'inst-store-value', 'inst-profit-rate', 'inst-store-n', 'inst-payments-var', 'loan-amount', 'loan-rate', 'loan-n'];
   required.forEach(id => {
     const input = document.getElementById(id);
     if (input.getClientRects().length) input.setAttribute('aria-required', 'true');
@@ -87,7 +90,7 @@ function errorField(prefix) {
   if (instEntryMode === 'store') {
     const months = v('inst-store-n');
     if (months < 1 || months > 360 || Math.floor(months) !== months) return 'inst-store-n';
-    return 'inst-store-value';
+    return profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value';
   }
   if (instVariableMode) return 'inst-payments-var';
   const months = v('inst-n');
@@ -96,7 +99,7 @@ function errorField(prefix) {
 }
 function validateRequired(prefix) {
   const ids = prefix === 'loan' ? ['loan-amount', 'loan-rate', 'loan-n']
-    : ['inst-cash'].concat(instEntryMode === 'store' ? ['inst-store-value', 'inst-store-n']
+    : ['inst-cash'].concat(instEntryMode === 'store' ? [profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value', 'inst-store-n']
       : instVariableMode ? ['inst-payments-var'] : ['inst-payment', 'inst-n']);
   const missing = ids.find(id => !document.getElementById(id).value.trim());
   if (!missing) return true;

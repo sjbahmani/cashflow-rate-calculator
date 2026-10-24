@@ -118,6 +118,7 @@ function solveAnnualEffectiveWithGrace(pv, gracePmt, graceN, payment, repayN) {
 }
 
 // inp: cash, down, mode ('payment' | 'store' | 'variable'), payment, n,
+// storeUnit ('amount' | 'percent', whole-term percent of cash, extra only),
 // storeKind ('extra' | 'total'), storeValue, storeN, varPayments, firstPaymentNow,
 // kind ('purchase' | 'loan'). For a loan, cash is the loan amount and down is the upfront fee,
 // which the lender's stated interest or total repayment does not include.
@@ -150,7 +151,8 @@ function installment(inp) {
     if (n < 1 || n > 360 || Math.floor(n) !== n) {
       return { error: 'تعداد اقساط باید بین ۱ تا ۳۶۰ ماه باشد.' };
     }
-    const totalPaidFromStore = inp.storeKind === 'extra' ? cash + inp.storeValue : inp.storeValue;
+    const profit = inp.storeUnit === 'percent' ? cash * inp.storeValue / 100 : inp.storeValue;
+    const totalPaidFromStore = inp.storeKind === 'extra' ? cash + profit : inp.storeValue;
     if (totalPaidFromStore < cash) {
       return { error: inp.storeKind === 'extra'
         ? `${w.extra} نمی‌تواند منفی باشد.`
