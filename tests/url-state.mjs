@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { formatPaymentLines } from '../hesabkesh/number-display.js';
 
 const html = readFileSync(new URL('../hesabkesh/index.html', import.meta.url), 'utf8');
 const source = html.match(/function restoreFromUrl\(\) \{[\s\S]*?\n\}/)[0];
@@ -8,6 +9,7 @@ function restore(search) {
   const fields = {};
   const calls = {};
   const context = {
+    formatPaymentLines,
     profitIsPercent: () => new URLSearchParams(search).get('su') === 'percent', URLSearchParams, location: { search }, restoringState: false,
     document: {
       body: { dataset: {} },
@@ -20,7 +22,7 @@ function restore(search) {
   for (const name of ['setInstallmentKind', 'setProfitUnit', 'setInstallmentEntryMode', 'toggleVariable',
     'setFirstPaymentTiming', 'setInstallmentDownVisibility', 'setStoreKind',
     'updateVarCounter', 'updateStoreDerived', 'setLoanType', 'toggleGrace',
-    'setSelectIfValid', 'switchTab', 'calcInstallment', 'calcLoan']) {
+    'setSelectIfValid', 'switchTab', 'selectMoreTool', 'calcInstallment', 'calcLoan']) {
     context[name] = (...args) => { calls[name] = args; };
   }
   vm.runInNewContext(html.match(/function toEn\(s\) \{[\s\S]*?\n\}/)[0] + '\n' + source + '\nrestoreFromUrl();', context);
@@ -89,3 +91,11 @@ for (const kind of ['purchase', 'loan']) {
   assert.equal(roundTrip.fields['inst-down'].value,'15000000');
 }
 console.log('Passed: generated percentage URLs preserve matching units and restore in purchases and loans.');
+
+result = restore('?tab=tools&tool=return');
+assert.deepEqual(result.calls.switchTab,['tools']);
+assert.deepEqual(result.calls.selectMoreTool,['return']);
+assert.equal(result.calls.calcInstallment,undefined);
+assert.equal(result.calls.calcLoan,undefined);
+assert.equal(restore('?cash=10000000&mode=variable&var=6000000.5,0,6000000').fields['inst-payments-var'].value,'۶٬۰۰۰٬۰۰۰٫۵\n۰\n۶٬۰۰۰٬۰۰۰');
+console.log('Passed: investment tool routing and localized variable-payment URL restoration.');

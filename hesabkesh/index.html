@@ -653,7 +653,7 @@
     .tab-btn { font-size: 0.78rem; }
   }
 </style>
-<link rel="stylesheet" href="./warm.css?v=f2a40dc24a">
+<link rel="stylesheet" href="./warm.css?v=169aff10f3">
 </head>
 <body>
 <a class="skip-link" href="#main-content">پرش به محتوای اصلی</a>
@@ -688,8 +688,8 @@
   <div class="calculator-workspace">
   <div class="calculator-modes choice-group" role="group" aria-label="نوع محاسبه">
     <button class="choice-btn active" type="button" id="inst-kind-purchase" aria-pressed="true" onclick="setInstallmentKind('purchase')">خرید قسطی</button>
-    <button class="choice-btn" type="button" id="inst-kind-loan" aria-pressed="false" onclick="setInstallmentKind('loan')">وام با قسط معلوم</button>
-    <button class="choice-btn" type="button" id="calculator-bank" aria-pressed="false" onclick="switchTab('loan')">وام بانکی</button>
+    <button class="choice-btn" type="button" id="inst-kind-loan" aria-pressed="false" onclick="openUnifiedLoan()">وام</button>
+    <button class="choice-btn" type="button" id="calculator-tools" aria-pressed="false" aria-controls="panel-tools" onclick="switchTab('tools')">ابزارهای بیشتر</button>
   </div>
   <!-- ===== PANEL 1: Installment / Credit ===== -->
   <div id="panel-installment" class="panel calculator-panel active">
@@ -731,11 +731,14 @@
         <input type="text" inputmode="numeric" id="inst-cash" data-fmt="money" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰" autocomplete="off">
       </div>
 
-      <div class="input-choice">
+      <div class="input-choice" id="installment-entry-choice">
         <label id="inst-entry-label">کدام عدد را می‌دانی؟</label>
         <div class="choice-group choice-stack" role="group" aria-labelledby="inst-entry-label" aria-describedby="inst-entry-help">
           <button class="choice-btn choice-example active" type="button" id="inst-entry-payment" aria-pressed="true" onclick="selectInstallmentEntry('payment')">
             <strong>مبلغ هر قسط</strong><span id="inst-entry-payment-ex">مثلاً «ماهی ۵ میلیون، ۱۲ قسط»</span>
+          </button>
+          <button class="choice-btn choice-example" type="button" id="inst-entry-rate" aria-pressed="false" hidden onclick="selectLoanEntry('rate')">
+            <strong>نرخ سود سالانه</strong><span>مثلاً «سالانه ۲۳ درصد»</span>
           </button>
           <button class="choice-btn choice-example" type="button" id="inst-entry-extra" aria-pressed="false" onclick="selectInstallmentEntry('extra')">
             <strong id="inst-entry-extra-title">سود کل</strong><span id="inst-entry-extra-ex">مثلاً «۳٫۶ میلیون روی قیمت اضافه می‌شود»</span>
@@ -865,9 +868,7 @@
   <!-- ===== PANEL 2: Bank Loan ===== -->
   <div id="panel-loan" class="panel calculator-panel">
     <div class="card form-card"><div class="form-heading"><h2>شرایط وام</h2><span>همهٔ مبلغ‌ها به تومان</span></div>
-      <p class="panel-switch">نرخ سود را نمی‌دانی ولی مبلغ قسط را داری؟
-        <button type="button" class="link-btn" onclick="openLoanByPayment()">با مبلغ قسط حساب کن</button>
-      </p>
+      <p class="choice-help">اطلاعاتی را که از وام داری وارد کن؛ مبلغ قسط و هزینهٔ واقعی را حساب می‌کنیم.</p>
       <details class="example-picker"><summary>یک مثال آماده را امتحان کن</summary>
       <div class="presets" aria-label="نمونه‌های آماده وام">
         <button class="preset-btn" type="button" onclick="loadLoanPreset(150000000, 18, 24, 'on-principal')">
@@ -889,9 +890,19 @@
         <label>مبلغ وام <span class="hint">(تومان)</span></label>
         <input type="text" inputmode="numeric" id="loan-amount" data-fmt="money" placeholder="مثلاً ۲۰۰٬۰۰۰٬۰۰۰" autocomplete="off">
       </div>
+      <div class="input-choice">
+        <label id="loan-entry-label">کدام عدد را می‌دانی؟</label>
+        <div class="choice-group choice-stack loan-entry-choices" role="group" aria-labelledby="loan-entry-label">
+          <button class="choice-btn choice-example" type="button" id="loan-entry-payment" aria-pressed="false" onclick="selectLoanEntry('payment')"><strong>مبلغ هر قسط</strong><span>مثلاً «ماهی ۵ میلیون، ۱۲ قسط»</span></button>
+          <button class="choice-btn choice-example active" type="button" id="loan-entry-rate" aria-pressed="true" onclick="selectLoanEntry('rate')"><strong>نرخ سود سالانه</strong><span>مثلاً «سالانه ۲۳ درصد»</span></button>
+          <button class="choice-btn choice-example" type="button" id="loan-entry-extra" aria-pressed="false" onclick="selectLoanEntry('extra')"><strong>سود کل دوره</strong><span>مثلاً «سود کل ۴۰ میلیون»</span></button>
+          <button class="choice-btn choice-example" type="button" id="loan-entry-total" aria-pressed="false" onclick="selectLoanEntry('total')"><strong>جمع کل بازپرداخت</strong><span>مثلاً «در مجموع ۱۴۰ میلیون پس می‌دهی»</span></button>
+        </div>
+        <p class="choice-help">از نرخ اعلام‌شده، مبلغ قسط را تخمین می‌زنیم؛ اگر مبلغ قسط را داری، همان را وارد کن.</p>
+      </div>
       <div class="row-2">
         <div class="field">
-          <label>نرخ سود اعلام‌شده <span class="hint">(%  سالانه)</span></label>
+          <label>نرخ سود سالانه <span class="hint">(٪)</span></label>
           <input type="text" inputmode="decimal" id="loan-rate" data-fmt="rate" placeholder="مثلاً ۲۳" autocomplete="off">
         </div>
         <div class="field">
@@ -900,7 +911,7 @@
         </div>
       </div>
       <div class="field">
-        <label id="loan-type-label">بانک سود را چطور حساب می‌کند؟</label>
+        <label id="loan-type-label">سود وام چطور حساب می‌شود؟</label>
         <div class="choice-group choice-stack" role="group" aria-labelledby="loan-type-label" aria-describedby="loan-method-help">
           <button class="choice-btn choice-example active" type="button" id="loan-type-principal" aria-pressed="true" onclick="setLoanType('on-principal')">
             <strong>سود روی اصل وام</strong><span>رایج در بانک‌های ایران؛ سود کل دوره از اول روی همه مبلغ وام حساب می‌شود</span>
@@ -967,6 +978,92 @@
     </div><!-- /receipt-column -->
   </div>
 
+  <section id="panel-tools" class="panel" aria-label="ابزارهای بیشتر">
+    <div class="choice-group tools-tabs" role="tablist" aria-label="ابزارهای سرمایه‌گذاری">
+      <button class="choice-btn active" type="button" id="tool-tab-compound" role="tab" aria-selected="true" aria-controls="tool-compound" onclick="selectMoreTool('compound')">سود مرکب</button>
+      <button class="choice-btn" type="button" id="tool-tab-return" role="tab" aria-selected="false" aria-controls="tool-return" tabindex="-1" onclick="selectMoreTool('return')">بازده سالانه سرمایه‌گذاری</button>
+    </div>
+    <section id="tool-compound" role="tabpanel" aria-labelledby="tool-tab-compound">
+      <div class="tool-layout">
+        <form id="compound-form" class="card form-card" novalidate>
+          <div class="form-heading"><h2>محاسبهٔ سود مرکب</h2><span>همهٔ مبلغ‌ها به تومان</span></div>
+          <p class="choice-help">اگر سود هر ماه را دوباره سرمایه‌گذاری کنی، پولت در پایان چقدر می‌شود؟</p>
+          <button class="tool-example" type="button" id="compound-example">یک مثال: ۱۰۰ میلیون با سود ماهانهٔ ۲٪</button>
+          <div class="field"><label for="compound-principal">مبلغ اولیه <span class="hint">(تومان)</span></label><input id="compound-principal" type="text" inputmode="numeric" data-fmt="money" placeholder="مثلاً ۱۰۰٬۰۰۰٬۰۰۰" autocomplete="off" required></div>
+          <div class="tools-field-label" id="compound-mode-label">سود بانک را چطور می‌دانی؟</div>
+          <div class="choice-group" role="group" aria-labelledby="compound-mode-label">
+            <button class="choice-btn active" type="button" id="compound-mode-percent" aria-pressed="true" onclick="setCompoundMode('percent')">درصد ماهانه</button>
+            <button class="choice-btn" type="button" id="compound-mode-amount" aria-pressed="false" onclick="setCompoundMode('amount')">مبلغ سود ماه اول</button>
+          </div>
+          <div class="row-2 tool-fields">
+            <div class="field"><label for="compound-yield" id="compound-yield-label">نرخ سود ماهانه <span class="hint">(٪)</span></label><input id="compound-yield" type="text" inputmode="decimal" placeholder="مثلاً ۲" autocomplete="off" required></div>
+            <div class="field"><label for="compound-months">مدت سرمایه‌گذاری <span class="hint">(ماه)</span></label><input id="compound-months" type="text" inputmode="numeric" data-fmt="count" placeholder="مثلاً ۱۲" autocomplete="off" required></div>
+          </div>
+          <p class="choice-help" id="compound-assumption">فرض: سود هر ماه دوباره با همین نرخ سرمایه‌گذاری می‌شود. مبلغ سودِ ماه اول، در ماه‌های بعد با رشد موجودی بیشتر می‌شود.</p>
+          <div id="compound-error" class="form-error" role="alert"></div>
+          <button class="btn" type="submit">رشد پولم را حساب کن</button>
+          <button class="reset-btn" type="reset">پاک کردن فرم و شروع از اول</button>
+        </form>
+        <div class="tool-result-column">
+          <div class="result-placeholder" id="compound-placeholder"><strong>رشد پولت را اینجا ببین.</strong><p>مبلغ نهایی، سود کل و سهم سرمایه‌گذاری دوبارهٔ سود را نشان می‌دهیم.</p></div>
+          <div id="compound-result" class="result-card show tools-receipt" hidden tabindex="-1" aria-live="polite" aria-atomic="true">
+            <h2 class="receipt-title">آینده پس‌انداز</h2>
+            <div class="result-row receipt-rate tool-headline"><span class="label">موجودی پایان دوره</span><strong class="value apr receipt-money" id="compound-final">—</strong></div>
+            <div class="result-summary"><span class="verdict-title" id="compound-badge">—</span></div>
+            <div class="result-row"><span class="label">مبلغ اولیه</span><span class="value" id="compound-base">—</span></div>
+            <div class="result-row"><span class="label">سود کل دوره</span><span class="value big" id="compound-profit">—</span></div>
+            <div class="result-row"><span class="label">سود بیشتر به‌خاطر مرکب شدن</span><span class="value" id="compound-extra">—</span></div>
+            <div class="result-row"><span class="label">بازده مؤثر سالانه</span><span class="value" id="compound-annual">—</span></div>
+            <div class="receipt-chart" id="compound-chart" role="img">
+              <div class="receipt-bar"><span class="receipt-principal"></span><span class="receipt-extra"></span></div>
+              <div class="receipt-legend"><span class="chart-base-label">اصل سرمایه</span><span class="chart-profit-label">سود</span></div>
+            </div>
+            <details class="receipt-details"><summary>جزئیات بیشتر و روش خواندن نتیجه</summary><p class="choice-help" id="compound-summary"></p></details>
+          </div>
+          <div class="explainer"><strong>مرکب شدن یعنی سود روی سود.</strong><br>اگر سود را برداشت کنی یا نتوانی با همان نرخ دوباره سرمایه‌گذاری کنی، این رشد اتفاق نمی‌افتد. این برآورد با نرخ ثابت و پیش از هزینه‌ها و تورم است.</div>
+        </div>
+      </div>
+    </section>
+    <section id="tool-return" role="tabpanel" aria-labelledby="tool-tab-return" hidden>
+      <div class="tool-layout">
+        <form id="return-form" class="card form-card" novalidate>
+          <div class="form-heading"><h2>بازده سالانهٔ سرمایه‌گذاری</h2><span>همهٔ مبلغ‌ها به تومان</span></div>
+          <p class="choice-help">چه طلا خریده باشی، چه سهام یا کریپتو: بگو چه وقت چقدر پول وارد کرده‌ای و در تاریخ دلخواه، کل دارایی چقدر می‌ارزد.</p>
+          <button class="tool-example" type="button" id="return-example">یک مثال با دو واریز در دو تاریخ</button>
+          <p class="choice-help" id="investment-dates-help">تاریخ‌ها شمسی‌اند؛ مثل ۱۴۰۴/۰۸/۰۳. مبلغ هر واریز را با یک واحد ثابت وارد کن.</p>
+          <div id="investment-deposits"></div>
+          <button class="tool-add" type="button" id="investment-add">+ افزودن واریز</button>
+          <div class="row-2 tool-fields">
+            <div class="field"><label for="investment-final-date">تاریخ ارزش‌گذاری <span class="hint">(شمسی)</span></label><input id="investment-final-date" type="text" dir="ltr" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۰۳" aria-describedby="investment-dates-help" autocomplete="off" required></div>
+            <div class="field"><label for="investment-final-value">ارزش کل دارایی در این تاریخ <span class="hint">(تومان)</span></label><input id="investment-final-value" type="text" inputmode="numeric" data-fmt="money" placeholder="مثلاً ۲۵۰٬۰۰۰٬۰۰۰" autocomplete="off" required></div>
+          </div>
+          <p class="choice-help">برای سرمایه‌گذاری بدون برداشت میان‌دوره. تعداد واحد یا قیمت هر خرید لازم نیست؛ مبلغ واریز و ارزش کل دارایی کافی است.</p>
+          <div id="return-error" class="form-error" role="alert"></div>
+          <button class="btn" type="submit">بازده سرمایه‌گذاری‌ام را حساب کن</button>
+          <button class="reset-btn" type="reset">پاک کردن فرم و شروع از اول</button>
+        </form>
+        <div class="tool-result-column">
+          <div class="result-placeholder" id="return-placeholder"><strong>زمان ورود پول هم مهم است.</strong><p>بازده سالانه را با درنظرگرفتن تاریخ تک‌تک واریزها حساب می‌کنیم، حتی وقتی فاصله‌هایشان برابر نیست.</p></div>
+          <div id="return-result" class="result-card show tools-receipt" hidden tabindex="-1" aria-live="polite" aria-atomic="true">
+            <h2 class="receipt-title">بازده سرمایه‌گذاری</h2>
+            <div class="result-row receipt-rate tool-headline"><span class="label">بازده مؤثر سالانه</span><strong class="value apr" id="investment-annual">—</strong></div>
+            <div class="result-summary"><span class="verdict-title" id="investment-badge">—</span></div>
+            <div class="result-row"><span class="label">مجموع واریزها</span><span class="value" id="investment-total">—</span></div>
+            <div class="result-row"><span class="label">ارزش نهایی دارایی</span><span class="value" id="investment-final">—</span></div>
+            <div class="result-row"><span class="label">سود یا زیان کل</span><span class="value big" id="investment-profit">—</span></div>
+            <div class="result-row"><span class="label">درصد سود یا زیان کل دوره</span><span class="value" id="investment-growth">—</span></div>
+            <div class="receipt-chart" id="investment-chart" role="img">
+              <div class="receipt-bar"><span class="receipt-principal"></span><span class="receipt-extra"></span></div>
+              <div class="receipt-legend"><span class="chart-base-label">اصل سرمایه</span><span class="chart-profit-label">سود</span></div>
+            </div>
+            <details class="receipt-details"><summary>جزئیات بیشتر و روش خواندن نتیجه</summary><p class="choice-help" id="investment-summary"></p></details>
+          </div>
+          <div class="explainer"><strong>چرا بازده سالانه با درصد سود کل فرق دارد؟</strong><br>پولی که دیرتر وارد کرده‌ای، زمان کمتری برای رشد داشته است. این ابزار با روش XIRR و سال ۳۶۵روزه، زمان و مبلغ واریزها را لحاظ می‌کند. نتیجه ممکن است منفی باشد؛ برای دوره‌های کوتاه، عدد سالانه می‌تواند خیلی بزرگ شود و پیش‌بینی آینده نیست.<br><a href="https://support.microsoft.com/en-us/excel/functions/xirr-function?nochrome=true" target="_blank" rel="noopener noreferrer">دربارهٔ روش محاسبه</a></div>
+        </div>
+      </div>
+    </section>
+  </section>
+
   </div><!-- /calculator-workspace -->
 
   <!-- Articles: duplicate an article-card below for each new entry. Keep IDs unique. -->
@@ -975,9 +1072,9 @@
     <p class="articles-intro">خواندنی‌های کوتاه درباره هزینه واقعی قسط و وام.</p>
 
     <article class="card article-card" id="article-rate-guide" aria-labelledby="article-rate-guide-title">
-      <h2 id="article-rate-guide-title" tabindex="-1"><a href="?tab=articles&amp;article=article-rate-guide#article-rate-guide" onclick="openArticlePermalink(event, this)">راهنمای تفسیر نرخ مؤثر سالانه و اثر تورم</a></h2>
+      <h2 id="article-rate-guide-title" tabindex="-1"><a href="?tab=articles&amp;article=article-rate-guide#article-rate-guide" onclick="openArticlePermalink(event, this)">نرخ مرجع، برچسب‌های مقایسه و اثر تورم</a></h2>
       <p class="article-meta">نوشتهٔ حساب‌کش — همراه با منابع نرخ بانکی و آمار تورم</p>
-      <p>برچسب گرانی نتیجه را چطور بخوانیم؟ این راهنما مبنای مقایسهٔ نرخ‌ها را توضیح می‌دهد و نشان می‌دهد چرا اثر تورم را باید جدا از هزینهٔ اعتبار و توان پرداخت قسط سنجید.</p>
+      <p>تگ‌های هزینهٔ وام و بازده سرمایه‌گذاری چه معنایی دارند؟ این راهنما نرخ مرجع حساب‌کش، تفاوت تگ‌های مقایسه و نقش تورم در خواندن نتیجه را توضیح می‌دهد.</p>
       <details class="article-details">
         <summary><span class="article-read-more">خواندن راهنمای کامل و منابع</span><span class="article-read-less">بستن متن کامل</span></summary>
         <div class="article-full rate-guide-body">
@@ -988,7 +1085,7 @@
       <h3>نرخ بانکی و هزینه واقعی اعتبار</h3>
       <p class="ref-note">
         مبنای بانکی این ابزار، نرخ اسمی ۲۳٪ در مصوبه ابلاغ‌شده در بهمن ۱۴۰۱ است؛ این عدد نرخ همه وام‌ها نیست.
-        نرخ اسمی ۲۳٪ با محاسبه ماهانه روی مانده بدهی، بدون هزینه جانبی، حدود ۲۵٫۶٪ مؤثر سالانه می‌شود.
+        نرخ اسمی <strong data-reference-nominal>۲۳٫۰٪</strong> با محاسبه ماهانه روی مانده بدهی، بدون هزینه جانبی، حدود <strong data-reference-effective>۲۵٫۶٪</strong> مؤثر سالانه می‌شود و مرجع ثابت مقایسه در ابزارهای حساب‌کش است.
         کارمزد و نحوه بازپرداخت می‌توانند هزینه واقعی قرارداد را بالاتر ببرند.
         در این بررسی، مصوبه جدیدتری برای تغییر این مبنا تأیید نشد.
       </p>
@@ -1003,6 +1100,9 @@
         <div class="band b-high"><span class="bdot"></span> از ۶۰٪ تا کمتر از ۹۰٪ — خیلی گران نسبت به مرجع بانکی</div>
         <div class="band b-bad"><span class="bdot"></span> ۹۰٪ و بیشتر — فاصله بسیار زیاد با مرجع بانکی</div>
       </div>
+      <h3>تگ‌های بازده سرمایه‌گذاری چه می‌گویند؟</h3>
+      <p class="ref-note">در سود مرکب و بازده سرمایه‌گذاری، تگ‌های «پایین‌تر از مرجع»، «هم‌سطح مرجع» و «بالاتر از مرجع»، بازده مؤثر سالانه را با همین مرجع می‌سنجند. برخلاف هزینهٔ وام، بازده بیشتر در این مقایسه بالاتر قرار می‌گیرد؛ مثبت بودن سود به‌تنهایی کافی نیست. مثلاً بازده سالانهٔ ۱۰٪، با وجود مثبت بودن، پایین‌تر از مرجع است.</p>
+      <p class="ref-note">مقایسه در دقت یک رقم اعشار انجام می‌شود. مرجع ثابت است و تغییرات تاریخی نرخ‌ها، ریسک، تورم و هزینه‌های واردنشده را لحاظ نمی‌کند. بالاتر بودن بازده از مرجع، به‌تنهایی به معنی مناسب بودن سرمایه‌گذاری نیست.</p>
       <h3>تورم نزدیک ۱۰۰٪ چه اثری دارد؟</h3>
       <p class="ref-note">
         طبق گزارش دیدبان ایران به نقل از مرکز آمار، در شهریور ۱۴۰۵ تورم نقطه‌به‌نقطه <strong>۸۹٫۸٪</strong>،
@@ -1273,7 +1373,7 @@
     <div class="learning-heading"><h2 id="learning-title">خواندنی‌های حساب‌کش</h2><a href="?tab=articles" onclick="switchTab('articles'); return false">همهٔ مقالات ←</a></div>
     <div class="learning-grid">
       <a href="#article-effective-rate" onclick="openEffectiveRateArticle()"><h3>نرخ مؤثر سالانه چیست؟ <span aria-hidden="true">↗</span></h3></a>
-      <a href="#article-rate-guide" onclick="openRateGuideArticle()"><h3>برچسب گرانی و اثر تورم <span aria-hidden="true">↗</span></h3></a>
+      <a href="#article-rate-guide" onclick="openRateGuideArticle()"><h3>نرخ مرجع، تگ‌ها و اثر تورم <span aria-hidden="true">↗</span></h3></a>
     </div>
   </section>
 
@@ -1378,7 +1478,9 @@
 
 <script type="module">
   // Module scripts run before DOMContentLoaded, so the handlers below see these globals.
-  import calc from './calc.js';
+  import calc from './calc.js?v=6d6f4b8171';
+  import {formatPaymentLines} from './number-display.js?v=7688f3b7f2';
+  window.formatPaymentLines = formatPaymentLines;
   import prepareStaticPages from './static-pages.js';
   prepareStaticPages();
   window.calc = calc;
@@ -1430,9 +1532,29 @@ function applyRateFmt(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('inst-payments-var').addEventListener('input', updateVarCounter);
+  const paymentsField = document.getElementById('inst-payments-var');
+  paymentsField.addEventListener('input', event => {
+    if (event.isComposing) return;
+    const old = paymentsField.value;
+    const start = paymentsField.selectionStart, end = paymentsField.selectionEnd;
+    paymentsField.value = formatPaymentLines(old);
+    // Keep the caret beside the same digit even when grouping adds separators.
+    const restorePosition = position => {
+      const count = old.slice(0, position).replace(/[٬,]/g, '').length;
+      if (count === 0) return 0;
+      let seen = 0;
+      for (let i = 0; i < paymentsField.value.length; i++) {
+        if (!/[٬,]/.test(paymentsField.value[i])) seen++;
+        if (seen === count) return i + 1;
+      }
+      return paymentsField.value.length;
+    };
+    paymentsField.setSelectionRange(restorePosition(start), restorePosition(end));
+    updateVarCounter();
+  });
 
   document.querySelectorAll('input[data-fmt]').forEach(el => {
+    if (el.closest('#panel-tools')) return;
     const fmt = el.dataset.fmt;
     el.addEventListener('input', () => {
       const pos = el.selectionStart;
@@ -1463,7 +1585,7 @@ function verdictText(apr) {
 }
 
 function renderSummary(prefix, apr, lead) {
-  const p = verdictProfile(apr);
+  const p = calc.benchmarkProfile(apr, 'cost');
   const title = document.getElementById(prefix + '-verdict-title');
   title.textContent = p.title;
   title.className = 'verdict-title ' + p.tone;
@@ -1475,6 +1597,7 @@ function renderSummary(prefix, apr, lead) {
 // ── Installment input modes ───────────────────────────────────────────────
 const receiptStates = { inst: null, loan: null };
 let lastCalculatorTab = 'installment';
+let lastLoanPanel = 'installment';
 let restoringState = false;
 let instKind = 'purchase';
 let instEntryMode = 'payment';
@@ -1492,9 +1615,9 @@ function setChoice(ids, activeId) {
 // Same math for both kinds: the loan amount plays the cash price and the upfront fee plays the down payment.
 const INST_KIND_TEXT = {
   'inst-kind-help':            ['خرید اعتباری از فروشگاه، بانک یا اپ‌ها، یا خرید با چک.',
-                                'وام صندوق، اپ‌های وام، وام محل کار یا خرید امتیاز وام؛ هر وامی که مبلغ قسطش را می‌دانی.'],
+                                'وام صندوق، اپ‌های وام، وام محل کار یا خرید امتیاز وام؛ هر وامی که مبلغ قسط، نرخ سود یا جمع بازپرداختش را می‌دانی.'],
   'inst-cash-text':            ['قیمت نقدی', 'مبلغ وام'],
-  'inst-entry-extra-title':    ['سود کل', 'سود کل وام'],
+  'inst-entry-extra-title':    ['سود کل', 'سود کل دوره'],
   'inst-entry-extra-ex':       ['مثلاً «۳٫۶ میلیون روی قیمت اضافه می‌شود»', 'مثلاً «سود کل ۴۰ میلیون»'],
   'inst-entry-total-title':    ['جمع پرداخت', 'جمع کل بازپرداخت'],
   'inst-entry-total-ex':       ['مثلاً «در مجموع ۳۸ میلیون پرداخت می‌کنی»', 'مثلاً «در مجموع ۱۴۰ میلیون پس می‌دهی»'],
@@ -1515,12 +1638,15 @@ function setInstallmentKind(kind) {
     instKind = nextKind;
     restoreInstallmentDraft(installmentDrafts[nextKind]);
   }
+  if (instKind === 'loan') lastLoanPanel = 'installment';
   const i = instKind === 'loan' ? 1 : 0;
   document.querySelector('#panel-installment .form-heading h2').textContent = i ? 'شرایط وام' : 'شرایط خرید';
   Object.keys(INST_KIND_TEXT).forEach(id => {
     document.getElementById(id).textContent = INST_KIND_TEXT[id][i];
   });
-  setChoice(['inst-kind-purchase', 'inst-kind-loan'], `inst-kind-${instKind}`);
+  setChoice(['inst-kind-purchase', 'inst-kind-loan', 'calculator-tools'], `inst-kind-${instKind}`);
+  document.getElementById('inst-entry-rate').hidden = instKind !== 'loan';
+  document.getElementById('installment-entry-choice').classList.toggle('loan-entry', instKind === 'loan');
   document.getElementById('inst-presets-purchase').style.display = i ? 'none' : '';
   document.getElementById('inst-presets-loan').style.display = i ? '' : 'none';
   document.getElementById('inst-down-help').style.display = i ? '' : 'none';
@@ -1540,6 +1666,30 @@ const ENTRY_HELP = {
   loan:     { extra: 'سودی که روی مبلغ وام پس می‌دهی، بدون کارمزد؛ مبلغ هر قسط خودکار حساب می‌شود.',
               total: 'جمع همه قسط‌ها، بدون کارمزد؛ مبلغ هر قسط خودکار حساب می‌شود.' }
 };
+
+function openUnifiedLoan() {
+  if (lastLoanPanel === 'loan') switchTab('loan');
+  else setInstallmentKind('loan');
+}
+
+// Share the principal between loan entry methods, while keeping each method's
+// rate, fees and schedule intact. A term including grace is not an installment count.
+function selectLoanEntry(choice) {
+  const fromRate = document.getElementById('panel-loan').classList.contains('active');
+  const amount = document.getElementById(fromRate ? 'loan-amount' : 'inst-cash').value;
+  if (choice === 'rate') {
+    if (!fromRate) {
+      document.getElementById('loan-amount').value = amount;
+      resetLoanResult();
+    }
+    switchTab('loan');
+  } else {
+    setInstallmentKind('loan');
+    if (fromRate) document.getElementById('inst-cash').value = amount;
+    selectInstallmentEntry(choice);
+    updateStoreDerived();
+  }
+}
 
 function selectInstallmentEntry(choice) {
   if (choice === 'payment') {
@@ -1762,7 +1912,8 @@ function resetLoanForm() {
 // Article links also work on landing pages and when opened directly by hash.
 function articleFromHash() {
   const id = location.hash.slice(1) || new URLSearchParams(location.search).get('article');
-  const article = id ? document.getElementById(id) : null;
+  const articleId = id === 'article-reference-benchmark' ? 'article-rate-guide' : id;
+  const article = articleId ? document.getElementById(articleId) : null;
   return article && article.matches('#panel-articles .article-card') ? article : null;
 }
 
@@ -1806,7 +1957,10 @@ function switchTab(name) {
     params.delete('article');
     history.replaceState(null, '', location.pathname + (params.size ? '?' + params : ''));
   }
-  if (name !== 'articles') lastCalculatorTab = name;
+  if (name !== 'articles') {
+    lastCalculatorTab = name;
+    if (name === 'loan') lastLoanPanel = name;
+  }
   document.body.classList.toggle('articles-view', name === 'articles');
   document.querySelectorAll('.tab-btn').forEach(button => {
     const active = button.dataset.tab === (name === 'articles' ? 'articles' : 'installment');
@@ -1815,7 +1969,7 @@ function switchTab(name) {
   });
   document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
-  setChoice(['inst-kind-purchase', 'inst-kind-loan', 'calculator-bank'], name === 'loan' ? 'calculator-bank' : 'inst-kind-' + instKind);
+  setChoice(['inst-kind-purchase', 'inst-kind-loan', 'calculator-tools'], name === 'tools' ? 'calculator-tools' : name === 'loan' ? 'inst-kind-loan' : 'inst-kind-' + instKind);
   if (window.refreshMobileAction) refreshMobileAction();
   trackEvent('calculator_tab_change', { tab_name: name });
   refreshAccessibility();
@@ -1871,13 +2025,7 @@ function loadStorePreset(cash, down, storeValue, n, storeKind, firstPaymentNow, 
 
 // For loans whose installment is known but whose rate is not.
 function openLoanByPayment() {
-  const amount = rawNum('loan-amount');
-  switchTab('installment');
-  setInstallmentKind('loan');
-  setInstallmentEntryMode('payment');
-  if (amount) setFmtValue('inst-cash', amount, 'money');
-  document.getElementById('panel-installment').scrollIntoView({ behavior: preferredScrollBehavior(), block: 'start' });
-  document.getElementById(rawNum('inst-cash') ? 'inst-payment' : 'inst-cash').focus({ preventScroll: true });
+  selectLoanEntry('payment');
 }
 
 function loadLoanPreset(amount, rate, n, type) {
@@ -2055,6 +2203,12 @@ function buildStateParams(prefix) {
   const landingPage = new URLSearchParams(location.search).get('page');
   if (landingPage) p.set('page', landingPage);
   const active = document.querySelector('.panel.active');
+  if (!prefix && (active?.id === 'panel-tools' || (active?.id === 'panel-articles' && lastCalculatorTab === 'tools'))) {
+    p.set('tab', active.id === 'panel-articles' ? 'articles' : 'tools');
+    if (active.id === 'panel-articles') p.set('calc', 'tools');
+    p.set('tool', document.getElementById('tool-return').hidden ? 'compound' : 'return');
+    return p;
+  }
   const isArticles = !prefix && active && active.id === 'panel-articles';
   prefix = prefix || (lastCalculatorTab === 'loan' ? 'loan' : 'inst');
   const put = (key, value) => { if (value !== '') p.set(key, value); };
@@ -2117,8 +2271,7 @@ function restoreFromUrl() {
   fill(profitIsPercent() && p.has('pv') ? 'pv' : 'sv', profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value', profitIsPercent() ? 'rate' : 'money');
   fill('sn', 'inst-store-n', 'count');
   if (p.get('var')) {
-    document.getElementById('inst-payments-var').value = p.get('var').split(',')
-      .map(x => (parseFloat(toEn(x)) || 0).toLocaleString('fa-IR')).join('\n');
+    document.getElementById('inst-payments-var').value = formatPaymentLines(p.get('var').split(',').join('\n'));
     updateVarCounter();
   }
   updateStoreDerived();
@@ -2134,7 +2287,9 @@ function restoreFromUrl() {
   }
 
   if (p.get('calc') === 'loan') lastCalculatorTab = 'loan';
-  if (p.get('tab') === 'loan' || p.get('tab') === 'articles') switchTab(p.get('tab'));
+  if (p.get('calc') === 'tools') lastCalculatorTab = 'tools';
+  if (p.get('tool') === 'return') selectMoreTool('return');
+  if (['loan', 'articles', 'tools'].includes(p.get('tab'))) switchTab(p.get('tab'));
   if (!p.has('tab') && !p.has('cash')) {
     const example = new URLSearchParams(document.body.dataset.preset || '');
     if (example.get('tab') === 'loan') switchTab('loan');
@@ -2148,6 +2303,8 @@ function restoreFromUrl() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-reference-effective]').forEach(el => { el.textContent = fmtPct(calc.COMPARISON_BENCHMARK.effectiveAnnual); });
+  document.querySelectorAll('[data-reference-nominal]').forEach(el => { el.textContent = fmtPct(calc.COMPARISON_BENCHMARK.nominalAnnual); });
   const articleRequested = articleFromHash();
   restoreFromUrl();
   if (articleRequested) openArticle(articleRequested);
@@ -2158,5 +2315,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="./experience.js"></script>
 <script src="./warm.js"></script>
+<script type="module" src="./more-tools.js?v=dd6be4aca5"></script>
 </body>
 </html>

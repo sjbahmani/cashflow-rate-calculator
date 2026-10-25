@@ -1,6 +1,11 @@
 // Shared by the page and the nginx njs link-preview handler (og.js); keep the syntax njs-compatible.
 
-const OFFICIAL_BENCHMARK = 23;
+// The site's comparison assumption, not a claim about every available loan.
+const REFERENCE_NOMINAL_ANNUAL = 23;
+const COMPARISON_BENCHMARK = {
+  nominalAnnual: REFERENCE_NOMINAL_ANNUAL,
+  effectiveAnnual: (Math.pow(1 + REFERENCE_NOMINAL_ANNUAL / 100 / 12, 12) - 1) * 100
+};
 
 function toPersian(s) {
   return String(s).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -44,10 +49,10 @@ function monthlyFromAnnualEffective(ear) {
 
 function rateMultiple(apr) {
   if (!isFinite(apr)) return '';
-  return toPersian((apr / OFFICIAL_BENCHMARK).toFixed(1)).replace('.', '٫') + ' برابر';
+  return toPersian((apr / COMPARISON_BENCHMARK.effectiveAnnual).toFixed(1)).replace('.', '٫') + ' برابر';
 }
 
-// Verdict text thresholds are calibrated against the 23% reference benchmark used in this tool.
+// Cost bands use the effective equivalent of the nominal 23% comparison assumption.
 function verdictProfile(apr) {
   if (isNaN(apr) || !isFinite(apr)) {
     return { tone: 'warn', title: 'نیاز به بررسی', msg: 'عددها برای محاسبه نرخ کافی نیستند.' };
@@ -65,6 +70,26 @@ function verdictProfile(apr) {
     return { tone: 'high', title: 'خیلی گران', msg: 'نرخ فشارآور است؛ قبل از امضا یک گزینه دیگر هم پیدا کن و مقایسه بگیر.' };
   }
   return { tone: 'bad', title: 'فرار کن', msg: 'ظاهرش قسطی است، باطنش وام با سود سنگین. این پیشنهاد را جدی دوباره بررسی کن.' };
+}
+
+// Rates and the gap are in percentage points. Round the displayed gap to
+// one decimal so equal-looking rates do not receive contradictory labels.
+function benchmarkProfile(annualEffective, purpose) {
+  if (!isFinite(annualEffective)) return { title: 'نیاز به بررسی', tone: 'warn', gapText: 'نرخ معتبر نیست.' };
+  const gap = (Math.round(annualEffective * 10) - Math.round(COMPARISON_BENCHMARK.effectiveAnnual * 10)) / 10;
+  const relation = gap > 0 ? 'بیشتر' : 'کمتر';
+  const magnitude = toPersian(Math.abs(gap).toFixed(1)).replace('.', '٫');
+  const gapText = gap === 0 ? 'هم‌سطح مرجع در دقت نمایش'
+    : magnitude + ' واحد درصد ' + relation + ' از مرجع';
+  if (purpose === 'cost') {
+    const profile = verdictProfile(annualEffective);
+    return { title: profile.title, tone: profile.tone, gapText: gapText };
+  }
+  return {
+    title: gap === 0 ? 'هم‌سطح مرجع' : (gap > 0 ? 'بالاتر از مرجع' : 'پایین‌تر از مرجع'),
+    tone: gap === 0 ? 'receipt-neutral' : gap > 0 ? 'good' : 'warn',
+    gapText: gapText
+  };
 }
 
 // Solver for variable installment schedules.
@@ -300,6 +325,8 @@ function loan(inp) {
 }
 
 export default {
+  COMPARISON_BENCHMARK,
+  benchmarkProfile,
   toPersian,
   fmt,
   fmtPct,

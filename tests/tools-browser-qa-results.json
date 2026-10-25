@@ -1,0 +1,150 @@
+[
+  {
+    "case": "negative principal",
+    "error": "مبلغ اولیه باید بیشتر از صفر باشد.",
+    "focus": "compound-principal",
+    "hidden": true,
+    "value": "-۱٬۰۰۰"
+  },
+  {
+    "case": "fractional months",
+    "error": "مدت را به تعداد ماه کامل، بین ۱ تا ۱۲۰۰ وارد کن.",
+    "focus": "compound-months",
+    "hidden": true,
+    "value": "۱٫۵"
+  },
+  {
+    "case": "Enter submits & errors clear",
+    "error": "",
+    "invalid": 0,
+    "value": "۱٬۲۶۸ تومان",
+    "visible": true
+  },
+  {
+    "case": "editing invalidates receipt",
+    "hidden": true
+  },
+  {
+    "case": "zero interest",
+    "final": "۱٬۰۰۰ تومان",
+    "profit": "۰ تومان",
+    "zeroSegmentHidden": true
+  },
+  {
+    "case": "unit change without principal",
+    "principal": "",
+    "yield": ""
+  },
+  {
+    "case": "percent to money",
+    "yield": "۲٬۰۰۰٬۰۰۰"
+  },
+  {
+    "case": "negative valuation",
+    "error": "ارزش نهایی دارایی باید صفر یا بیشتر باشد.",
+    "focus": "investment-final-value",
+    "value": "-۱"
+  },
+  {
+    "annual": "۲۰٫۰٪",
+    "case": "numeric keyboard dates + CAGR",
+    "dates": [
+      "۱۴۰۴/۰۸/۰۳",
+      "۱۴۰۵/۰۸/۰۳"
+    ],
+    "visible": true
+  },
+  {
+    "case": "invalid leap date",
+    "description": "investment-dates-help return-error",
+    "error": "تاریخ واریز ۱ معتبر نیست؛ تاریخ شمسی را مثل ۱۴۰۴/۰۸/۰۳ وارد کن.",
+    "focus": "deposit-date-1"
+  },
+  {
+    "case": "deposit after valuation",
+    "error": "تاریخ واریز نمی‌تواند بعد از تاریخ ارزش‌گذاری باشد.",
+    "focus": "deposit-date-1"
+  },
+  {
+    "case": "zero elapsed time",
+    "error": "برای بازده سالانه، حداقل یک واریز باید قبل از تاریخ ارزش‌گذاری باشد.",
+    "focus": "return-error"
+  },
+  {
+    "annual": "‎−۱۰۰٫۰٪",
+    "case": "complete loss + accessibility restored",
+    "chart": "ارزش باقی‌مانده: ۰ تومان، زیان: ۱۰۰٬۰۰۰٬۰۰۰ تومان",
+    "description": "investment-dates-help"
+  },
+  {
+    "case": "reset then add",
+    "finalValue": "",
+    "hidden": true,
+    "rows": 2
+  },
+  {
+    "case": "delete leaves one mandatory row",
+    "deleteHidden": true,
+    "rows": 1
+  },
+  {
+    "case": "keyboard ArrowLeft",
+    "selected": "tool-tab-compound",
+    "url": "?tab=tools&tool=compound"
+  },
+  {
+    "case": "keyboard End + retained draft",
+    "selected": "tool-tab-return",
+    "value": "۲۳۱٬۰۰۰٬۰۰۰",
+    "visible": true
+  },
+  {
+    "annual": "۸٫۰×۱۰^۳۰٪",
+    "case": "one-day annualization, huge rate display",
+    "latinDigits": false,
+    "visible": true
+  },
+  {
+    "alignmentDelta": 1440,
+    "case": "responsive 320",
+    "layout": "flex",
+    "overflow": false
+  },
+  {
+    "alignmentDelta": 1367,
+    "case": "responsive 390",
+    "layout": "flex",
+    "overflow": false
+  },
+  {
+    "alignmentDelta": 0,
+    "case": "responsive 800",
+    "layout": "contents",
+    "overflow": false
+  },
+  {
+    "alignmentDelta": 0,
+    "case": "responsive 1280",
+    "layout": "contents",
+    "overflow": false
+  },
+  {
+    "case": "main-tab draft persistence",
+    "final": "۲۳۱٬۰۰۰٬۰۰۰",
+    "selected": "tool-tab-return",
+    "visible": true
+  },
+  {
+    "case": "article round trip",
+    "final": "۲۳۱٬۰۰۰٬۰۰۰",
+    "hash": "",
+    "selected": "tool-tab-return",
+    "visible": true
+  },
+  {
+    "active": "panel-tools",
+    "case": "reload tool routing",
+    "initialRows": 1,
+    "selected": "tool-tab-return"
+  }
+]
