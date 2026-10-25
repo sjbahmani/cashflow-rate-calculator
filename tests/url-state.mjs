@@ -61,3 +61,31 @@ assert.deepEqual(result.calls.setProfitUnit,['percent']);
 assert.equal(result.fields['inst-profit-rate'].value,'23.5');
 assert.equal(result.fields['inst-down'].value,'5000000');
 console.log('Passed: percentage profit and upfront fee restore from a shared URL.');
+
+// Generated links must keep sv in the same unit as su. Older running njs
+// workers understand this format and do not need the temporary pv extension.
+const buildSource = html.match(/function buildStateParams\(prefix\) \{[\s\S]*?\n\}/)[0];
+for (const kind of ['purchase', 'loan']) {
+  const values = {
+    'inst-cash': '100000000', 'inst-profit-rate': '23',
+    'inst-store-n': '12', 'inst-down': '15000000',
+  };
+  const state = vm.createContext({
+    URLSearchParams, location: {search:''}, lastCalculatorTab:'installment',
+    instKind:kind, instEntryMode:'store', instFirstPaymentNow:false,
+    profitIsPercent:()=>true, rawNum:id=>values[id] || '',
+    document:{
+      querySelector:()=>({id:'panel-installment'}),
+      getElementById:id=>({value:id==='inst-store-kind'?'extra':'',classList:{contains:()=>id==='inst-down-panel'}}),
+    },
+  });
+  vm.runInContext(buildSource,state);
+  const params=state.buildStateParams('inst');
+  assert.equal(params.get('su'),'percent');
+  assert.equal(params.get('sv'),'23');
+  assert.equal(params.has('pv'),false);
+  const roundTrip=restore('?'+params);
+  assert.equal(roundTrip.fields['inst-profit-rate'].value,'23');
+  assert.equal(roundTrip.fields['inst-down'].value,'15000000');
+}
+console.log('Passed: generated percentage URLs preserve matching units and restore in purchases and loans.');

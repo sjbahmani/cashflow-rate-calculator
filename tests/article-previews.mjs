@@ -109,4 +109,4 @@ const olderPreviewHandler = context.resultFromQuery({cash:'100000000',down:'1500
 assert.equal(backwardCompatible.totalPaid,olderPreviewHandler.totalPaid);
 assert.equal(backwardCompatible.ear,olderPreviewHandler.ear);
 assert.equal(backwardCompatible.extra,38000000);
-console.log('Passed: new percentage URLs provide an amount fallback compatible with older preview handlers.');
+console.log('Passed: previously shared pv URLs remain readable by the current preview handler.');
