@@ -2061,8 +2061,12 @@ function buildStateParams(prefix) {
     put('cash', rawNum('inst-cash'));
     if (instEntryMode === 'store') {
       p.set('mode', 'store'); p.set('kind', document.getElementById('inst-store-kind').value);
-      if (profitIsPercent()) p.set('su', 'percent');
-      put('sv', rawNum(profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value')); put('sn', rawNum('inst-store-n'));
+      if (profitIsPercent()) {
+        const rate = rawNum('inst-profit-rate');
+        p.set('su', 'percent');
+        put('pv', rate);
+        put('sv', String((Number(rawNum('inst-cash')) * Number(rate) / 100) || 0));
+      } else put('sv', rawNum('inst-store-value')); put('sn', rawNum('inst-store-n'));
     } else if (instVariableMode) {
       p.set('mode', 'variable');
       const payments = parseVarPayments();
@@ -2104,7 +2108,7 @@ function restoreFromUrl() {
   fill('pmt', 'inst-payment', 'money');
   fill('n', 'inst-n', 'count');
   setProfitUnit(p.get('su'));
-  fill('sv', profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value', profitIsPercent() ? 'rate' : 'money');
+  fill(profitIsPercent() && p.has('pv') ? 'pv' : 'sv', profitIsPercent() ? 'inst-profit-rate' : 'inst-store-value', profitIsPercent() ? 'rate' : 'money');
   fill('sn', 'inst-store-n', 'count');
   if (p.get('var')) {
     document.getElementById('inst-payments-var').value = p.get('var').split(',')

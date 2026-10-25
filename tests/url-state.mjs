@@ -56,7 +56,7 @@ assert.ok(restore('?tab=loan&amount=120000000&rate=0&term=24&shared=1').calls.ca
 assert.deepEqual(restore('?inst=loan').fields, {});
 assert.deepEqual(restore('').fields, {});
 console.log('Passed: URL fields and modes restore without shared=1; shared links still calculate.');
-result = restore('?inst=loan&cash=100000000&mode=store&kind=extra&su=percent&sv=23.5&sn=24&down=5000000');
+result = restore('?inst=loan&cash=100000000&mode=store&kind=extra&su=percent&sv=23500000&pv=23.5&sn=24&down=5000000');
 assert.deepEqual(result.calls.setProfitUnit,['percent']);
 assert.equal(result.fields['inst-profit-rate'].value,'23.5');
 assert.equal(result.fields['inst-down'].value,'5000000');

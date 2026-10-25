@@ -40,7 +40,7 @@ function resultFromQuery(args) {
       payment: num(args, 'pmt'),
       n: num(args, 'n'),
       storeKind: args.kind === 'total' ? 'total' : 'extra',
-      storeValue: num(args, 'sv'),
+      storeValue: num(args, args.pv !== undefined ? 'pv' : 'sv'),
       storeUnit: args.su === 'percent' ? 'percent' : 'amount',
       storeN: num(args, 'sn'),
       varPayments: (args['var'] || '').split(',').map(x => parseFloat(numericText(x)) || 0),

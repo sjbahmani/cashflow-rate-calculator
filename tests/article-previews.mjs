@@ -103,3 +103,10 @@ const previewPercent = context.resultFromQuery({inst:'loan',cash:'100000000',dow
 assert.equal(previewPercent.totalPaid,128000000);
 assert.equal(previewPercent.financedAmount,95000000);
 console.log('Passed: shared-link preview includes percentage profit and upfront fee.');
+
+const backwardCompatible = context.resultFromQuery({cash:'100000000',down:'15000000',inst:'loan',kind:'extra',mode:'store',sn:'12',su:'percent',sv:'23000000',pv:'23'});
+const olderPreviewHandler = context.resultFromQuery({cash:'100000000',down:'15000000',inst:'loan',kind:'extra',mode:'store',sn:'12',shared:'1',sv:'23000000'});
+assert.equal(backwardCompatible.totalPaid,olderPreviewHandler.totalPaid);
+assert.equal(backwardCompatible.ear,olderPreviewHandler.ear);
+assert.equal(backwardCompatible.extra,38000000);
+console.log('Passed: new percentage URLs provide an amount fallback compatible with older preview handlers.');
