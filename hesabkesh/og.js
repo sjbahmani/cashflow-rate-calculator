@@ -92,7 +92,20 @@ function articlePreview(html, id) {
   const title = card[1].match(/<h2[^>]*>([\s\S]*?)<\/h2>/);
   const intro = card[1].match(/<p>([\s\S]*?)<\/p>/);
   if (!title || !intro) return null;
-  const plain = value => value.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const plain = value => {
+    let text = '', inTag = false, pendingSpace = false;
+    for (let i = 0; i < value.length; i++) {
+      const char = value[i];
+      if (char === '<') { inTag = true; continue; }
+      if (char === '>') { inTag = false; continue; }
+      if (inTag) continue;
+      if (/\s/.test(char)) { pendingSpace = true; continue; }
+      if (pendingSpace && text) text += ' ';
+      pendingSpace = false;
+      text += char;
+    }
+    return text;
+  };
   return { title: plain(title[1]), description: plain(intro[1]) };
 }
 
