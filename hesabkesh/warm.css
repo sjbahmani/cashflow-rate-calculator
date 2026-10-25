@@ -213,3 +213,98 @@ button:focus-visible, a:focus-visible, summary:focus-visible,
 }
 .tabs > a { font-weight:500; }
 .tabs > .tab-btn.active { border-bottom-color:var(--primary); }
+
+/* One loan category, with only the selected entry method's fields visible. */
+[hidden] { display:none !important; }
+.loan-entry .choice-stack, .loan-entry-choices {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.loan-entry .choice-btn, .loan-entry-choices .choice-btn {
+  min-width:0;
+  text-align:right;
+  padding:10px;
+}
+
+/* Additional investment tools share the calculator workspace. */
+.calculator-workspace #panel-tools.active { display:block; grid-column:1 / -1; grid-row:2; min-width:0; }
+.tools-tabs {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  direction:ltr;
+  width:calc((100% - 28px) * .5744680851);
+  max-width:none;
+  margin:0 0 18px auto;
+}
+.tools-tabs .choice-btn { direction:rtl; }
+.tool-layout { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:28px; align-items:start; }
+@media(min-width:681px) and (max-width:900px) {
+  .tools-tabs { width:calc((100% - 18px) * .5454545455); }
+  .tool-layout { column-gap:18px; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); }
+}
+.calculator-workspace .tool-layout .form-card { grid-column:auto; grid-row:auto; }
+.tool-result-column { min-width:0; }
+.tools-receipt .choice-help { margin-top:18px; line-height:2; }
+.tool-example, .tool-add { font-family:inherit; background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--primary); padding:10px 13px; cursor:pointer; font-size:12px; min-height:44px; margin-bottom:18px; }
+.tool-example { width:100%; text-align:right; }
+.tool-add { width:100%; border-style:dashed; }
+.tool-fields { margin-top:18px; }
+.investment-deposit { padding:14px 0 0; margin-bottom:12px; border-top:1px solid var(--border); }
+.deposit-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.deposit-heading strong { font-size:13px; }
+.deposit-remove { color:var(--primary); font-family:inherit; cursor:pointer; background:none; border:0; min-height:36px; padding:5px 10px; }
+.tools-receipt .value { overflow-wrap:anywhere; }
+#panel-tools input[dir="ltr"] { text-align:right; }
+@media(max-width:680px) {
+  .tool-layout { display:flex; flex-direction:column; gap:0; }
+  .tool-layout > *, .tools-tabs { width:100%; }
+  .tools-tabs .choice-btn { font-size:12px; padding:9px 6px; }
+  .tool-layout .form-card { margin-bottom:24px !important; }
+  .tool-layout .row-2 { grid-template-columns:1fr; }
+}
+
+.tools-field-label { font-size:14px; margin-bottom:7px; }
+
+/* Reuse the original receipt hierarchy, dividers, badges and capital/profit bar. */
+.tools-receipt .tool-headline { text-align:center; align-items:center; }
+.tools-receipt .tool-headline .value.apr { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+.tools-receipt .tool-headline .receipt-money { font-size:clamp(32px,3.8vw,52px); letter-spacing:-1.5px; }
+.receipt-money .receipt-currency { display:block; font-size:16px; line-height:1.8; letter-spacing:0; font-weight:600; }
+.tools-receipt .result-summary .verdict-title { display:inline-block; }
+.tools-receipt .result-summary .receipt-neutral { background:#eee8dc; color:var(--muted) !important; }
+.tools-receipt .result-row:not(.receipt-rate) .value { white-space:normal; text-align:left; }
+.tools-receipt .receipt-details .choice-help { margin-top:10px; }
+@media(max-width:680px) {
+  .tools-receipt .tool-headline .receipt-money { font-size:clamp(28px,9vw,48px); }
+}
+
+
+
+
+
+
+/* Investment receipts begin beside the main toolbar, like loan receipts. */
+@media(min-width:681px) {
+  .calculator-workspace:has(#panel-tools.active) { grid-template-rows:min-content min-content auto; }
+  .calculator-workspace #panel-tools.active,
+  #panel-tools > [role="tabpanel"]:not([hidden]),
+  #panel-tools .tool-layout { display:contents; }
+  .calculator-workspace #panel-tools .tools-tabs {
+    grid-column:1;
+    grid-row:2;
+    width:100%;
+    margin:0;
+  }
+  .calculator-workspace #panel-tools .tool-layout .form-card {
+    grid-column:1;
+    grid-row:3;
+  }
+  #panel-tools .tool-result-column {
+    grid-column:2;
+    grid-row:1 / span 3;
+    align-self:start;
+  }
+  #panel-tools .tool-result-column .result-card,
+  #panel-tools .tool-result-column .result-placeholder { margin-top:0; }
+}
