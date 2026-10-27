@@ -141,8 +141,12 @@ function page(r) {
 
   if (res && !res.error) {
     const p = calc.verdictProfile(res.ear);
-    const title = 'حساب‌کش می‌گه: ' + p.title + ' ' + TONE_MARK[p.tone];
-    html = setPreview(html, title, res.summaryLead.replace(/<[^>]+>/g, ''), SITE + r.variables.request_uri);
+    // Large-image cards may show only a shortened title, without the description.
+    // Put the calculated rate first so the key result survives truncation.
+    const rate = isFinite(res.ear) ? calc.fmtPct(res.ear) + ' نرخ مؤثر سالانه' : 'نرخ نیاز به بررسی';
+    const title = rate + ' | ' + p.title + ' ' + TONE_MARK[p.tone] + ' | حساب‌کش';
+    const description = rate + '؛ ' + res.summaryLead.replace(/<[^>]+>/g, '');
+    html = setPreview(html, title, description, SITE + r.variables.request_uri);
   }
 
   r.headersOut['Content-Type'] = 'text/html';

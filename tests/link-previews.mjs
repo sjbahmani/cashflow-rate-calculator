@@ -70,7 +70,29 @@ console.log('Passed: home and every landing page have complete large-image socia
 
 const calculator = render('/', { cash: '30000000', pmt: '3800000', n: '10', shared: '1' });
 checkPreview(calculator.body, { url: calculator.url });
-assert.match(meta(calculator.body, 'property', 'og:title'), /^حساب‌کش می‌گه:/);
+const resultCases = [
+  { cash: '30000000', pmt: '3800000', n: '10', shared: '1' },
+  { tab: 'loan', amount: '100000000', rate: '23', term: '24', type: 'on-balance', shared: '1' },
+  { cash: '100000000', down: '5000000', mode: 'store', kind: 'extra', su: 'percent', sv: '23', sn: '24', inst: 'loan', shared: '1' },
+  { cash: '30000000', mode: 'variable', var: '10000000,12000000,12000000', first: 'now', shared: '1' },
+  { cash: '30000000', pmt: '3000000', n: '10', shared: '1' },
+];
+for (const args of resultCases) {
+  const result = context.resultFromQuery(args);
+  assert.ok(result && !result.error);
+  const preview = render('/', args);
+  checkPreview(preview.body, { url: preview.url });
+  const rate = calc.fmtPct(result.ear) + ' نرخ مؤثر سالانه';
+  const profile = calc.verdictProfile(result.ear);
+  const title = meta(preview.body, 'name', 'twitter:title');
+  assert.ok(title.startsWith(rate), 'the calculated effective rate must precede any verdict or branding');
+  assert.ok(title.slice(0, 30).includes(calc.fmtPct(result.ear)), 'short card titles must retain the percentage');
+  assert.ok(title.includes(profile.title));
+  assert.ok(meta(preview.body, 'name', 'twitter:description').startsWith(rate));
+}
+const invalid = render('/', { cash: '30000000', pmt: '0', n: '10' });
+assert.equal(meta(invalid.body, 'name', 'twitter:title'), meta(home.body, 'name', 'twitter:title'));
+console.log('Passed: installment, loan, percentage-profit, variable-payment, and zero-interest previews put the calculated rate first; invalid inputs keep the default preview.');
 const article = render('/', { tab: 'articles', article: 'article-effective-rate' });
 checkPreview(article.body, { url: article.url, type: 'article' });
 assert.ok(meta(article.body, 'property', 'og:title').includes('نرخ مؤثر سالانه'));
