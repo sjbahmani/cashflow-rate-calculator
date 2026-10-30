@@ -348,4 +348,18 @@ Run the calculation and accessibility regression checks with Node.js:
 ```sh
 node tests/calculators.mjs
 node tests/accessibility.mjs
+node tests/seo-pages.mjs
+node tests/url-state.mjs
 ```
+
+SEO landing pages are defined in `hesabkesh/pages.js`, linked from the page footer,
+and listed in `hesabkesh/sitemap.xml`. They include `/compound-interest` and
+`/investment-return`. Preview them on the static server with
+`/index.html?page=compound-interest` or `/index.html?page=investment-return`.
+The server and static previews share page titles, hero copy, canonical URLs and
+application structured data. Landing URLs select the relevant calculator;
+explicit calculator parameters in shared URLs take precedence.
+
+When adding a landing page, also update the trailing-slash redirect in
+`hesabkesh.nginx.conf`. `tests/seo-pages.mjs` verifies those routes alongside
+the rendered headings, metadata, structured data, sitemap and internal links.

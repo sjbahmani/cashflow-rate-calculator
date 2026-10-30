@@ -77,9 +77,16 @@ function applyLanding(html, path, lp) {
   html = fill(html, /(<title>)[^<]*(<\/title>)/, escapeAttr(lp.title));
   html = setMeta(html, 'name', 'description', lp.description);
   html = setPreview(html, lp.title, lp.description, SITE + path);
-  html = html.replace(/(<h1>)[\s\S]*?(<\/h1>\s*<p>)[\s\S]*?(<\/p>)/, (m, h1, mid, end) =>
-    h1 + '<span class="hero-question">' + lp.question + '</span> <span class="hero-answer">' + lp.answer + '</span>' +
-    mid + lp.intro + end);
+  html = fill(html, /(<h1 id="hero-heading">)[\s\S]*?(<\/h1>)/, escapeAttr(lp.question));
+  html = fill(html, /(<p class="hero-subtitle">)[\s\S]*?(<\/p>)/, escapeAttr(lp.answer));
+  html = fill(html, /(<p class="hero-description">)[\s\S]*?(<\/p>)/, escapeAttr(lp.intro));
+  html = html.replace(/(<script id="calculator-schema" type="application\/ld\+json">)[\s\S]*?(<\/script>)/, (match, start, end) => {
+    const schema = JSON.parse(match.slice(start.length, -end.length));
+    schema.name = lp.question + ' | حساب‌کش';
+    schema.url = SITE + path;
+    schema.description = lp.description;
+    return start + '\n' + JSON.stringify(schema).replace(/</g, '\\u003c') + '\n' + end;
+  });
   html = html.replace(/<h2 id="seo-title">[\s\S]*?(?=<div class="seo-grid">)/, () => lp.body.trim() + '\n\n    ');
   return html.replace('<body>', () => '<body data-preset="' + escapeAttr(lp.preset) + '">');
 }

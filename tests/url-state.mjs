@@ -5,14 +5,14 @@ import { formatPaymentLines } from '../hesabkesh/number-display.js';
 
 const html = readFileSync(new URL('../hesabkesh/index.html', import.meta.url), 'utf8');
 const source = html.match(/function restoreFromUrl\(\) \{[\s\S]*?\n\}/)[0];
-function restore(search) {
+function restore(search, preset = '') {
   const fields = {};
   const calls = {};
   const context = {
     formatPaymentLines,
     profitIsPercent: () => new URLSearchParams(search).get('su') === 'percent', URLSearchParams, location: { search }, restoringState: false,
     document: {
-      body: { dataset: {} },
+      body: { dataset: { preset } },
       getElementById(id) {
         return fields[id] ||= { value: '', classList: { contains: () => false } };
       },
@@ -99,3 +99,17 @@ assert.equal(result.calls.calcInstallment,undefined);
 assert.equal(result.calls.calcLoan,undefined);
 assert.equal(restore('?cash=10000000&mode=variable&var=6000000.5,0,6000000').fields['inst-payments-var'].value,'۶٬۰۰۰٬۰۰۰٫۵\n۰\n۶٬۰۰۰٬۰۰۰');
 console.log('Passed: investment tool routing and localized variable-payment URL restoration.');
+
+// Direct landing URLs initialize the matching calculator without overwriting shared state.
+for (const query of ['', '?utm_source=search', '?page=bank-loan']) {
+  assert.deepEqual(restore(query, 'tab=loan&amount=300000000').calls.switchTab, ['loan']);
+  assert.deepEqual(restore(query, 'inst=loan&cash=50000000').calls.setInstallmentKind, ['loan']);
+  assert.deepEqual(restore(query, 'tab=tools&tool=return').calls.selectMoreTool, ['return']);
+  assert.deepEqual(restore(query, 'tab=tools&tool=compound').calls.switchTab, ['tools']);
+}
+assert.deepEqual(restore('?tab=loan', 'tab=tools&tool=return').calls.switchTab, ['loan']);
+assert.equal(restore('?tab=loan', 'tab=tools&tool=return').calls.selectMoreTool, undefined);
+assert.deepEqual(restore('?inst=loan', 'tab=loan').calls.setInstallmentKind, ['loan']);
+assert.equal(restore('?inst=loan', 'tab=loan').calls.switchTab, undefined);
+assert.equal(restore('?cash=10000000&pmt=1000000&n=12', 'tab=tools&tool=return').calls.switchTab, undefined);
+console.log('Passed: clean landing URLs, tracking parameters, static previews, and explicit calculator overrides.');
